@@ -1,19 +1,7 @@
 import { App, PluginSettingTab, Setting, ToggleComponent, Platform } from 'obsidian';
 import ThePlugin from './main';
+import { Settings, DEFAULT_SETTINGS } from './settings';
 
-export interface Settings {
-	enableRibbon: boolean,
-	enableDebugMode: boolean,
-	blockRefAliasIndicator: string,
-	bookmarks: string
-}
-
-export const DEFAULT_SETTINGS: Settings = {
-	enableRibbon: true,
-	enableDebugMode: false,
-	blockRefAliasIndicator: "*",
-	bookmarks: ""
-}
 
 export class SettingsTab extends PluginSettingTab {
 	plugin: ThePlugin;
@@ -36,10 +24,10 @@ export class SettingsTab extends PluginSettingTab {
 				cb.setValue(this.plugin.settings.enableRibbon);
 				cb.onChange(async (value: boolean) => {
 					this.plugin.settings.enableRibbon = value;
-					if (this.plugin.settings.enableRibbon === false)
-						this.plugin.ribbonIcon.remove();
-					else
-						this.plugin.configureRibbonCommand();
+					// if (this.plugin.settings.enableRibbon === false)
+						// this.plugin.ribbonIcon.remove();
+					// else
+						// this.plugin.configureRibbonCommand();
 					await this.plugin.saveSettings();
 				});
 			});
@@ -98,19 +86,6 @@ export class SettingsTab extends PluginSettingTab {
 
 
 		containerEl.createEl("h2", { text: "Context Menu Commands: Enable/Disable" });
-
-		for(const command of this.plugin.commands.commands) {
-			new Setting(containerEl)
-				.setName(command.caption)
-				.addToggle((cb: ToggleComponent) => {
-					cb.setValue(command.cmItemEnabled);
-					cb.onChange(async (value: boolean) => {
-						command.cmItemEnabled = value;
-						this.plugin.settings["cMenuEnabled-" + command.shortcut] = value;
-						await this.plugin.saveSettings();
-					});
-				});
-		}
 
 		containerEl.createEl("h2", { text: "Debugging support" });
 		new Setting(containerEl)
