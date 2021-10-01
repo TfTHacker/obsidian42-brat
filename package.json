@@ -1,0 +1,29 @@
+{
+  "name": "obsidian42-brat",
+  "version": "1.0.0",
+  "description": "Obsidian42 - Beta Reviewer's Autoupdate Tool.",
+  "main": "main.js",
+  "scripts": {
+    "dev": "esbuild src/main.ts --bundle --external:obsidian --format=cjs --outfile=build/main.js --watch",
+    "build": "esbuild src/main.ts --bundle --external:obsidian --format=cjs --outfile=build/main.js",
+    "lint": "eslint . --ext .ts"
+  },
+  "author": "TfT Hacker",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/TfTHacker/obsidian42-text-transporter.git"
+  },
+  "devDependencies": {
+    "@types/node": "^16.9.1",
+    "@typescript-eslint/eslint-plugin": "^4.31.1",
+    "@typescript-eslint/parser": "^4.31.1",
+    "eslint": "^7.32.0",
+    "obsidian": "^0.12.16",
+    "tslib": "^2.3.1",
+    "typescript": "^4.4.3"
+  },
+  "dependencies": {
+    
+  }
+}
