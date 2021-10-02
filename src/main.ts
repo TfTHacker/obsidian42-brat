@@ -17,7 +17,9 @@ export default class ThePlugin extends Plugin {
 
 		this.betaPlugins = new BetaPlugins(this);
 
-		await this.betaPlugins.displayAddNewPluginModal();
+		const testpath = "TfTHacker/tester-rep-for-brat/"
+		const x = await this.betaPlugins.getBetaPluginIDs();
+		console.log(x)
 
 		this.addCommand({
 			id: "BRAT-AddBetaPlugin",

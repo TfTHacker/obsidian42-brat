@@ -1,4 +1,4 @@
-import { Notice } from "obsidian";
+import { Notice, PluginManifest, request } from "obsidian";
 import ThePlugin from "./main";
 
 const GITHUB_RAW_USERCONTENT_PATH = "https://raw.githubusercontent.com/";
@@ -11,7 +11,7 @@ export const grabReleaseFileFromRepository = async (repository: string, version:
 
 // grabs the manifest.json from the repository
 // rootManifest - if true grabs manifest.json if false grabs manifest-beta.json
-export const grabManifestJsonFromRepository = async (repositoryPath: string, rootManifest = true): Promise<JSON> => {
+export const grabManifestJsonFromRepository = async (repositoryPath: string, rootManifest = true): Promise<PluginManifest> => {
     const manifestJsonPath = GITHUB_RAW_USERCONTENT_PATH + repositoryPath +
         (rootManifest === true ? "/HEAD/manifest.json" : "/HEAD/manifest-beta.json");
     try {
