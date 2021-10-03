@@ -14,7 +14,9 @@ const GITHUB_RAW_USERCONTENT_PATH = "https://raw.githubusercontent.com/";
  */
 export const grabReleaseFileFromRepository = async (repository: string, version: string, fileName: string): Promise<string> => {
     const download = await fetch(`https://github.com/${repository}/releases/download/${version}/${fileName}`);
-    return (download) ? await download.text() : null;
+    if(!download) return null;
+    const downloadedText = await download.text();
+    return (downloadedText==="Not Found" ? null : downloadedText);
 }
 
 /**

@@ -40,7 +40,7 @@ export default class BetaPlugins {
      *
      * @return  {Promise<PluginManifest>}                     the manifest file if found, or null if its incomplete
      */
-    async validateRepository(repositoryPath: string, getBetaManifest = false, reportIsues = false): Promise<PluginManifest> {
+    async validateRepository(repositoryPath: string, getBetaManifest: boolean = false, reportIsues: boolean = false): Promise<PluginManifest> {
         const noticeTimeout = 60000;
         const manifestJson = await grabManifestJsonFromRepository(repositoryPath, !getBetaManifest);
         if (!manifestJson) { // this is a plugin with a manifest json, try to see if there is a beta version
@@ -104,9 +104,12 @@ export default class BetaPlugins {
      *
      * @return  {Promise<boolean>}                       true if succeeds
      */
-    async addPlugin(repositoryPath: string, updatePluginFiles = false): Promise<boolean> {
+    async addPlugin(repositoryPath: string, updatePluginFiles: boolean = false): Promise<boolean> {
+        console.log('start validate')
         const manifestJson = await this.validateRepository(repositoryPath, false, true);
         const noticeTimeout = 60000;
+        console.log('after manifest')
+        console.log(JSON.stringify(manifestJson,2,0))
         if (manifestJson === null) return false;
         const betaManifestJson = await this.validateRepository(repositoryPath, false, true);
         const primaryManifest: PluginManifest = betaManifestJson ? betaManifestJson : manifestJson; // if there is a beta manifest, use that
@@ -131,11 +134,20 @@ export default class BetaPlugins {
         } else {
             // test if the plugin needs to be updated
             const pluginTargetFolderPath = this.plugin.app.vault.configDir + "/plugins/" + remoteManifestJSON.id + "/";
-            const localManifestContents = await this.plugin.app.vault.adapter.read(pluginTargetFolderPath + "manifest.json")
+            let localManifestContents = null;
+            try {
+                localManifestContents = await this.plugin.app.vault.adapter.read(pluginTargetFolderPath + "manifest.json")
+            } catch (e) {
+                if (e.errno = -4058) { // file does not exist, try installing the plugin
+                    await this.addPlugin(repositoryPath, false);
+                    return false;
+                } else
+                    console.log(JSON.stringify(e, 0, 2));
+            }
             const localManifestJSON = await JSON.parse(localManifestContents);
             if (localManifestJSON.version !== remoteManifestJSON.version) { //manifest files are not the same, do an update
                 await this.writeReleaseFilesToPluginFolder(remoteManifestJSON.id, releaseFiles);
-                await this.reloadPlugin(this.plugin, remoteManifestJSON.id)
+                await this.reloadPlugin(remoteManifestJSON.id)
                 new Notice(`${remoteManifestJSON.id}\n plugin has been updated and reloaded`, noticeTimeout);
             }
         }
@@ -146,18 +158,16 @@ export default class BetaPlugins {
      * reloads a plugin (assuming it has been enabled by user)
      * pjeby, Thanks Bro https://github.com/pjeby/hot-reload/blob/master/main.js
      * 
-     * @param   {ThePlugin}      plugin      
      * @param   {string<void>}   pluginName  name of plugin
      *
      * @return  {Promise<void>}              
      */
-    async reloadPlugin(plugin: ThePlugin, pluginName: string): Promise<void> {
+    async reloadPlugin(pluginName: string): Promise<void> {
         // @ts-ignore
-        const plugins = plugin.app.plugins;
+        const plugins = this.plugin.app.plugins;
         try {
             await plugins.disablePlugin(pluginName);
             await plugins.enablePlugin(pluginName);
-            new Notice(`Plugin "${pluginName}" has been reloaded`);
         } catch (e) { console.log("reload plugin", e) }
     }
 
@@ -177,10 +187,10 @@ export default class BetaPlugins {
     /**
      * walks through the list  of plugins and performs anupdate
      *
-     * @param   {[type]}           showInfo  should this with a started/completed message - useful when ran from CP
+     * @param   {boolean}           showInfo  should this with a started/completed message - useful when ran from CP
      * @return  {Promise<void>}              
      */
-    async checkForUpdates(showInfo = false): Promise<void> {
+    async checkForUpdates(showInfo: boolean = false): Promise<void> {
         if (showInfo) new Notice(`Checking for plugin updates STARTED`);
         for (const bp of this.plugin.settings.pluginList) {
             this.updatePlugin(bp)

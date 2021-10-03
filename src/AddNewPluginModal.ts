@@ -24,7 +24,6 @@ export default class AddNewPluginModal extends Modal {
             return;
         }
         const result = await this.betaPlugins.addPlugin(this.address);
-        console.log(result)
         if (result) this.close();
     }
 

@@ -2,10 +2,12 @@ import ThePlugin from "./main";
 
 export interface Settings {
     pluginList: string[];
+    updateAtStartup: boolean;
 }
 
 export const DEFAULT_SETTINGS: Settings = {
-    pluginList: []
+    pluginList: [],
+    updateAtStartup: false
 }
 
 /**
