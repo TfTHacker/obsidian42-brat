@@ -105,13 +105,10 @@ export default class BetaPlugins {
      * @return  {Promise<boolean>}                       true if succeeds
      */
     async addPlugin(repositoryPath: string, updatePluginFiles: boolean = false): Promise<boolean> {
-        console.log('start validate')
         const manifestJson = await this.validateRepository(repositoryPath, false, true);
         const noticeTimeout = 60000;
-        console.log('after manifest')
-        console.log(JSON.stringify(manifestJson,2,0))
         if (manifestJson === null) return false;
-        const betaManifestJson = await this.validateRepository(repositoryPath, false, true);
+        const betaManifestJson = await this.validateRepository(repositoryPath, true, false);
         const primaryManifest: PluginManifest = betaManifestJson ? betaManifestJson : manifestJson; // if there is a beta manifest, use that
 
         const releaseFiles = await this.getAllReleaseFiles(repositoryPath, primaryManifest)
@@ -140,9 +137,9 @@ export default class BetaPlugins {
             } catch (e) {
                 if (e.errno = -4058) { // file does not exist, try installing the plugin
                     await this.addPlugin(repositoryPath, false);
-                    return false;
+                    return true; // even though failed, return true since install will be attempted
                 } else
-                    console.log(JSON.stringify(e, 0, 2));
+                    console.log(JSON.stringify(e, null, 2));
             }
             const localManifestJSON = await JSON.parse(localManifestContents);
             if (localManifestJSON.version !== remoteManifestJSON.version) { //manifest files are not the same, do an update
@@ -193,7 +190,7 @@ export default class BetaPlugins {
     async checkForUpdates(showInfo: boolean = false): Promise<void> {
         if (showInfo) new Notice(`Checking for plugin updates STARTED`);
         for (const bp of this.plugin.settings.pluginList) {
-            this.updatePlugin(bp)
+            await this.updatePlugin(bp)
         }
         if (showInfo) new Notice(`Checking for plugin updates COMPLETED`);
     }
