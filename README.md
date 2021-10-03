@@ -6,7 +6,7 @@ Simply add the GitHub repository path for the beta Obsidian plugin to the list f
 # How to use the plugin
 The first thing you need is the GitHub Repository path for the beta plugin. This sounds way more complicated than it is. Plugins are developed using GitHub.  Each developer has their own account on GitHub and create a unique repository for their plugin. Likely the developer will give you this information, but you can ascertain it for yourself using your own powerful brain.
 
-This is the info you need: The GitHub user name for the developer followed by the repository name. So for example, for this plugin, the repository is located at: https://github.com/**TfTHacker/obsidian42-brat**. From this, you can ignore "https://github.com". But the next block of text is the user name, then a forward slash / then the repository name. So the GitHub repository path in this case is:
+This is the info you need: The GitHub user name for the developer followed by the repository name. So for example, for this plugin, the repository is located at: `https://github.com/TfTHacker/obsidian42-brat`. From this, you can ignore "https://github.com". But the next block of text is the user name, then a forward slash / then the repository name. So the GitHub repository path in this case is:
 
 `TfTHacker/obsidian42-brat`
 
