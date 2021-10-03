@@ -1,4 +1,4 @@
-import { Notice, Plugin } from "obsidian";
+import { Notice, Plugin, request } from "obsidian";
 import { SettingsTab } from "./SettingsTab";
 import { Settings, DEFAULT_SETTINGS, existBetaPluginInList } from "./settings";
 import BetaPlugins from "./BetaPlugins";

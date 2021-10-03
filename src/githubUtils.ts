@@ -1,5 +1,4 @@
-import { Notice, PluginManifest } from "obsidian";
-import ThePlugin from "./main";
+import { PluginManifest, request } from "obsidian";
 
 const GITHUB_RAW_USERCONTENT_PATH = "https://raw.githubusercontent.com/";
 
@@ -13,10 +12,12 @@ const GITHUB_RAW_USERCONTENT_PATH = "https://raw.githubusercontent.com/";
  * @return  {Promise<string>}              contents of file as string from the repository's release
  */
 export const grabReleaseFileFromRepository = async (repository: string, version: string, fileName: string): Promise<string> => {
-    const download = await fetch(`https://github.com/${repository}/releases/download/${version}/${fileName}`);
-    if(!download) return null;
-    const downloadedText = await download.text();
-    return (downloadedText==="Not Found" ? null : downloadedText);
+    try {
+        const download = await request({ url: `https://github.com/${repository}/releases/download/${version}/${fileName}` });
+        return (download === "Not Found" ? null : download);
+    } catch (error) {
+        console.log("error in grabReleaseFileFromRepository", error)
+    }
 }
 
 /**
@@ -31,12 +32,9 @@ export const grabManifestJsonFromRepository = async (repositoryPath: string, roo
     const manifestJsonPath = GITHUB_RAW_USERCONTENT_PATH + repositoryPath +
         (rootManifest === true ? "/HEAD/manifest.json" : "/HEAD/manifest-beta.json");
     try {
-        const response = await fetch(manifestJsonPath);
-        if (!response.ok)
-            return null;
-        else
-            return await response.json();
+        const response = await request({ url: manifestJsonPath });
+        return (response === "404: Not Found" ? null : await JSON.parse(response));
     } catch (error) {
-        console.log("error in download", error)
+        console.log("error in grabManifestJsonFromRepository", error)
     }
 }
