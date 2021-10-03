@@ -13,6 +13,9 @@ interface ReleaseFiles {
     styles: string;
 }
 
+/**
+ * Primary handler for adding, updating, deleting beta plugins tracked by this plugin
+ */
 export default class BetaPlugins {
     plugin: ThePlugin;
 
@@ -40,7 +43,7 @@ export default class BetaPlugins {
      *
      * @return  {Promise<PluginManifest>}                     the manifest file if found, or null if its incomplete
      */
-    async validateRepository(repositoryPath: string, getBetaManifest: boolean = false, reportIsues: boolean = false): Promise<PluginManifest> {
+    async validateRepository(repositoryPath: string, getBetaManifest = false, reportIsues = false): Promise<PluginManifest> {
         const noticeTimeout = 60000;
         const manifestJson = await grabManifestJsonFromRepository(repositoryPath, !getBetaManifest);
         if (!manifestJson) { // this is a plugin with a manifest json, try to see if there is a beta version
@@ -104,7 +107,7 @@ export default class BetaPlugins {
      *
      * @return  {Promise<boolean>}                       true if succeeds
      */
-    async addPlugin(repositoryPath: string, updatePluginFiles: boolean = false): Promise<boolean> {
+    async addPlugin(repositoryPath: string, updatePluginFiles = false): Promise<boolean> {
         const manifestJson = await this.validateRepository(repositoryPath, false, true);
         const noticeTimeout = 60000;
         if (manifestJson === null) return false;
@@ -135,12 +138,12 @@ export default class BetaPlugins {
             try {
                 localManifestContents = await this.plugin.app.vault.adapter.read(pluginTargetFolderPath + "manifest.json")
             } catch (e) {
-                if (e.errno = -4058) { // file does not exist, try installing the plugin
+                if (e.errno === -4058) { // file does not exist, try installing the plugin
                     await this.addPlugin(repositoryPath, false);
                     return true; // even though failed, return true since install will be attempted
-                } 
+                }
                 else
-                    console.log("BRAT - Local Manifest Load", remoteManifestJSON.id,  JSON.stringify(e, null, 2));
+                    console.log("BRAT - Local Manifest Load", remoteManifestJSON.id, JSON.stringify(e, null, 2));
             }
             const localManifestJSON = await JSON.parse(localManifestContents);
             if (localManifestJSON.version !== remoteManifestJSON.version) { //manifest files are not the same, do an update
@@ -188,12 +191,12 @@ export default class BetaPlugins {
      * @param   {boolean}           showInfo  should this with a started/completed message - useful when ran from CP
      * @return  {Promise<void>}              
      */
-    async checkForUpdates(showInfo: boolean = false): Promise<void> {
-        if (showInfo) new Notice(`BRAT\nChecking for plugin updates STARTED`);
+    async checkForUpdates(showInfo = false): Promise<void> {
+        if (showInfo) new Notice(`BRAT\nChecking for plugin updates STARTED`, 30000);
         for (const bp of this.plugin.settings.pluginList) {
             await this.updatePlugin(bp)
         }
-        if (showInfo) new Notice(`BRAT\nChecking for plugin updates COMPLETED`);
+        if (showInfo) new Notice(`BRAT\nChecking for plugin updates COMPLETED`, 10000);
     }
 
     /**
@@ -203,8 +206,8 @@ export default class BetaPlugins {
      *
      * @return  {Promise<void>}                [return description]
      */
-    async deletePlugin(repositoryPath:string): Promise<void> {
-        this.plugin.settings.pluginList = this.plugin.settings.pluginList.filter( (b)=> b != repositoryPath); ;
+    async deletePlugin(repositoryPath: string): Promise<void> {
+        this.plugin.settings.pluginList = this.plugin.settings.pluginList.filter((b) => b != repositoryPath);
         this.plugin.saveSettings();
     }
 

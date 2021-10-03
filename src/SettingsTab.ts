@@ -1,7 +1,5 @@
-import { App, PluginSettingTab, Setting, ToggleComponent, Platform, ButtonComponent } from 'obsidian';
+import { App, PluginSettingTab, Setting, ToggleComponent, ButtonComponent } from 'obsidian';
 import ThePlugin from './main';
-import { Settings, DEFAULT_SETTINGS } from './settings';
-
 
 export class SettingsTab extends PluginSettingTab {
 	plugin: ThePlugin;
@@ -35,18 +33,18 @@ export class SettingsTab extends PluginSettingTab {
 		containerEl.createEl("div", { text: `Click the x button next to a plugin to remove it from the list.` });
 		containerEl.createEl("p");
 		containerEl.createEl("span")
-			.createEl("b", {text: "Note: "})
-		containerEl.createSpan( { text: "This does not delete the plugin, this should be done from the  Community Plugins tab in Settings." });
-		
-		for(const bp of this.plugin.settings.pluginList) {
+			.createEl("b", { text: "Note: " })
+		containerEl.createSpan({ text: "This does not delete the plugin, this should be done from the  Community Plugins tab in Settings." });
+
+		for (const bp of this.plugin.settings.pluginList) {
 			new Setting(containerEl)
 				.setName(bp)
-				.addButton( (btn: ButtonComponent)=>{
+				.addButton((btn: ButtonComponent) => {
 					btn.setIcon("cross");
 					btn.setTooltip("Delete this beta plugin");
-					btn.onClick( async ()=>{
+					btn.onClick(async () => {
 						// await this.plugin.betaPlugins.deletePlugin(bp);
-						if(btn.buttonEl.textContent==="")
+						if (btn.buttonEl.textContent === "")
 							btn.setButtonText("Click once more to confirm removal");
 						else {
 							btn.buttonEl.parentElement.parentElement.remove();

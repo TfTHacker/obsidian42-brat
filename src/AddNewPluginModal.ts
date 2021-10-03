@@ -3,8 +3,9 @@ import BetaPlugins from './BetaPlugins';
 import ThePlugin from './main';
 import { existBetaPluginInList } from './settings';
 
-// Generic class for capturing a line of text
-
+/**
+ * Add a beta plugin to the list of plugins being tracked and updated
+ */
 export default class AddNewPluginModal extends Modal {
     plugin: ThePlugin;
     betaPlugins: BetaPlugins;
@@ -20,7 +21,7 @@ export default class AddNewPluginModal extends Modal {
     async submitForm(): Promise<void> {
         if (this.address === "") return;
         if (await existBetaPluginInList(this.plugin, this.address)) {
-            new Notice(`This plugin is already in the list for beta testing`, 20000);
+            new Notice(`BRAT\nThis plugin is already in the list for beta testing`, 20000);
             return;
         }
         const result = await this.betaPlugins.addPlugin(this.address);

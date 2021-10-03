@@ -26,7 +26,7 @@ export async function addBetaPluginToList(plugin: ThePlugin, repositoryPath: str
 }
 
 /**
- * tests if  a  plugin  is in data.json
+ * Tests if  a  plugin  is in data.json
  *
  * @param   {ThePlugin}         plugin          
  * @param   {string<boolean>}   repositoryPath  path to the GitHub repository

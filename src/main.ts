@@ -1,6 +1,6 @@
-import { Notice, Plugin, request } from "obsidian";
+import { Notice, Plugin } from "obsidian";
 import { SettingsTab } from "./SettingsTab";
-import { Settings, DEFAULT_SETTINGS, existBetaPluginInList } from "./settings";
+import { Settings, DEFAULT_SETTINGS } from "./settings";
 import BetaPlugins from "./BetaPlugins";
 import { GenericFuzzySuggester, SuggesterItem } from "./GenericFuzzySuggester";
 
@@ -32,12 +32,12 @@ export default class ThePlugin extends Plugin {
 		this.addCommand({
 			id: "BRAT-restart plugin",
 			name: "Restart a plugin that is already installed",
-			callback: async () => { 
+			callback: async () => {
 				// @ts-ignore
-				const pluginList: SuggesterItem[] = Object.values(this.app.plugins.manifests).map( (m)=> { return { display: m.id, info: m.id }} );
+				const pluginList: SuggesterItem[] = Object.values(this.app.plugins.manifests).map((m) => { return { display: m.id, info: m.id } });
 				const gfs = new GenericFuzzySuggester(this);
 				gfs.setSuggesterData(pluginList);
-				await gfs.display( async (results) => {
+				await gfs.display(async (results) => {
 					new Notice(`${results.info}\nPlugin reloading .....`, 5000);
 					await this.betaPlugins.reloadPlugin(results.info);
 				});
@@ -45,8 +45,8 @@ export default class ThePlugin extends Plugin {
 		});
 
 		this.app.workspace.onLayoutReady((): void => {
-			if(this.settings.updateAtStartup) // let obsidian load and calm down before check
-				setTimeout( async () => {  await this.betaPlugins.checkForUpdates(false) }, 60000);
+			if (this.settings.updateAtStartup) // let obsidian load and calm down before check
+				setTimeout(async () => { await this.betaPlugins.checkForUpdates(false) }, 60000);
 		});
 	}
 
