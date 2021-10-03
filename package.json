@@ -12,7 +12,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git://github.com/TfTHacker/obsidian42-text-transporter.git"
+    "url": "git://github.com/TfTHacker/obsidian42-brat.git"
   },
   "devDependencies": {
     "@types/node": "^16.9.1",

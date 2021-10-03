@@ -44,16 +44,16 @@ export default class BetaPlugins {
         const noticeTimeout = 60000;
         const manifestJson = await grabManifestJsonFromRepository(repositoryPath, !getBetaManifest);
         if (!manifestJson) { // this is a plugin with a manifest json, try to see if there is a beta version
-            if (reportIsues) new Notice(`${repositoryPath}\nThis does not seem to be an obsidian plugin, as there is no manifest.json file.`, noticeTimeout);
+            if (reportIsues) new Notice(`BRAT\n${repositoryPath}\nThis does not seem to be an obsidian plugin, as there is no manifest.json file.`, noticeTimeout);
             return null;
         }
         // Test that the mainfest has some key elements, like ID and version
         if (!("id" in manifestJson)) { // this is a plugin with a manifest json, try to see if there is a beta version
-            if (reportIsues) new Notice(`${repositoryPath}\nThe plugin id attribute for the release is missing from the manifest file`, noticeTimeout);
+            if (reportIsues) new Notice(`BRAT\n${repositoryPath}\nThe plugin id attribute for the release is missing from the manifest file`, noticeTimeout);
             return null;
         }
         if (!("version" in manifestJson)) { // this is a plugin with a manifest json, try to see if there is a beta version
-            if (reportIsues) new Notice(`${repositoryPath}\nThe version attribute for the release is missing from the manifest file`, noticeTimeout);
+            if (reportIsues) new Notice(`BRAT\n${repositoryPath}\nThe version attribute for the release is missing from the manifest file`, noticeTimeout);
             return null;
         }
         return manifestJson;
@@ -114,12 +114,12 @@ export default class BetaPlugins {
         const releaseFiles = await this.getAllReleaseFiles(repositoryPath, primaryManifest)
 
         if (releaseFiles.mainJs === "Not Found") {
-            new Notice(`${repositoryPath}\nThe release is not complete and cannot be download. main.js is missing from the release`, noticeTimeout);
+            new Notice(`BRAT\n${repositoryPath}\nThe release is not complete and cannot be download. main.js is missing from the release`, noticeTimeout);
             return false;
         }
 
         if (releaseFiles.manifest === "Not Found") {
-            new Notice(`${repositoryPath}\nThe release is not complete and cannot be download. manifest.json is missing from the release`, noticeTimeout);
+            new Notice(`BRAT\n${repositoryPath}\nThe release is not complete and cannot be download. manifest.json is missing from the release`, noticeTimeout);
             return false;
         }
         const remoteManifestJSON = JSON.parse(releaseFiles.manifest);
@@ -127,7 +127,7 @@ export default class BetaPlugins {
         if (updatePluginFiles === false) {
             await this.writeReleaseFilesToPluginFolder(remoteManifestJSON.id, releaseFiles);
             await addBetaPluginToList(this.plugin, repositoryPath);
-            new Notice(`${repositoryPath}\nThe plugin has been installed and now needs to be enabled in Community Plugins in Settings. First refresh community plugins and then enable this plugin`, noticeTimeout);
+            new Notice(`BRAT\n${repositoryPath}\nThe plugin has been installed and now needs to be enabled in Community Plugins in Settings. First refresh community plugins and then enable this plugin`, noticeTimeout);
         } else {
             // test if the plugin needs to be updated
             const pluginTargetFolderPath = this.plugin.app.vault.configDir + "/plugins/" + remoteManifestJSON.id + "/";
@@ -139,13 +139,13 @@ export default class BetaPlugins {
                     await this.addPlugin(repositoryPath, false);
                     return true; // even though failed, return true since install will be attempted
                 } else
-                    console.log(JSON.stringify(e, null, 2));
+                    console.log("BRAT - Local Manifest Load", remoteManifestJSON.id,  JSON.stringify(e, null, 2));
             }
             const localManifestJSON = await JSON.parse(localManifestContents);
             if (localManifestJSON.version !== remoteManifestJSON.version) { //manifest files are not the same, do an update
                 await this.writeReleaseFilesToPluginFolder(remoteManifestJSON.id, releaseFiles);
                 await this.reloadPlugin(remoteManifestJSON.id)
-                new Notice(`${remoteManifestJSON.id}\n plugin has been updated and reloaded`, noticeTimeout);
+                new Notice(`BRAT\n${remoteManifestJSON.id}\nplugin has been updated and reloaded`, noticeTimeout);
             }
         }
         return true;
@@ -178,7 +178,7 @@ export default class BetaPlugins {
     async updatePlugin(repositoryPath: string): Promise<void> {
         const result = await this.addPlugin(repositoryPath, true);
         if (result === false)
-            new Notice(`${repositoryPath}\nUpdate of plugin failed.`)
+            new Notice(`BRAT\n${repositoryPath}\nUpdate of plugin failed.`)
     }
 
     /**
@@ -188,11 +188,23 @@ export default class BetaPlugins {
      * @return  {Promise<void>}              
      */
     async checkForUpdates(showInfo: boolean = false): Promise<void> {
-        if (showInfo) new Notice(`Checking for plugin updates STARTED`);
+        if (showInfo) new Notice(`BRAT\nChecking for plugin updates STARTED`);
         for (const bp of this.plugin.settings.pluginList) {
             await this.updatePlugin(bp)
         }
-        if (showInfo) new Notice(`Checking for plugin updates COMPLETED`);
+        if (showInfo) new Notice(`BRAT\nChecking for plugin updates COMPLETED`);
+    }
+
+    /**
+     * Removes the beta plugin from the list of beta plugins (does not delete them from disk)
+     *
+     * @param   {string<void>}   betaPluginID  repository path
+     *
+     * @return  {Promise<void>}                [return description]
+     */
+    async deletePlugin(repositoryPath:string): Promise<void> {
+        this.plugin.settings.pluginList = this.plugin.settings.pluginList.filter( (b)=> b != repositoryPath); ;
+        this.plugin.saveSettings();
     }
 
 }
