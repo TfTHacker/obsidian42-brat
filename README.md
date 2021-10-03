@@ -1,5 +1,5 @@
-# Beta Reviewers Autou-pdate Tester
-Beta Reviewers Auto-update Tester or BRAT for short is a plugin that makes it easier for you to assist other developers with reviewing and testing their plugins. 
+# Beta Reviewers Auto-update Tester
+**Beta Reviewers Auto-update Tester** or **BRAT** for short is a plugin that makes it easier for you to assist other developers with reviewing and testing their plugins. 
 
 Simply add the GitHub repository path for the beta Obsidian plugin to the list for testing and now you can just check for updates. Updates are downloaded and the plugin is reloaded. No more having to create folders, download files, copy them to right place and so on. This plugin takes care of all that for you.
 
