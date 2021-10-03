@@ -138,7 +138,8 @@ export default class BetaPlugins {
                 if (e.errno = -4058) { // file does not exist, try installing the plugin
                     await this.addPlugin(repositoryPath, false);
                     return true; // even though failed, return true since install will be attempted
-                } else
+                } 
+                else
                     console.log("BRAT - Local Manifest Load", remoteManifestJSON.id,  JSON.stringify(e, null, 2));
             }
             const localManifestJSON = await JSON.parse(localManifestContents);
