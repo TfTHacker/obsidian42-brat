@@ -1,6 +1,7 @@
-import { Modal, Setting } from 'obsidian';
+import { Modal, Notice, Setting } from 'obsidian';
 import BetaPlugins from './BetaPlugins';
 import ThePlugin from './main';
+import { existBetaPluginInList } from './settings';
 
 // Generic class for capturing a line of text
 
@@ -13,21 +14,24 @@ export default class AddNewPluginModal extends Modal {
         super(plugin.app);
         this.plugin = plugin;
         this.betaPlugins = betaPlugins;
-        this.address="";
+        this.address = "";
     }
 
     async submitForm(): Promise<void> {
-        // this.address = "TfTHacker/obsidian42-text-transporter";
-        console.log(this.address,  this.address.length)
-        if(this.address==="") return;
-        if(this.betaPlugins.addPlugin(this.address))
-            this.close();
+        if (this.address === "") return;
+        if (await existBetaPluginInList(this.plugin, this.address)) {
+            new Notice(`This plugin is already in the list for beta testing`, 20000);
+            return;
+        }
+        const result = await this.betaPlugins.addPlugin(this.address);
+        console.log(result)
+        if (result) this.close();
     }
 
     onOpen(): void {
         this.contentEl.createEl('h4', { text: "Github repository for beta plugin:" });
         this.contentEl.createEl('form', {}, (formEl) => {
-            const inputEl = new Setting(formEl)
+            new Setting(formEl)
                 .addText((textEl) => {
                     textEl.setPlaceholder('Repository (example: TfTHacker/obsidian-brat');
                     textEl.onChange((value) => {
