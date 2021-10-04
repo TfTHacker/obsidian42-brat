@@ -20,11 +20,12 @@ export default class AddNewPluginModal extends Modal {
 
     async submitForm(): Promise<void> {
         if (this.address === "") return;
-        if (await existBetaPluginInList(this.plugin, this.address)) {
+        const scrubbedAddress = this.address.replace("https://github.com/","");
+        if (await existBetaPluginInList(this.plugin, scrubbedAddress)) {
             new Notice(`BRAT\nThis plugin is already in the list for beta testing`, 20000);
             return;
         }
-        const result = await this.betaPlugins.addPlugin(this.address);
+        const result = await this.betaPlugins.addPlugin(scrubbedAddress);
         if (result) this.close();
     }
 
