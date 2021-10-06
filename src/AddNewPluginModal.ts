@@ -10,12 +10,14 @@ export default class AddNewPluginModal extends Modal {
     plugin: ThePlugin;
     betaPlugins: BetaPlugins;
     address: string;
+    openSettingsTabAfterwards: boolean;
 
-    constructor(plugin: ThePlugin, betaPlugins: BetaPlugins) {
+    constructor(plugin: ThePlugin, betaPlugins: BetaPlugins, openSettingsTabAfterwards = false) {
         super(plugin.app);
         this.plugin = plugin;
         this.betaPlugins = betaPlugins;
         this.address = "";
+        this.openSettingsTabAfterwards = openSettingsTabAfterwards;
     }
 
     async submitForm(): Promise<void> {
@@ -26,7 +28,9 @@ export default class AddNewPluginModal extends Modal {
             return;
         }
         const result = await this.betaPlugins.addPlugin(scrubbedAddress);
-        if (result) this.close();
+        if (result) {
+            this.close();
+        }
     }
 
     onOpen(): void {
@@ -69,5 +73,16 @@ export default class AddNewPluginModal extends Modal {
                 if (this.address !== '') await this.submitForm();
             });
         });
+    }
+    
+    async onClose(): Promise<void> {
+        console.log('close',this.openSettingsTabAfterwards)
+        if(this.openSettingsTabAfterwards) {
+            //@ts-ignore
+            await this.plugin.app.setting.open();
+            //@ts-ignore
+            await this.plugin.app.setting.openTabById("obsidian42-brat");
+        }
+
     }
 }

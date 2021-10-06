@@ -20,7 +20,7 @@ export const DEFAULT_SETTINGS: Settings = {
  */
 export async function addBetaPluginToList(plugin: ThePlugin, repositoryPath: string): Promise<void> {
     if (!plugin.settings.pluginList.contains(repositoryPath)) {
-        plugin.settings.pluginList.push(repositoryPath);
+        plugin.settings.pluginList.unshift(repositoryPath);
         plugin.saveSettings();
     }
 }

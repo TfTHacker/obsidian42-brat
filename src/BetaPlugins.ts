@@ -25,11 +25,11 @@ export default class BetaPlugins {
 
     /**
      * opens the AddNewPluginModal to get info for  a new beta plugin
-     *
+     * @param   {boolean}   openSettingsTabAfterwards will open settings screen afterwards. Used when this command is called from settings tab
      * @return  {<Promise><void>}
      */
-    async displayAddNewPluginModal(): Promise<void> {
-        const newPlugin = new AddNewPluginModal(this.plugin, this);
+    async displayAddNewPluginModal(openSettingsTabAfterwards = false): Promise<void> {
+        const newPlugin = new AddNewPluginModal(this.plugin, this, openSettingsTabAfterwards);
         newPlugin.open();
     }
 

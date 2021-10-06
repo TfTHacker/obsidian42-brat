@@ -37,7 +37,7 @@ export default class ThePlugin extends Plugin {
 
 		this.addCommand({
 			id: "BRAT-updateOnePlugin",
-			name: "Update a plugin if an update is available",
+			name: "Choose a single plugin to update",
 			callback: async () => {
 				const pluginList: SuggesterItem[] = Object.values(this.settings.pluginList).map((m) => { return { display: m, info: m } });
 				const gfs = new GenericFuzzySuggester(this);

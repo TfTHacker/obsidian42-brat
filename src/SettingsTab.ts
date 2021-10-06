@@ -36,6 +36,16 @@ export class SettingsTab extends PluginSettingTab {
 			.createEl("b", { text: "Note: " })
 		containerEl.createSpan({ text: "This does not delete the plugin, this should be done from the  Community Plugins tab in Settings." });
 
+		new Setting(containerEl)
+			.addButton((cb: ButtonComponent)=>{
+				cb.setButtonText("Add Beta plugin")
+				cb.onClick(async ()=>{
+					// @ts-ignore
+					this.plugin.app.setting.close();
+					await this.plugin.betaPlugins.displayAddNewPluginModal(true);
+				})
+			});
+
 		for (const bp of this.plugin.settings.pluginList) {
 			new Setting(containerEl)
 				.setName(bp)

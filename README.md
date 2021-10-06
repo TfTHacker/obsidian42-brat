@@ -22,7 +22,8 @@ Please note, it might take 5 to 15 minutes for an updated beta plugin to update.
 ## See if there are upates, but don't update them
 The command palette command "Only check for updates to beta plugins, but don't Update" will look for updates to beta plugins, but will not do any updates.
 
-## TBD - manually update one plugin
+## Manually update one plugin
+To update just a specific plugin, use the "Choose a single plugin to update" command in the command palette.
 
 ## Restart a plugin
 You may not need this often, but this is a useful feature for developers. Using the Restart a plugin command from command palette, you can force a plugin to be reloaded.
