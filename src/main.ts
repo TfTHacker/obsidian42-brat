@@ -24,13 +24,33 @@ export default class ThePlugin extends Plugin {
 		});
 
 		this.addCommand({
-			id: "BRAT-checkForUpdates",
-			name: "Check for updates to beta plugins",
-			callback: async () => { await this.betaPlugins.checkForUpdates(true) }
+			id: "BRAT-checkForUpdatesAndUpdate",
+			name: "Check for updates to all beta plugins and UPDATE",
+			callback: async () => { await this.betaPlugins.checkForUpdatesAndInstallUpdates(true, false) }
 		});
 
 		this.addCommand({
-			id: "BRAT-restart plugin",
+			id: "BRAT-checkForUpdatesAndDontUpdate",
+			name: "Only check for updates to beta plugins, but don't Update",
+			callback: async () => { await this.betaPlugins.checkForUpdatesAndInstallUpdates(true, true) }
+		});
+
+		this.addCommand({
+			id: "BRAT-updateOnePlugin",
+			name: "Update a plugin if an update is available",
+			callback: async () => {
+				const pluginList: SuggesterItem[] = Object.values(this.settings.pluginList).map((m) => { return { display: m, info: m } });
+				const gfs = new GenericFuzzySuggester(this);
+				gfs.setSuggesterData(pluginList);
+				await gfs.display(async (results) => {
+					new Notice(`BRAT\nChecking for updates for ${results.info}`,3000);
+					await this.betaPlugins.updatePlugin(results.info, false, true);
+				});
+			}
+		});
+
+		this.addCommand({
+			id: "BRAT-restartPlugin",
 			name: "Restart a plugin that is already installed",
 			callback: async () => {
 				// @ts-ignore
@@ -46,7 +66,7 @@ export default class ThePlugin extends Plugin {
 
 		this.app.workspace.onLayoutReady((): void => {
 			if (this.settings.updateAtStartup) // let obsidian load and calm down before check
-				setTimeout(async () => { await this.betaPlugins.checkForUpdates(false) }, 60000);
+				setTimeout(async () => { await this.betaPlugins.checkForUpdatesAndInstallUpdates(false) }, 60000);
 		});
 	}
 

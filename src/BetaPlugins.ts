@@ -103,11 +103,13 @@ export default class BetaPlugins {
      * existing plugins.
      *
      * @param   {string}              repositoryPath     path to GitHub repository formated as USERNAME/repository
-     * @param   {[type]}              updatePluginFiles  true if this is just an update not an install
+     * @param   {boolean}             updatePluginFiles  true if this is just an update not an install
+     * @param   {boolean}             seeIfUpdatedOnly   if true, and updatePluginFiles true, will just check for updates, but not do the update. will report to user that there is a new plugin
+     * @param   {boolean}             reportIfNotUpdted  if true, report if an update has not succed
      *
      * @return  {Promise<boolean>}                       true if succeeds
      */
-    async addPlugin(repositoryPath: string, updatePluginFiles = false): Promise<boolean> {
+    async addPlugin(repositoryPath: string, updatePluginFiles = false, seeIfUpdatedOnly = false, reportIfNotUpdted = false): Promise<boolean> {
         const manifestJson = await this.validateRepository(repositoryPath, false, true);
         const noticeTimeout = 60000;
         if (manifestJson === null) return false;
@@ -147,10 +149,15 @@ export default class BetaPlugins {
             }
             const localManifestJSON = await JSON.parse(localManifestContents);
             if (localManifestJSON.version !== remoteManifestJSON.version) { //manifest files are not the same, do an update
-                await this.writeReleaseFilesToPluginFolder(remoteManifestJSON.id, releaseFiles);
-                await this.reloadPlugin(remoteManifestJSON.id)
-                new Notice(`BRAT\n${remoteManifestJSON.id}\nplugin has been updated and reloaded`, noticeTimeout);
-            }
+                if (seeIfUpdatedOnly) { // dont update, just report it
+                    new Notice(`BRAT\nThere is an update available for ${remoteManifestJSON.id}`);
+                } else {
+                    await this.writeReleaseFilesToPluginFolder(remoteManifestJSON.id, releaseFiles);
+                    await this.reloadPlugin(remoteManifestJSON.id)
+                    new Notice(`BRAT\n${remoteManifestJSON.id}\nplugin has been updated and reloaded`, noticeTimeout);
+                }
+            } else
+                if (reportIfNotUpdted) new Notice(`BRAT\nNo update available for ${repositoryPath}`, 3000);
         }
         return true;
     }
@@ -175,14 +182,16 @@ export default class BetaPlugins {
     /**
      * updates a beta plugin
      *
-     * @param   {string<void>}   repositoryPath  repository path on GitHub
+     * @param   {string}   repositoryPath  repository path on GitHub
+     * @param   {boolean}  onlyCheckDontUpdate only looks for update
      *
      * @return  {Promise<void>}                  
      */
-    async updatePlugin(repositoryPath: string): Promise<void> {
-        const result = await this.addPlugin(repositoryPath, true);
-        if (result === false)
+    async updatePlugin(repositoryPath: string, onlyCheckDontUpdate = false, reportIfNotUpdted = false): Promise<boolean> {
+        const result = await this.addPlugin(repositoryPath, true, onlyCheckDontUpdate, reportIfNotUpdted);
+        if (result === false && onlyCheckDontUpdate === false)
             new Notice(`BRAT\n${repositoryPath}\nUpdate of plugin failed.`)
+        return result;
     }
 
     /**
@@ -191,10 +200,10 @@ export default class BetaPlugins {
      * @param   {boolean}           showInfo  should this with a started/completed message - useful when ran from CP
      * @return  {Promise<void>}              
      */
-    async checkForUpdates(showInfo = false): Promise<void> {
+    async checkForUpdatesAndInstallUpdates(showInfo = false, onlyCheckDontUpdate = false): Promise<void> {
         if (showInfo) new Notice(`BRAT\nChecking for plugin updates STARTED`, 30000);
         for (const bp of this.plugin.settings.pluginList) {
-            await this.updatePlugin(bp)
+            await this.updatePlugin(bp, onlyCheckDontUpdate);
         }
         if (showInfo) new Notice(`BRAT\nChecking for plugin updates COMPLETED`, 10000);
     }
