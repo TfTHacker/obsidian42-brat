@@ -3,7 +3,7 @@
 	"name": "Obsidian42 - BRAT",
 	"version": "0.3",
 	"minAppVersion": "0.9.12",
-	"description": "Easi.y install a beta version of a plugin for testing.",
+	"description": "Easily install a beta version of a plugin for testing.",
 	"author": "TfTHacker",
 	"authorUrl": "https://github.com/TfTHacker/obsidian42-brat",
 	"isDesktopOnly": false
