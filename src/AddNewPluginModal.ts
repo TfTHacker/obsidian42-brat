@@ -24,7 +24,7 @@ export default class AddNewPluginModal extends Modal {
         if (this.address === "") return;
         const scrubbedAddress = this.address.replace("https://github.com/","");
         if (await existBetaPluginInList(this.plugin, scrubbedAddress)) {
-            new Notice(`BRAT\nThis plugin is already in the list for beta testing`, 20000);
+            new Notice(`BRAT\nThis plugin is already in the list for beta testing`, 10000);
             return;
         }
         const result = await this.betaPlugins.addPlugin(scrubbedAddress);
@@ -76,12 +76,9 @@ export default class AddNewPluginModal extends Modal {
     }
     
     async onClose(): Promise<void> {
-        console.log('close',this.openSettingsTabAfterwards)
         if(this.openSettingsTabAfterwards) {
-            //@ts-ignore
-            await this.plugin.app.setting.open();
-            //@ts-ignore
-            await this.plugin.app.setting.openTabById("obsidian42-brat");
+            await (this.plugin as any).app.setting.open();
+            await (this.plugin as any).app.setting.openTabById("obsidian42-brat");
         }
 
     }

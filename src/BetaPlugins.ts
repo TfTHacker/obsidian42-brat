@@ -44,7 +44,7 @@ export default class BetaPlugins {
      * @return  {Promise<PluginManifest>}                     the manifest file if found, or null if its incomplete
      */
     async validateRepository(repositoryPath: string, getBetaManifest = false, reportIsues = false): Promise<PluginManifest> {
-        const noticeTimeout = 60000;
+        const noticeTimeout = 10000;
         const manifestJson = await grabManifestJsonFromRepository(repositoryPath, !getBetaManifest);
         if (!manifestJson) { // this is a plugin with a manifest json, try to see if there is a beta version
             if (reportIsues) new Notice(`BRAT\n${repositoryPath}\nThis does not seem to be an obsidian plugin, as there is no manifest.json file.`, noticeTimeout);
@@ -111,23 +111,33 @@ export default class BetaPlugins {
      */
     async addPlugin(repositoryPath: string, updatePluginFiles = false, seeIfUpdatedOnly = false, reportIfNotUpdted = false): Promise<boolean> {
         const manifestJson = await this.validateRepository(repositoryPath, false, true);
-        const noticeTimeout = 60000;
+        const noticeTimeout = 10000;
         if (manifestJson === null) return false;
         const betaManifestJson = await this.validateRepository(repositoryPath, true, false);
         const primaryManifest: PluginManifest = betaManifestJson ? betaManifestJson : manifestJson; // if there is a beta manifest, use that
 
-        const releaseFiles = await this.getAllReleaseFiles(repositoryPath, primaryManifest)
-
-        if (releaseFiles.mainJs === "Not Found") {
-            new Notice(`BRAT\n${repositoryPath}\nThe release is not complete and cannot be download. main.js is missing from the release`, noticeTimeout);
+        if(!primaryManifest.hasOwnProperty('version')) {
+            new Notice(`BRAT\n${repositoryPath}\nThe manifest file in the root directory of the repository does not have a version number in the file. This plugin cannot be installed.`, noticeTimeout);
             return false;
         }
 
-        if (releaseFiles.manifest === "Not Found") {
-            new Notice(`BRAT\n${repositoryPath}\nThe release is not complete and cannot be download. manifest.json is missing from the release`, noticeTimeout);
+        const releaseFiles = await this.getAllReleaseFiles(repositoryPath, primaryManifest)
+
+        if (releaseFiles.mainJs === null) {
+            new Notice(`BRAT\n${repositoryPath}\nThe release is not complete and cannot be download. main.js is missing from the Release`, noticeTimeout);
+            return false;
+        }
+
+        if (releaseFiles.manifest === null) {
+            new Notice(`BRAT\n${repositoryPath}\nThe release is not complete and cannot be download. manifest.json is missing from the Release`, noticeTimeout);
             return false;
         }
         const remoteManifestJSON = JSON.parse(releaseFiles.manifest);
+
+        if(!remoteManifestJSON.hasOwnProperty('version')) {
+            new Notice(`BRAT\n${repositoryPath}\nThe manifest file in the Release does not have a version number in the file. This plugin cannot be installed`, noticeTimeout);
+            return false;
+        }
 
         if (updatePluginFiles === false) {
             await this.writeReleaseFilesToPluginFolder(remoteManifestJSON.id, releaseFiles);
@@ -201,7 +211,7 @@ export default class BetaPlugins {
      * @return  {Promise<void>}              
      */
     async checkForUpdatesAndInstallUpdates(showInfo = false, onlyCheckDontUpdate = false): Promise<void> {
-        if (showInfo) new Notice(`BRAT\nChecking for plugin updates STARTED`, 30000);
+        if (showInfo) new Notice(`BRAT\nChecking for plugin updates STARTED`, 10000);
         for (const bp of this.plugin.settings.pluginList) {
             await this.updatePlugin(bp, onlyCheckDontUpdate);
         }
