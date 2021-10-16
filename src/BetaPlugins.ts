@@ -67,13 +67,14 @@ export default class BetaPlugins {
      *
      * @param   {string}                        repositoryPath  path to the GitHub repository
      * @param   {PluginManifest<ReleaseFiles>}  manifest        manifest file
+     * @param   {boolean}                       getManifest     grab the remote manifest file
      *
      * @return  {Promise<ReleaseFiles>}                         all relase files as strings based on the ReleaseFiles interaface
      */
-    async getAllReleaseFiles(repositoryPath: string, manifest: PluginManifest): Promise<ReleaseFiles> {
+    async getAllReleaseFiles(repositoryPath: string, manifest: PluginManifest, getManifest: boolean): Promise<ReleaseFiles> {
         return {
             mainJs: await grabReleaseFileFromRepository(repositoryPath, manifest.version, "main.js"),
-            manifest: await grabReleaseFileFromRepository(repositoryPath, manifest.version, "manifest.json"),
+            manifest: getManifest ? await grabReleaseFileFromRepository(repositoryPath, manifest.version, "manifest.json") : null,
             styles: await grabReleaseFileFromRepository(repositoryPath, manifest.version, "styles.css")
         }
     }
@@ -110,61 +111,69 @@ export default class BetaPlugins {
      * @return  {Promise<boolean>}                       true if succeeds
      */
     async addPlugin(repositoryPath: string, updatePluginFiles = false, seeIfUpdatedOnly = false, reportIfNotUpdted = false): Promise<boolean> {
-        const manifestJson = await this.validateRepository(repositoryPath, false, true);
         const noticeTimeout = 10000;
-        if (manifestJson === null) return false;
-        const betaManifestJson = await this.validateRepository(repositoryPath, true, false);
-        const primaryManifest: PluginManifest = betaManifestJson ? betaManifestJson : manifestJson; // if there is a beta manifest, use that
+        let primaryManifest = await this.validateRepository(repositoryPath, true, false); // attempt to get manifest-beta.json
+        const usingBetaManifest: boolean = primaryManifest ? true : false;
+        if(usingBetaManifest===false) 
+            primaryManifest = await this.validateRepository(repositoryPath, false, true); // attempt to get manifest.json
 
+        if(primaryManifest===null) {
+            new Notice(`BRAT\n${repositoryPath}\nA manifest.json or manifest-beta.json file does not exist in the root directory of the repository. This plugin cannot be installed.`, noticeTimeout);
+            return false;
+        }
+            
         if(!primaryManifest.hasOwnProperty('version')) {
-            new Notice(`BRAT\n${repositoryPath}\nThe manifest file in the root directory of the repository does not have a version number in the file. This plugin cannot be installed.`, noticeTimeout);
+            new Notice(`BRAT\n${repositoryPath}\nThe manifest${usingBetaManifest ? "-beta" : ""}.json file in the root directory of the repository does not have a version number in the file. This plugin cannot be installed.`, noticeTimeout);
             return false;
         }
 
-        const releaseFiles = await this.getAllReleaseFiles(repositoryPath, primaryManifest)
-
-        if (releaseFiles.mainJs === null) {
-            new Notice(`BRAT\n${repositoryPath}\nThe release is not complete and cannot be download. main.js is missing from the Release`, noticeTimeout);
-            return false;
-        }
-
-        if (releaseFiles.manifest === null) {
-            new Notice(`BRAT\n${repositoryPath}\nThe release is not complete and cannot be download. manifest.json is missing from the Release`, noticeTimeout);
-            return false;
-        }
-        const remoteManifestJSON = JSON.parse(releaseFiles.manifest);
-
-        if(!remoteManifestJSON.hasOwnProperty('version')) {
-            new Notice(`BRAT\n${repositoryPath}\nThe manifest file in the Release does not have a version number in the file. This plugin cannot be installed`, noticeTimeout);
-            return false;
+        const getRelease = async ()=>{
+            const rFiles = await this.getAllReleaseFiles(repositoryPath, primaryManifest, usingBetaManifest);
+            if(usingBetaManifest || rFiles.manifest === null)  //if beta, use that manifest, or if there is no manifest in release, use the primaryManifest
+                rFiles.manifest = JSON.stringify(primaryManifest);
+    
+            if (rFiles.mainJs === null) {
+                new Notice(`BRAT\n${repositoryPath}\nThe release is not complete and cannot be download. main.js is missing from the Release`, noticeTimeout);
+                return null;
+            }
+            return rFiles;
         }
 
         if (updatePluginFiles === false) {
-            await this.writeReleaseFilesToPluginFolder(remoteManifestJSON.id, releaseFiles);
+            const releaseFiles = await getRelease();
+            if (releaseFiles===null) return;
+            await this.writeReleaseFilesToPluginFolder(primaryManifest.id, releaseFiles);
             await addBetaPluginToList(this.plugin, repositoryPath);
-            new Notice(`BRAT\n${repositoryPath}\nThe plugin has been installed and now needs to be enabled in Community Plugins in Settings. First refresh community plugins and then enable this plugin`, noticeTimeout);
+            //@ts-ignore
+            const appPlugins = this.plugin.app.plugins;
+            await appPlugins.loadManifests();
+            await appPlugins.enablePlugin(primaryManifest.id);
+            new Notice(`BRAT\n${repositoryPath}\nThe plugin has been installed.`, noticeTimeout);
         } else {
             // test if the plugin needs to be updated
-            const pluginTargetFolderPath = this.plugin.app.vault.configDir + "/plugins/" + remoteManifestJSON.id + "/";
+            const pluginTargetFolderPath = this.plugin.app.vault.configDir + "/plugins/" + primaryManifest.id + "/";
             let localManifestContents = null;
             try {
                 localManifestContents = await this.plugin.app.vault.adapter.read(pluginTargetFolderPath + "manifest.json")
             } catch (e) {
                 if (e.errno === -4058) { // file does not exist, try installing the plugin
-                    await this.addPlugin(repositoryPath, false);
+                    await this.addPlugin(repositoryPath, false, usingBetaManifest);
                     return true; // even though failed, return true since install will be attempted
                 }
                 else
-                    console.log("BRAT - Local Manifest Load", remoteManifestJSON.id, JSON.stringify(e, null, 2));
+                    console.log("BRAT - Local Manifest Load", primaryManifest.id, JSON.stringify(e, null, 2));
             }
             const localManifestJSON = await JSON.parse(localManifestContents);
-            if (localManifestJSON.version !== remoteManifestJSON.version) { //manifest files are not the same, do an update
+            if (localManifestJSON.version !== primaryManifest.version) { //manifest files are not the same, do an update
+                const releaseFiles = await getRelease();
+                if (releaseFiles===null) return;
+
                 if (seeIfUpdatedOnly) { // dont update, just report it
-                    new Notice(`BRAT\nThere is an update available for ${remoteManifestJSON.id}`);
+                    new Notice(`BRAT\nThere is an update available for ${primaryManifest.id}`);
                 } else {
-                    await this.writeReleaseFilesToPluginFolder(remoteManifestJSON.id, releaseFiles);
-                    await this.reloadPlugin(remoteManifestJSON.id)
-                    new Notice(`BRAT\n${remoteManifestJSON.id}\nplugin has been updated and reloaded`, noticeTimeout);
+                    await this.writeReleaseFilesToPluginFolder(primaryManifest.id, releaseFiles);
+                    await this.reloadPlugin(primaryManifest.id)
+                    new Notice(`BRAT\n${primaryManifest.id}\nplugin has been updated and reloaded`, noticeTimeout);
                 }
             } else
                 if (reportIfNotUpdted) new Notice(`BRAT\nNo update available for ${repositoryPath}`, 3000);

@@ -45,8 +45,20 @@ This allows you to control what release version beta testers are using, while le
 
 If you choose to use manifest-beta.json, it needs to be formatted with the same structure of a manifest.json file. Again, manifest-beta.json file is completly optional. 
 
+Pseudo code for how the manifest files are processed:
+```
+if repositoryRoot/manifest-beta.json exists
+    use repositoryRoot/manifest-beta.json for release information, ignore repositoryRoot/manifest.json
+    copy repositoryRoot/manifest-beta.json to plugin folder, renaming it to manifest.json
+else
+    use repositoryRoot/manifest.json for release information
+    copy Release/manifest.json to the plugin folder if it exists. If it doesn't exist, use the repositoryRoot/manifest.json
+
+main.js and styles.css copied from the correspondencing release version depending upon the above logic
+````
+
+
 Few additional notes:
 * manifest-beta.json does not need to be in the GitHub release, it just needs to be on the root of the repository itself.
 * manifest-beta.json should have the exact same details as your manifest.json file, except the version number in this file should point to the release you want tested.
-* A GitHub release must contain a main.js and a manifest.json file. The styles.css file is optional.
 * For additional instructions on plugin requirements, see the plugins documentation provided by obsidian: [Obsidian Sample Plugin](https://github.com/obsidianmd/obsidian-sample-plugin)

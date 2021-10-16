@@ -11,7 +11,7 @@ export default class ThePlugin extends Plugin {
 	betaPlugins: BetaPlugins;
 
 	async onload(): Promise<void> {
-		console.log("loading " + this.appName);
+		console.log("loading Obsidian42 - BRAT");
 		await this.loadSettings();
 		this.addSettingTab(new SettingsTab(this.app, this));
 

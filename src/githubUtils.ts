@@ -12,8 +12,9 @@ const GITHUB_RAW_USERCONTENT_PATH = "https://raw.githubusercontent.com/";
  * @return  {Promise<string>}              contents of file as string from the repository's release
  */
 export const grabReleaseFileFromRepository = async (repository: string, version: string, fileName: string): Promise<string> => {
+    const URL = `https://github.com/${repository}/releases/download/${version}/${fileName}`;
     try {
-        const download = await request({ url: `https://github.com/${repository}/releases/download/${version}/${fileName}` });
+        const download = await request({ url: URL });
         return ( ( download === "Not Found" || download === `{"error":"Not Found"}`) ? null : download);
     } catch (error) {
         console.log("error in grabReleaseFileFromRepository", error)
