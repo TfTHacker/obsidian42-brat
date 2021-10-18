@@ -17,7 +17,7 @@ export const grabReleaseFileFromRepository = async (repository: string, version:
         const download = await request({ url: URL });
         return ( ( download === "Not Found" || download === `{"error":"Not Found"}`) ? null : download);
     } catch (error) {
-        console.log("error in grabReleaseFileFromRepository", error)
+        console.log("error in grabReleaseFileFromRepository", URL,  error)
     }
 }
 

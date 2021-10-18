@@ -69,10 +69,9 @@ export default class ThePlugin extends Plugin {
 			id: "BRAT-openGitHubRepository",
 			name: "Open the GitHub repository for a plugin",
 			callback: async () => {
-				let communityPlugins = await grabCommmunityPluginList();
-				let communityPluginList: SuggesterItem[] = Object.values(communityPlugins).map((p) => { return { display: `${p.name}  (${p.repo})`, info: p.repo } });
+				const communityPlugins = await grabCommmunityPluginList();
+				const communityPluginList: SuggesterItem[] = Object.values(communityPlugins).map((p) => { return { display: `Community: ${p.name}  (${p.repo})`, info: p.repo } });
 				const bratList: SuggesterItem[] = Object.values(this.settings.pluginList).map((p) => { return { display: "BRAT: " + p, info: p } });
-				bratList.push({ display: "--------------------------  Community Plugins  --------------------------", info: null });
 				communityPluginList.forEach(si => bratList.push(si));
 				const gfs = new GenericFuzzySuggester(this);
 				gfs.setSuggesterData(bratList);
