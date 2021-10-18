@@ -39,3 +39,14 @@ export const grabManifestJsonFromRepository = async (repositoryPath: string, roo
         console.log("error in grabManifestJsonFromRepository", error)
     }
 }
+
+
+export const grabCommmunityPluginList = async(): Promise<JSON> => {
+    const pluginListURL = `https://raw.githubusercontent.com/obsidianmd/obsidian-releases/HEAD/community-plugins.json`;
+    try {
+        const response = await request({ url: pluginListURL });
+        return (response === "404: Not Found" ? null : await JSON.parse(response));
+    } catch (error) {
+        console.log("error in grabCommmunityPluginList", error)
+    }
+}

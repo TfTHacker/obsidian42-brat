@@ -3,6 +3,7 @@ import { SettingsTab } from "./SettingsTab";
 import { Settings, DEFAULT_SETTINGS } from "./settings";
 import BetaPlugins from "./BetaPlugins";
 import { GenericFuzzySuggester, SuggesterItem } from "./GenericFuzzySuggester";
+import { grabCommmunityPluginList } from "./githubUtils";
 
 export default class ThePlugin extends Plugin {
 	appName = "Obsidian42 - Beta Reviewer's Auto-update Tool (BRAT)";
@@ -43,7 +44,7 @@ export default class ThePlugin extends Plugin {
 				const gfs = new GenericFuzzySuggester(this);
 				gfs.setSuggesterData(pluginList);
 				await gfs.display(async (results) => {
-					new Notice(`BRAT\nChecking for updates for ${results.info}`,3000);
+					new Notice(`BRAT\nChecking for updates for ${results.info}`, 3000);
 					await this.betaPlugins.updatePlugin(results.info, false, true);
 				});
 			}
@@ -60,6 +61,23 @@ export default class ThePlugin extends Plugin {
 				await gfs.display(async (results) => {
 					new Notice(`${results.info}\nPlugin reloading .....`, 5000);
 					await this.betaPlugins.reloadPlugin(results.info);
+				});
+			}
+		});
+
+		this.addCommand({
+			id: "BRAT-openGitHubRepository",
+			name: "Open the GitHub repository for a plugin",
+			callback: async () => {
+				let communityPlugins = await grabCommmunityPluginList();
+				let communityPluginList: SuggesterItem[] = Object.values(communityPlugins).map((p) => { return { display: `${p.name}  (${p.repo})`, info: p.repo } });
+				const bratList: SuggesterItem[] = Object.values(this.settings.pluginList).map((p) => { return { display: "BRAT: " + p, info: p } });
+				bratList.push({ display: "--------------------------  Community Plugins  --------------------------", info: null });
+				communityPluginList.forEach(si => bratList.push(si));
+				const gfs = new GenericFuzzySuggester(this);
+				gfs.setSuggesterData(bratList);
+				await gfs.display(async (results) => {
+					if (results.info) window.open(`https://github.com/${results.info}`)
 				});
 			}
 		});

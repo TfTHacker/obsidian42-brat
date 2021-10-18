@@ -1,7 +1,7 @@
 import ThePlugin from "./main";
 import AddNewPluginModal from "./AddNewPluginModal";
 import { grabManifestJsonFromRepository, grabReleaseFileFromRepository } from "./githubUtils";
-import { Notice, PluginManifest } from "obsidian";
+import { normalizePath, Notice, PluginManifest } from "obsidian";
 import { addBetaPluginToList } from "./settings";
 
 /**
@@ -88,15 +88,16 @@ export default class BetaPlugins {
      * @return  {Promise<void>}                     
      */
     async writeReleaseFilesToPluginFolder(betaPluginID: string, relFiles: ReleaseFiles): Promise<void> {
-        const pluginTargetFolderPath = this.plugin.app.vault.configDir + "/plugins/" + betaPluginID + "/";
-        if (await this.plugin.app.vault.adapter.exists(pluginTargetFolderPath) === false ||
-            !(await this.plugin.app.vault.adapter.exists(pluginTargetFolderPath + "manifest.json"))) {
+        const pluginTargetFolderPath = normalizePath(this.plugin.app.vault.configDir + "/plugins/" + betaPluginID) + "/";
+        const adapter = this.plugin.app.vault.adapter;
+        if (await adapter.exists(pluginTargetFolderPath) === false ||
+            !(await adapter.exists(pluginTargetFolderPath + "manifest.json"))) {
             // if plugin folder doesnt exist or manifest.json doesn't exist, create it and save the plugin files
-            await this.plugin.app.vault.adapter.mkdir(pluginTargetFolderPath);
+            await adapter.mkdir(pluginTargetFolderPath);
         }
-        await this.plugin.app.vault.adapter.write(pluginTargetFolderPath + "main.js", relFiles.mainJs);
-        await this.plugin.app.vault.adapter.write(pluginTargetFolderPath + "manifest.json", relFiles.manifest);
-        if (relFiles.styles) await this.plugin.app.vault.adapter.write(pluginTargetFolderPath + "styles.css", relFiles.styles);
+        await adapter.write(pluginTargetFolderPath + "main.js", relFiles.mainJs);
+        await adapter.write(pluginTargetFolderPath + "manifest.json", relFiles.manifest);
+        if (relFiles.styles) await adapter.write(pluginTargetFolderPath + "styles.css", relFiles.styles);
     }
 
     /**
@@ -145,10 +146,8 @@ export default class BetaPlugins {
             await this.writeReleaseFilesToPluginFolder(primaryManifest.id, releaseFiles);
             await addBetaPluginToList(this.plugin, repositoryPath);
             //@ts-ignore
-            const appPlugins = this.plugin.app.plugins;
-            await appPlugins.loadManifests();
-            await appPlugins.enablePlugin(primaryManifest.id);
-            new Notice(`BRAT\n${repositoryPath}\nThe plugin has been installed.`, noticeTimeout);
+            await this.plugin.app.plugins.loadManifests();
+            new Notice(`BRAT\n${repositoryPath}\nThe plugin has been registered with BRAT. You may still need to enable it the Community Plugin List.`, noticeTimeout);
         } else {
             // test if the plugin needs to be updated
             const pluginTargetFolderPath = this.plugin.app.vault.configDir + "/plugins/" + primaryManifest.id + "/";
@@ -172,8 +171,11 @@ export default class BetaPlugins {
                     new Notice(`BRAT\nThere is an update available for ${primaryManifest.id}`);
                 } else {
                     await this.writeReleaseFilesToPluginFolder(primaryManifest.id, releaseFiles);
-                    await this.reloadPlugin(primaryManifest.id)
-                    new Notice(`BRAT\n${primaryManifest.id}\nplugin has been updated and reloaded`, noticeTimeout);
+                    //@ts-ignore
+                    await this.plugin.app.plugins.loadManifests();
+                    //@ts-ignore
+                    if(!this.plugin.app.plugins.plugins[primaryManifest.id]===undefined) await this.reloadPlugin(primaryManifest.id); //reload if enabled
+                    new Notice(`BRAT\n${primaryManifest.id}\nPlugin has been updated.`, noticeTimeout);
                 }
             } else
                 if (reportIfNotUpdted) new Notice(`BRAT\nNo update available for ${repositoryPath}`, 3000);
