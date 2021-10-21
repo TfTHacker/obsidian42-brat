@@ -174,7 +174,7 @@ export default class BetaPlugins {
                     //@ts-ignore
                     await this.plugin.app.plugins.loadManifests();
                     //@ts-ignore
-                    if(!this.plugin.app.plugins.plugins[primaryManifest.id]===undefined) await this.reloadPlugin(primaryManifest.id); //reload if enabled
+                    if(this.plugin.app.plugins.plugins[primaryManifest.id]?.manifest) await this.reloadPlugin(primaryManifest.id); //reload if enabled
                     new Notice(`BRAT\n${primaryManifest.id}\nPlugin has been updated.`, noticeTimeout);
                 }
             } else
