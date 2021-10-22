@@ -44,7 +44,7 @@ export default class BetaPlugins {
      * @return  {Promise<PluginManifest>}                     the manifest file if found, or null if its incomplete
      */
     async validateRepository(repositoryPath: string, getBetaManifest = false, reportIsues = false): Promise<PluginManifest> {
-        const noticeTimeout = 10000;
+        const noticeTimeout = 15000;
         const manifestJson = await grabManifestJsonFromRepository(repositoryPath, !getBetaManifest);
         if (!manifestJson) { // this is a plugin with a manifest json, try to see if there is a beta version
             if (reportIsues) new Notice(`BRAT\n${repositoryPath}\nThis does not seem to be an obsidian plugin, as there is no manifest.json file.`, noticeTimeout);
