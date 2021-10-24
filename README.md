@@ -19,6 +19,15 @@ Simply add the GitHub repository path for the beta Obsidian plugin to the list f
 - Plugins can be updated using the command palette by running the command **BRAT: Check for updates to all beta plugins and UPDATE**
 - Optionally, beta plugins can be configured to auto-update when starting Obsidian. This feature can be enabled in the **Obsidian42- BRAT" tab in settings.
 
+## Stopping Beta Plugin updates/Deleting a Beta plugin
+- Stopping updates to a beta plugin (Step 1)
+  - In the BRAT tab in settings, click the button with an x next to the beta plugin you want to stop updating. In place of the x button, a button will appear for you to confirm removing the beta plugin from updating
+  - When you remove the beta plugin from BRAT, the plugin in still installed in your Obsidian vault and will receive updates in the normal way through Obsidian's "check for updates" feature. If you really want to remove the plugin, make sure to do the following step.
+
+- Deleting a beta plugin from Obsidian (Step 2: optional)
+  - If you want to delete the plugin, you need to do one more step. Go to the Community Plugins tab in settings and find the beta plugin and uninstall it, just as you would uninstall any other plugin.
+  - You also have to remove the reference to this beta plugin in BRAT as outined in the previous step 1. Otherwise BRAT will continue to update the plugin
+
 # Little more explanation for those who like to read
 The first thing you need is the GitHub Repository path for the beta plugin. This sounds way more complicated than it is. Plugins are developed using GitHub.  Each developer has their own account on GitHub and creates a unique repository for their plugin. Likely the developer will give you this information, but you can ascertain it for yourself using your own powerful ability to think, reason and understand.
 
