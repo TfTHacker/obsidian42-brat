@@ -61,7 +61,7 @@ Most of you won't need this, but its useful to developers. I bet you wish I told
 The command palette contains a command **BRAT: Open the GitHub repository for a plugin**. This gives you a list of all beta plugins registered with BRAT, but also all plugins from the community plugin list. By selecting a plugin from the list, the GitHub repository will be opened in your browser
 
 
-<a href="https://twitter.com/TfTHacker/status/1452175686928580612" target="_blank"><img style="width:200px;" src="https://raw.githubusercontent.com/TfTHacker/obsidian42-text-transporter/main/docs/images/copypushpull.png"></a> Click image for video demo!
+<a href="https://twitter.com/TfTHacker/status/1452175686928580612" target="_blank"><img style="width:200px;" src="https://raw.githubusercontent.com/TfTHacker/obsidian42-brat/main/help/GithubOpenrepositories.png"></a> Click image for video demo!
 
 
 ---
