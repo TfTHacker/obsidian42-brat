@@ -15,7 +15,7 @@ esbuild.build({
     logLevel: "info",
     sourcemap: prod ? false : "inline",
     treeShaking: true,
-    outfile: "main.js",
+    outfile: "build/main.js",
 }).catch(() => process.exit(1));
 
 fs.copyFile("manifest.json", "build/manifest.json", (err) => {if(err) console.log(err )} );
