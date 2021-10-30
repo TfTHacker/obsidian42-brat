@@ -4,8 +4,8 @@
   "description": "Obsidian42 - Beta Reviewer's Autoupdate Tool.",
   "main": "main.js",
   "scripts": {
-    "dev": "esbuild src/main.ts --bundle --external:obsidian --format=cjs --outfile=build/main.js --watch",
-    "build": "esbuild src/main.ts --bundle --external:obsidian --format=cjs --outfile=build/main.js",
+    "dev": "node esbuild.config.mjs",
+    "build": "node esbuild.config.mjs production",
     "lint": "eslint . --ext .ts"
   },
   "author": "TfT Hacker",
@@ -15,15 +15,13 @@
     "url": "git://github.com/TfTHacker/obsidian42-brat.git"
   },
   "devDependencies": {
-    "@types/node": "^16.10.3",
-    "@typescript-eslint/eslint-plugin": "^4.33.0",
-    "@typescript-eslint/parser": "^4.33.0",
-    "eslint": "^7.32.0",
+    "@types/node": "^16.11.6",
+    "eslint": "^8.1.0",
+    "@typescript-eslint/eslint-plugin": "^5.2.0",
+    "@typescript-eslint/parser": "^5.2.0",
+    "esbuild": "0.13.8",
     "obsidian": "^0.12.17",
     "tslib": "^2.3.1",
-    "typescript": "^4.4.3"
-  },
-  "dependencies": {
-    
+    "typescript": "^4.4.4"
   }
 }
