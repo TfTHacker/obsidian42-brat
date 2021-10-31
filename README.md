@@ -106,9 +106,9 @@ Few additional notes:
 
 # Buy me a coffee?
 
-Bitcoin address: bc1qgx052tja4fsh5fv65rr6ceytj8zmjplvauxcuk
-Bitcoin cash: qp40hnhm24v785pyzl8dvsax9tzc2tur8vx32lshn4
-Ethereum address: 0xb29782A4EA6e02BbdF296671D8576bB045abf8AE
-Binance address: bnb18p4adhzlhvsxudkrduxqng9em992fj0raa5d6d
-Tether address: 0xb29782A4EA6e02BbdF296671D8576bB045abf8AE
-Cardano addres: addr1qx8xj8u5977qhhweeasrv6ygemn8y42pt9teqkn3eurj2juwdy0egtaup0wannmqxe5g3nhxwf25zk2hjpd8rnc8y49s7pffmf
+- Bitcoin address: bc1qgx052tja4fsh5fv65rr6ceytj8zmjplvauxcuk
+- Bitcoin cash: qp40hnhm24v785pyzl8dvsax9tzc2tur8vx32lshn4
+- Ethereum address: 0xb29782A4EA6e02BbdF296671D8576bB045abf8AE
+- Binance address: bnb18p4adhzlhvsxudkrduxqng9em992fj0raa5d6d
+- Tether address: 0xb29782A4EA6e02BbdF296671D8576bB045abf8AE
+- Cardano addres: addr1qx8xj8u5977qhhweeasrv6ygemn8y42pt9teqkn3eurj2juwdy0egtaup0wannmqxe5g3nhxwf25zk2hjpd8rnc8y49s7pffmf
