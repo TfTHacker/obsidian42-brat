@@ -81,6 +81,34 @@ export default class ThePlugin extends Plugin {
 			}
 		});
 
+		this.addCommand({
+			id: "BRAT-disablePlugin",
+			name: "Disable a plugin - toggle it off",
+			callback: async () => {
+				const pluginList = this.betaPlugins.getEnabledDisabledPlugins(true).map(manifest=>{ return  { display: `${manifest.name} (${manifest.id})`, info: manifest.id } });
+				const gfs = new GenericFuzzySuggester(this);
+				gfs.setSuggesterData(pluginList);
+				await gfs.display(async (results) => {
+					// @ts-ignore
+					await this.app.plugins.disablePlugin(results.info);
+				});
+			}
+		});
+
+		this.addCommand({
+			id: "BRAT-enablePlugin",
+			name: "Enable a plugin - toggle it on",
+			callback: async () => {
+				const pluginList = this.betaPlugins.getEnabledDisabledPlugins(false).map(manifest=>{ return  { display: `${manifest.name} (${manifest.id})`, info: manifest.id } });
+				const gfs = new GenericFuzzySuggester(this);
+				gfs.setSuggesterData(pluginList);
+				await gfs.display(async (results) => {
+					// @ts-ignore
+					await this.app.plugins.enablePlugin(results.info);
+				});
+			}
+		});
+
 		this.app.workspace.onLayoutReady((): void => {
 			if (this.settings.updateAtStartup) // let obsidian load and calm down before check
 				setTimeout(async () => { await this.betaPlugins.checkForUpdatesAndInstallUpdates(false) }, 60000);

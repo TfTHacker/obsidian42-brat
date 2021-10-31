@@ -168,14 +168,14 @@ export default class BetaPlugins {
                 if (releaseFiles===null) return;
 
                 if (seeIfUpdatedOnly) { // dont update, just report it
-                    new Notice(`BRAT\nThere is an update available for ${primaryManifest.id}`);
+                    new Notice(`BRAT\nThere is an update available for ${primaryManifest.id} from version ${localManifestJSON.version} to ${primaryManifest.version}`,30000);
                 } else {
                     await this.writeReleaseFilesToPluginFolder(primaryManifest.id, releaseFiles);
                     //@ts-ignore
                     await this.plugin.app.plugins.loadManifests();
                     //@ts-ignore
                     if(this.plugin.app.plugins.plugins[primaryManifest.id]?.manifest) await this.reloadPlugin(primaryManifest.id); //reload if enabled
-                    new Notice(`BRAT\n${primaryManifest.id}\nPlugin has been updated.`, noticeTimeout);
+                    new Notice(`BRAT\n${primaryManifest.id}\nPlugin has been updated from version ${localManifestJSON.version} to ${primaryManifest.version}.`, 30000);
                 }
             } else
                 if (reportIfNotUpdted) new Notice(`BRAT\nNo update available for ${repositoryPath}`, 3000);
@@ -241,4 +241,22 @@ export default class BetaPlugins {
         this.plugin.saveSettings();
     }
 
+    /**
+     * Returns a list of plugins that are currently enabled or currently disabled
+     *
+     * @param   {boolean[]}        enabled  true for enabled plugins, false for disabled plutings
+     *
+     * @return  {PluginManifest[]}           manifests  of plugins
+     */
+    getEnabledDisabledPlugins( enabled: boolean): PluginManifest[] {
+        // @ts-ignore
+        const pl = this.plugin.app.plugins;
+        const manifests: PluginManifest[] = Object.values(pl.manifests);
+        // @ts-ignore
+        const enabledPlugins: PluginManifest[] = Object.values(pl.plugins).map(p=>p.manifest);
+        console.log(enabledPlugins)
+        return  enabled ? 
+                manifests.filter(manifest => enabledPlugins.find(pluginName=> manifest.id===pluginName.id)) :
+                manifests.filter(manifest => !enabledPlugins.find(pluginName=> manifest.id===pluginName.id));
+    }
 }
