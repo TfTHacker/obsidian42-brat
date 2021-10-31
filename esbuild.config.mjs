@@ -18,7 +18,7 @@ esbuild.build({
     outfile: "build/main.js",
 }).catch(() => process.exit(1));
 
-fs.copyFile("manifest.json", "build/manifest.json", (err) => {if(err) console.log(err )} );
+fs.copyFile("manifest-beta.json", "build/manifest.json", (err) => {if(err) console.log(err)} );
 
 // eslint won't slow down the build process, just runs after the build finishes
 (async function eslintTest() {
