@@ -57,6 +57,9 @@ I use this for mobile development. Obsidian Sync synchronizes my code changes to
 
 Most of you won't need this, but its useful to developers. I bet you wish I told you this before you read this section.
 
+## Enable/Disable a plugin
+You can enable a plugin that is currently disabled or disable a plugin that is currently enabled. This saves you from having to into the Settings to toggle these plugins off and on.
+
 ## Open a GitHub repository (This is way more cool than it sounds)
 The command palette contains a command **BRAT: Open the GitHub repository for a plugin**. This gives you a list of all beta plugins registered with BRAT, but also all plugins from the community plugin list. By selecting a plugin from the list, the GitHub repository will be opened in your browser
 
@@ -95,10 +98,17 @@ else
 
 main.js and styles.css copied from the correspondencing release version depending upon the above logic
 ````
-
-
 Few additional notes:
 * manifest-beta.json does not need to be in the GitHub release, it just needs to be on the root of the repository itself.
 * manifest-beta.json should have the exact same details as your manifest.json file, except the version number in this file should point to the release you want tested.
 * For additional instructions on plugin requirements, see the plugins documentation provided by obsidian: [Obsidian Sample Plugin](https://github.com/obsidianmd/obsidian-sample-plugin)
 * BRAT is a little forgiving in what it allows to be installed as a plugin, since many plugins are still under development. Therefore, before releasing your plugin to the public, you need to verify that everything is configured for production use. (Example: do you have a valid manifest.json in the root of your repository? Is there a release with the correct tag as indicated in your manifest.json? Does your release contain main.js and manifest.json)
+
+# Buy me a coffee?
+
+Bitcoin address: bc1qgx052tja4fsh5fv65rr6ceytj8zmjplvauxcuk
+Bitcoin cash: qp40hnhm24v785pyzl8dvsax9tzc2tur8vx32lshn4
+Ethereum address: 0xb29782A4EA6e02BbdF296671D8576bB045abf8AE
+Binance address: bnb18p4adhzlhvsxudkrduxqng9em992fj0raa5d6d
+Tether address: 0xb29782A4EA6e02BbdF296671D8576bB045abf8AE
+Cardano addres: addr1qx8xj8u5977qhhweeasrv6ygemn8y42pt9teqkn3eurj2juwdy0egtaup0wannmqxe5g3nhxwf25zk2hjpd8rnc8y49s7pffmf
