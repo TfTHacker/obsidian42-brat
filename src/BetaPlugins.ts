@@ -254,7 +254,6 @@ export default class BetaPlugins {
         const manifests: PluginManifest[] = Object.values(pl.manifests);
         // @ts-ignore
         const enabledPlugins: PluginManifest[] = Object.values(pl.plugins).map(p=>p.manifest);
-        console.log(enabledPlugins)
         return  enabled ? 
                 manifests.filter(manifest => enabledPlugins.find(pluginName=> manifest.id===pluginName.id)) :
                 manifests.filter(manifest => !enabledPlugins.find(pluginName=> manifest.id===pluginName.id));
