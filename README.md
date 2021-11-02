@@ -104,6 +104,8 @@ Few additional notes:
 * For additional instructions on plugin requirements, see the plugins documentation provided by obsidian: [Obsidian Sample Plugin](https://github.com/obsidianmd/obsidian-sample-plugin)
 * BRAT is a little forgiving in what it allows to be installed as a plugin, since many plugins are still under development. Therefore, before releasing your plugin to the public, you need to verify that everything is configured for production use. (Example: do you have a valid manifest.json in the root of your repository? Is there a release with the correct tag as indicated in your manifest.json? Does your release contain main.js and manifest.json)
 
+
+
 # Say Thank You
 If you are enjoying this plugin then feel free to buying me a coffee on [https://ko-fi/TfTHacker](https://ko-fi.com/TfTHacker).
 
@@ -111,7 +113,7 @@ Please also help spread the word by sharing your enthusiasim for this plugin on 
 
 You can find me on Twitter [@TfTHacker](https://twitter.com/TfTHacker)
 
-[<img src="https://user-images.githubusercontent.com/14358394/115450238-f39e8100-a21b-11eb-89d0-fa4b82cdbce8.png" width="200">](https://ko-fi.com/TfTHacker)
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/N4N16TNFD)
 
 Also
 
