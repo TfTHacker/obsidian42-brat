@@ -104,7 +104,16 @@ Few additional notes:
 * For additional instructions on plugin requirements, see the plugins documentation provided by obsidian: [Obsidian Sample Plugin](https://github.com/obsidianmd/obsidian-sample-plugin)
 * BRAT is a little forgiving in what it allows to be installed as a plugin, since many plugins are still under development. Therefore, before releasing your plugin to the public, you need to verify that everything is configured for production use. (Example: do you have a valid manifest.json in the root of your repository? Is there a release with the correct tag as indicated in your manifest.json? Does your release contain main.js and manifest.json)
 
-# Buy me a coffee?
+# Say Thank You
+If you are enjoying this plugin then feel free to buying me a coffee on [https://ko-fi/TfTHacker](https://ko-fi.com/TfTHacker).
+
+Please also help spread the word by sharing about the Obsidian Excalidraw Plugin on Twitter, Reddit, or any other social media platform you regularly use. 
+
+You can find me on Twitter [@TfTHacker](https://twitter.com/TfTHacker)
+
+[<img src="https://user-images.githubusercontent.com/14358394/115450238-f39e8100-a21b-11eb-89d0-fa4b82cdbce8.png" width="200">](https://ko-fi.com/TfTHacker)
+
+Also
 
 - Bitcoin address: bc1qgx052tja4fsh5fv65rr6ceytj8zmjplvauxcuk
 - Bitcoin cash: qp40hnhm24v785pyzl8dvsax9tzc2tur8vx32lshn4
