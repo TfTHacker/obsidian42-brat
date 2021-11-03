@@ -67,15 +67,12 @@ export default class ThePlugin extends Plugin {
 
 		this.addCommand({
 			id: "BRAT-openGitHubRepository",
-			name: "Open the GitHub repository for a plugin or theme",
+			name: "Open the GitHub repository for a plugin",
 			callback: async () => {
 				const communityPlugins = await grabCommmunityPluginList();
 				const communityPluginList: SuggesterItem[] = Object.values(communityPlugins).map((p) => { return { display: `Plugin: ${p.name}  (${p.repo})`, info: p.repo } });
 				const bratList: SuggesterItem[] = Object.values(this.settings.pluginList).map((p) => { return { display: "BRAT: " + p, info: p } });
 				communityPluginList.forEach(si => bratList.push(si));
-				const communityTheme = await grabCommmunityThemesList();
-				const communityThemeList: SuggesterItem[] = Object.values(communityTheme).map((p) => { return { display: `Theme: ${p.name}  (${p.repo})`, info: p.repo } });
-				communityThemeList.forEach(si => bratList.push(si));
 				const gfs = new GenericFuzzySuggester(this);
 				gfs.setSuggesterData(bratList);
 				await gfs.display(async (results) => {
@@ -83,7 +80,6 @@ export default class ThePlugin extends Plugin {
 				});
 			}
 		});
-
 
 		this.addCommand({
 			id: "BRAT-disablePlugin",
@@ -109,6 +105,35 @@ export default class ThePlugin extends Plugin {
 				await gfs.display(async (results) => {
 					// @ts-ignore
 					await this.app.plugins.enablePlugin(results.info);
+				});
+			}
+		});
+
+		this.addCommand({
+			id: "BRAT-openGitHubRepoTheme",
+			name: "Open the GitHub repository for a theme ",
+			callback: async () => {
+				const communityTheme = await grabCommmunityThemesList();
+				const communityThemeList: SuggesterItem[] = Object.values(communityTheme).map((p) => { return { display: `Theme: ${p.name}  (${p.repo})`, info: p.repo } });
+				const gfs = new GenericFuzzySuggester(this);
+				gfs.setSuggesterData(communityThemeList);
+				await gfs.display(async (results) => {
+					if (results.info) window.open(`https://github.com/${results.info}`)
+				});
+			}
+		});
+
+		this.addCommand({
+			id: "BRAT-switchTheme",
+			name: "Switch Active Theme ",
+			callback: async () => {
+				// @ts-ignore
+				const communityThemeList: SuggesterItem[] = Object.values(this.app.customCss.themes).map((t) => { return { display: t, info: t } });
+				const gfs = new GenericFuzzySuggester(this);
+				gfs.setSuggesterData(communityThemeList);
+				await gfs.display(async (results) => {
+					// @ts-ignore
+					this.app.customCss.setTheme(results.info);
 				});
 			}
 		});

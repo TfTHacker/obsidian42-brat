@@ -63,9 +63,10 @@ You can enable a plugin that is currently disabled or disable a plugin that is c
 ## Open a GitHub repository (This is way more cool than it sounds)
 The command palette contains a command **BRAT: Open the GitHub repository for a plugin**. This gives you a list of all beta plugins registered with BRAT, but also all plugins from the community plugin list. By selecting a plugin from the list, the GitHub repository will be opened in your browser
 
-
 <a href="https://twitter.com/TfTHacker/status/1452175686928580612" target="_blank"><img style="width:200px;" src="https://raw.githubusercontent.com/TfTHacker/obsidian42-brat/main/help/GithubOpenrepositories.png"></a> Click image for video demo!
 
+## Working with Themes
+BRAT can also open Github repositories for Obsidian Themes, in addition to switching themes from the command palette.
 
 ---
 
