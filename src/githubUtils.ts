@@ -50,3 +50,13 @@ export const grabCommmunityPluginList = async(): Promise<JSON> => {
         console.log("error in grabCommmunityPluginList", error)
     }
 }
+
+export const grabCommmunityThemesList = async(): Promise<JSON> => {
+    const themesURL = `https://raw.githubusercontent.com/obsidianmd/obsidian-releases/HEAD/community-css-themes.json`;
+    try {
+        const response = await request({ url: themesURL });
+        return (response === "404: Not Found" ? null : await JSON.parse(response));
+    } catch (error) {
+        console.log("error in grabCommmunityThemesList", error)
+    }
+}

@@ -3,7 +3,7 @@ import { SettingsTab } from "./SettingsTab";
 import { Settings, DEFAULT_SETTINGS } from "./settings";
 import BetaPlugins from "./BetaPlugins";
 import { GenericFuzzySuggester, SuggesterItem } from "./GenericFuzzySuggester";
-import { grabCommmunityPluginList } from "./githubUtils";
+import { grabCommmunityPluginList, grabCommmunityThemesList } from "./githubUtils";
 
 export default class ThePlugin extends Plugin {
 	appName = "Obsidian42 - Beta Reviewer's Auto-update Tool (BRAT)";
@@ -67,12 +67,15 @@ export default class ThePlugin extends Plugin {
 
 		this.addCommand({
 			id: "BRAT-openGitHubRepository",
-			name: "Open the GitHub repository for a plugin",
+			name: "Open the GitHub repository for a plugin or theme",
 			callback: async () => {
 				const communityPlugins = await grabCommmunityPluginList();
-				const communityPluginList: SuggesterItem[] = Object.values(communityPlugins).map((p) => { return { display: `Community: ${p.name}  (${p.repo})`, info: p.repo } });
+				const communityPluginList: SuggesterItem[] = Object.values(communityPlugins).map((p) => { return { display: `Plugin: ${p.name}  (${p.repo})`, info: p.repo } });
 				const bratList: SuggesterItem[] = Object.values(this.settings.pluginList).map((p) => { return { display: "BRAT: " + p, info: p } });
 				communityPluginList.forEach(si => bratList.push(si));
+				const communityTheme = await grabCommmunityThemesList();
+				const communityThemeList: SuggesterItem[] = Object.values(communityTheme).map((p) => { return { display: `Theme: ${p.name}  (${p.repo})`, info: p.repo } });
+				communityThemeList.forEach(si => bratList.push(si));
 				const gfs = new GenericFuzzySuggester(this);
 				gfs.setSuggesterData(bratList);
 				await gfs.display(async (results) => {
@@ -80,6 +83,7 @@ export default class ThePlugin extends Plugin {
 				});
 			}
 		});
+
 
 		this.addCommand({
 			id: "BRAT-disablePlugin",
