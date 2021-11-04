@@ -26,6 +26,21 @@ export class BratSettingsTab extends PluginSettingTab {
 				});
 			})
 
+		new Setting(containerEl)
+			.setName('Ribbon Button')
+			.setDesc('Toggle ribbon button off and on.')
+			.addToggle((cb: ToggleComponent) => {
+				cb.setValue(this.plugin.settings.ribbonIconEnabled);
+				cb.onChange(async (value: boolean) => {
+					this.plugin.settings.ribbonIconEnabled = value;
+					if (this.plugin.settings.ribbonIconEnabled === false)
+						this.plugin.ribbonIcon.remove();
+					else
+						this.plugin.showRibbonButton();
+					await this.plugin.saveSettings();
+				});
+			})			
+
 		containerEl.createEl("hr");
 		containerEl.createEl("h2", { text: "Beta Plugin List" });
 		containerEl.createEl("div", { text: `The following is a list of beta plugins added via the command palette "Add a beta plugin for testing". ` });

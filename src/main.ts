@@ -1,4 +1,4 @@
-import { Notice, Plugin } from "obsidian";
+import { Command, Notice, Plugin } from "obsidian";
 import { BratSettingsTab } from "./SettingsTab";
 import { Settings, DEFAULT_SETTINGS } from "./settings";
 import BetaPlugins from "./BetaPlugins";
@@ -11,6 +11,8 @@ export default class ThePlugin extends Plugin {
 	appID = "obsidian42-brat";
 	settings: Settings;
 	betaPlugins: BetaPlugins;
+	ribbonIcon: HTMLElement;
+	bratCommands: Command[];
 
 	async onload(): Promise<void> {
 		console.log("loading Obsidian42 - BRAT");
@@ -19,7 +21,7 @@ export default class ThePlugin extends Plugin {
 
 		this.betaPlugins = new BetaPlugins(this);
 
-		const bratCommands = [
+		this.bratCommands = [
 			{
 				id: "BRAT-AddBetaPlugin", 
 				name: "Add a beta plugin for testing",
@@ -151,7 +153,7 @@ export default class ThePlugin extends Plugin {
 			},
 		]
 
-		bratCommands.forEach(async (item) => {
+		this.bratCommands.forEach(async (item) => {
 			this.addCommand({
 				id: item.id,
 				name: item.name,
@@ -160,43 +162,8 @@ export default class ThePlugin extends Plugin {
 		});
 
 
-		const ribbonDisplayCommands = async () => {
-			const bratCommandList: SuggesterItem[] = bratCommands.map((t) => { return { display: t.name, info: t.callback } });
-			const gfs = new GenericFuzzySuggester(this);
-			// @ts-ignore
-			const settings = this.app.setting;
-			// @ts-ignore
-			const listOfCoreSettingsTabs: SuggesterItem[] = Object.values(settings.settingTabs).map((t: any) => {
-				return {
-					display: "Core: " + t.name,
-					info: async () => {
-						settings.open();
-						settings.openTabById(t.id);
-					}
-				}
-			});
-			// @ts-ignore
-			const listOfPluginSettingsTabs: SuggesterItem[] = Object.values(settings.pluginTabs).map((t: any) => {
-				return {
-					display: "Plugin: " + t.name,
-					info: async () => {
-						settings.open();
-						settings.openTabById(t.id);
-					}
-				}
-			});
-
-			bratCommandList.push({ display: "---- Core Plugin Settings ----", info: async () => { await ribbonDisplayCommands() } })
-			listOfCoreSettingsTabs.forEach(si => bratCommandList.push(si));
-			bratCommandList.push({ display: "---- Plugin Settings ----", info: async () => { await ribbonDisplayCommands() } })
-			listOfPluginSettingsTabs.forEach(si => bratCommandList.push(si));
-
-			gfs.setSuggesterData(bratCommandList);
-			await gfs.display(async (results) => await results.info());
-		};
-
 		addIcons();
-		this.addRibbonIcon("BratIcon", "BRAT", async () => ribbonDisplayCommands())
+		if (this.settings.ribbonIconEnabled) this.showRibbonButton();
 
 		this.app.workspace.onLayoutReady((): void => {
 			if (this.settings.updateAtStartup) { // let obsidian load and calm down before check
@@ -207,6 +174,45 @@ export default class ThePlugin extends Plugin {
 				}, 10000);
 			}
 		});
+	}
+
+	async ribbonDisplayCommands(): Promise<void> {
+		const bratCommandList: SuggesterItem[] = this.bratCommands.map((t) => { return { display: t.name, info: t.callback } });
+		const gfs = new GenericFuzzySuggester(this);
+		// @ts-ignore
+		const settings = this.app.setting;
+		// @ts-ignore
+		const listOfCoreSettingsTabs: SuggesterItem[] = Object.values(settings.settingTabs).map((t: any) => {
+			return {
+				display: "Core: " + t.name,
+				info: async () => {
+					settings.open();
+					settings.openTabById(t.id);
+				}
+			}
+		});
+		// @ts-ignore
+		const listOfPluginSettingsTabs: SuggesterItem[] = Object.values(settings.pluginTabs).map((t: any) => {
+			return {
+				display: "Plugin: " + t.name,
+				info: async () => {
+					settings.open();
+					settings.openTabById(t.id);
+				}
+			}
+		});
+
+		bratCommandList.push({ display: "---- Core Plugin Settings ----", info: async () => { await this.ribbonDisplayCommands() } })
+		listOfCoreSettingsTabs.forEach(si => bratCommandList.push(si));
+		bratCommandList.push({ display: "---- Plugin Settings ----", info: async () => { await this.ribbonDisplayCommands() } })
+		listOfPluginSettingsTabs.forEach(si => bratCommandList.push(si));
+
+		gfs.setSuggesterData(bratCommandList);
+		await gfs.display(async (results) => await results.info());
+	}
+
+	showRibbonButton(): void {
+		this.ribbonIcon = this.addRibbonIcon("BratIcon", "BRAT", async () => this.ribbonDisplayCommands())
 	}
 
 	onunload(): void { console.log("unloading " + this.appName) }

@@ -3,11 +3,13 @@ import ThePlugin from "./main";
 export interface Settings {
     pluginList: string[];
     updateAtStartup: boolean;
+    ribbonIconEnabled: boolean
 }
 
 export const DEFAULT_SETTINGS: Settings = {
     pluginList: [],
-    updateAtStartup: false
+    updateAtStartup: false,
+    ribbonIconEnabled: true
 }
 
 /**
