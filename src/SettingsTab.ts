@@ -1,7 +1,7 @@
 import { App, PluginSettingTab, Setting, ToggleComponent, ButtonComponent } from 'obsidian';
 import ThePlugin from './main';
 
-export class SettingsTab extends PluginSettingTab {
+export class BratSettingsTab extends PluginSettingTab {
 	plugin: ThePlugin;
 
 	constructor(app: App, plugin: ThePlugin) {
