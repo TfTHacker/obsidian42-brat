@@ -139,8 +139,13 @@ export default class ThePlugin extends Plugin {
 		});
 
 		this.app.workspace.onLayoutReady((): void => {
-			if (this.settings.updateAtStartup) // let obsidian load and calm down before check
-				setTimeout(async () => { await this.betaPlugins.checkForUpdatesAndInstallUpdates(false) }, 60000);
+			if (this.settings.updateAtStartup) { // let obsidian load and calm down before check
+				console.log("BRAT Autoupdate check started");
+				setTimeout(async () => { 
+					await this.betaPlugins.checkForUpdatesAndInstallUpdates(false) 
+					console.log("BRAT Autoupdate check completed.")
+				}, 10000);
+			}
 		});
 	}
 
