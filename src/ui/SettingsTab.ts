@@ -1,5 +1,5 @@
 import { App, PluginSettingTab, Setting, ToggleComponent, ButtonComponent } from 'obsidian';
-import ThePlugin from './main';
+import ThePlugin from '../main';
 
 export class BratSettingsTab extends PluginSettingTab {
 	plugin: ThePlugin;
@@ -78,5 +78,55 @@ export class BratSettingsTab extends PluginSettingTab {
 					});
 				})
 		}
+
+		containerEl.createEl("hr");
+		containerEl.createEl("h2", { text: "Monitoring" });
+
+		new Setting(containerEl)
+			.setName('Enable Logging')
+			.setDesc('Plugin updates will be logged to a file in the log file.')
+			.addToggle((cb: ToggleComponent) => {
+				cb.setValue(this.plugin.settings.loggingEnabled);
+				cb.onChange(async (value: boolean) => {
+					this.plugin.settings.loggingEnabled = value;
+					await this.plugin.saveSettings();
+				});
+			})
+
+		new Setting(this.containerEl)
+            .setName("BRAT Log File Location")
+            .setDesc("Logs will be saved to this file. Don't add .md to the file name.")
+            .addSearch((cb) => {
+                cb.setPlaceholder("Example: BRAT-log")
+                    .setValue(this.plugin.settings.loggingPath)
+                    .onChange(async (new_folder) => {
+                        this.plugin.settings.loggingPath = new_folder;
+						await this.plugin.saveSettings();
+                    });
+            });		
+
+		new Setting(containerEl)
+			.setName('Enable Verbose Logging')
+			.setDesc('Get a lot  more information in  the log.')
+			.addToggle((cb: ToggleComponent) => {
+				cb.setValue(this.plugin.settings.loggingVerboseEnabled);
+				cb.onChange(async (value: boolean) => {
+					this.plugin.settings.loggingVerboseEnabled = value;
+					await this.plugin.saveSettings();
+				});
+			})
+
+
+		new Setting(containerEl)
+			.setName('Debugging Mode')
+			.setDesc('Atomic Bomb level console logging. Can be used for troubleshoting and development.')
+			.addToggle((cb: ToggleComponent) => {
+				cb.setValue(this.plugin.settings.debuggingMode);
+				cb.onChange(async (value: boolean) => {
+					this.plugin.settings.debuggingMode = value;
+					await this.plugin.saveSettings();
+				});
+			})			
+	
 	}
 }

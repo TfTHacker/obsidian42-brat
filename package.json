@@ -16,12 +16,15 @@
   },
   "devDependencies": {
     "@types/node": "^16.11.6",
-    "eslint": "^8.1.0",
     "@typescript-eslint/eslint-plugin": "^5.3.0",
     "@typescript-eslint/parser": "^5.3.0",
     "esbuild": "0.13.12",
+    "eslint": "^8.1.0",
     "obsidian": "^0.12.17",
     "tslib": "^2.3.1",
     "typescript": "^4.4.4"
+  },
+  "dependencies": {
+    "obsidian-daily-notes-interface": "^0.9.4"
   }
 }

@@ -1,15 +1,23 @@
-import ThePlugin from "./main";
+import ThePlugin from "../main";
 
 export interface Settings {
     pluginList: string[];
     updateAtStartup: boolean;
-    ribbonIconEnabled: boolean
+    ribbonIconEnabled: boolean;
+    loggingEnabled: boolean;
+    loggingPath: string;
+    loggingVerboseEnabled: boolean;
+    debuggingMode: boolean;
 }
 
 export const DEFAULT_SETTINGS: Settings = {
     pluginList: [],
     updateAtStartup: false,
-    ribbonIconEnabled: true
+    ribbonIconEnabled: true,
+    loggingEnabled: false,
+    loggingPath: "BRAT-log",
+    loggingVerboseEnabled: false,
+    debuggingMode: true
 }
 
 /**

@@ -1,5 +1,5 @@
 import { FuzzySuggestModal, FuzzyMatch } from 'obsidian';
-import ThePlugin from './main';
+import ThePlugin from '../main';
 
 /**
  * Simple interface for what should be displayed and stored for suggester

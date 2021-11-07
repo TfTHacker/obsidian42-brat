@@ -1,6 +1,6 @@
 import { Modal, Notice, Setting } from 'obsidian';
-import BetaPlugins from './BetaPlugins';
-import ThePlugin from './main';
+import BetaPlugins from '../features/BetaPlugins';
+import ThePlugin from '../main';
 import { existBetaPluginInList } from './settings';
 
 /**
