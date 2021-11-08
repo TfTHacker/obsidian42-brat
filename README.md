@@ -68,6 +68,9 @@ The command palette contains a command **BRAT: Open the GitHub repository for a 
 ## Working with Themes
 BRAT can also open Github repositories for Obsidian Themes, in addition to switching themes from the command palette.
 
+## Logging Support
+In settings, Logging can be enabled. This logs information about updates to plugins into a log file. This is useful for you to keep a history of what BRAT has updated. 
+
 ---
 
 # Special notes for Developers

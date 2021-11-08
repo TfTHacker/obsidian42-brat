@@ -214,6 +214,7 @@ export default class PluginCommands {
             this.plugin.addCommand({
                 id: item.id,
                 name: item.name,
+                icon: item.icon,
                 callback: async () => { await item.callback() }
             })
         });
