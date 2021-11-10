@@ -261,7 +261,7 @@ export default class BetaPlugins {
      * @return  {Promise<void>}                [return description]
      */
     async deletePlugin(repositoryPath: string): Promise<void> {
-        const msg = `Removing ${repositoryPath} from BRAT plugin list`;
+        const msg = `Removed ${repositoryPath} from BRAT plugin list`;
         this.plugin.log(msg, true);
         this.plugin.settings.pluginList = this.plugin.settings.pluginList.filter((b) => b != repositoryPath);
         this.plugin.saveSettings();

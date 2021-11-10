@@ -2,6 +2,7 @@ import ThePlugin from "../main";
 
 export interface Settings {
     pluginList: string[];
+    themesList: string[];
     updateAtStartup: boolean;
     ribbonIconEnabled: boolean;
     loggingEnabled: boolean;
@@ -12,6 +13,7 @@ export interface Settings {
 
 export const DEFAULT_SETTINGS: Settings = {
     pluginList: [],
+    themesList: [],
     updateAtStartup: false,
     ribbonIconEnabled: true,
     loggingEnabled: false,
@@ -45,5 +47,33 @@ export async function addBetaPluginToList(plugin: ThePlugin, repositoryPath: str
  */
 export async function existBetaPluginInList(plugin: ThePlugin, repositoryPath: string): Promise<boolean> {
     return plugin.settings.pluginList.contains(repositoryPath);
+}
+
+
+/**
+ * Adds a theme for beta testing to the data.json file of this  plugin
+ *
+ * @param   {ThePlugin}      plugin         
+ * @param   {string<void>}   repositoryPath  path to the GitHub repository
+ *
+ * @return  {Promise<void>}                  
+ */
+ export async function addBetaThemeToList(plugin: ThePlugin, repositoryPath: string): Promise<void> {
+    if (!plugin.settings.themesList.contains(repositoryPath)) {
+        plugin.settings.themesList.unshift(repositoryPath);
+        plugin.saveSettings();
+    }
+}
+
+/**
+ * Tests if a  theme  is in data.json
+ *
+ * @param   {ThePlugin}         plugin          
+ * @param   {string<boolean>}   repositoryPath  path to the GitHub repository
+ *
+ * @return  {Promise<boolean>}  true if exists      
+ */
+export async function existBetaThemeinInList(plugin: ThePlugin, repositoryPath: string): Promise<boolean> {
+    return plugin.settings.themesList.contains(repositoryPath);
 }
 

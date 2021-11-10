@@ -1,5 +1,7 @@
 import { App, PluginSettingTab, Setting, ToggleComponent, ButtonComponent } from 'obsidian';
+import { themesDelete } from '../features/themes';
 import ThePlugin from '../main';
+import AddNewTheme from './AddNewTheme';
 
 export class BratSettingsTab extends PluginSettingTab {
 	plugin: ThePlugin;
@@ -16,7 +18,7 @@ export class BratSettingsTab extends PluginSettingTab {
 		containerEl.createEl('h2', { text: this.plugin.appName });
 
 		new Setting(containerEl)
-			.setName('Auto-update at startup')
+			.setName('Auto-update plugins at startup')
 			.setDesc('If enabled all beta plugins will be checked for updates each time Obsidian starts.')
 			.addToggle((cb: ToggleComponent) => {
 				cb.setValue(this.plugin.settings.updateAtStartup);
@@ -74,6 +76,37 @@ export class BratSettingsTab extends PluginSettingTab {
 						else {
 							btn.buttonEl.parentElement.parentElement.remove();
 							await this.plugin.betaPlugins.deletePlugin(bp)
+						}
+					});
+				})
+		}
+
+		containerEl.createEl("hr");
+		containerEl.createEl("h2", { text: "Beta Themes List" });
+
+		new Setting(containerEl)
+			.addButton((cb: ButtonComponent)=>{
+				cb.setButtonText("Add Beta Theme")
+				cb.onClick(async ()=>{
+					// @ts-ignore
+					this.plugin.app.setting.close();
+					(new AddNewTheme(this.plugin)).open();
+				})
+			});		
+
+
+		for (const bp of this.plugin.settings.themesList) {
+			new Setting(containerEl)
+				.setName(bp)
+				.addButton((btn: ButtonComponent) => {
+					btn.setIcon("cross");
+					btn.setTooltip("Delete this beta theme");
+					btn.onClick(async () => {
+						if (btn.buttonEl.textContent === "")
+							btn.setButtonText("Click once more to confirm removal");
+						else {
+							btn.buttonEl.parentElement.parentElement.remove();
+							await themesDelete(this.plugin, bp);
 						}
 					});
 				})

@@ -2,6 +2,8 @@ import { Notice } from "obsidian";
 import ThePlugin from "../main";
 import { GenericFuzzySuggester, SuggesterItem } from "./GenericFuzzySuggester";
 import { grabCommmunityPluginList, grabCommmunityThemesList } from "../features/githubUtils";
+import { themesInstallFromCommunityList } from "../features/themes";
+import AddNewTheme from "./AddNewTheme";
 
 export default class PluginCommands {
     plugin: ThePlugin;
@@ -144,6 +146,20 @@ export default class PluginCommands {
                     settings.openTabById(results.info);
                 });
             }
+        },
+        {
+            id: "BRAT-GrabCommunityTheme",
+            icon: "BratIcon",
+            name: "Grab a community theme",
+            showInRibbon: true,
+            callback: async () => await themesInstallFromCommunityList(this.plugin)
+        },
+        {
+            id: "BRAT-GrabBetaTheme",
+            icon: "BratIcon",
+            name: "Grab a beta theme for testing from a Github repository",
+            showInRibbon: true,
+            callback: async () => { (new AddNewTheme(this.plugin)).open() }
         },
         {
             id: "BRAT-switchTheme",
