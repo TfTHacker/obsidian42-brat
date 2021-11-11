@@ -1,8 +1,14 @@
+import { grabLastCommitDateForAFile } from "../features/githubUtils";
 import ThePlugin from "../main";
+
+export interface ThemeInforamtion {
+    repo: string;
+    lastUpdate: string;
+}
 
 export interface Settings {
     pluginList: string[];
-    themesList: string[];
+    themesList: ThemeInforamtion[];
     updateAtStartup: boolean;
     ribbonIconEnabled: boolean;
     loggingEnabled: boolean;
@@ -59,10 +65,12 @@ export async function existBetaPluginInList(plugin: ThePlugin, repositoryPath: s
  * @return  {Promise<void>}                  
  */
  export async function addBetaThemeToList(plugin: ThePlugin, repositoryPath: string): Promise<void> {
-    if (!plugin.settings.themesList.contains(repositoryPath)) {
-        plugin.settings.themesList.unshift(repositoryPath);
-        plugin.saveSettings();
+     const newTheme: ThemeInforamtion = { 
+         repo: repositoryPath, 
+         lastUpdate: await grabLastCommitDateForAFile(repositoryPath, "obsidian.css")
     }
+    plugin.settings.themesList.unshift(newTheme);
+    plugin.saveSettings();
 }
 
 /**
@@ -74,6 +82,7 @@ export async function existBetaPluginInList(plugin: ThePlugin, repositoryPath: s
  * @return  {Promise<boolean>}  true if exists      
  */
 export async function existBetaThemeinInList(plugin: ThePlugin, repositoryPath: string): Promise<boolean> {
-    return plugin.settings.themesList.contains(repositoryPath);
+    const testIfThemExists = plugin.settings.themesList.find(t=> t.repo === repositoryPath);
+    return testIfThemExists ? true : false;
 }
 

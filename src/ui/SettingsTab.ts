@@ -97,7 +97,7 @@ export class BratSettingsTab extends PluginSettingTab {
 
 		for (const bp of this.plugin.settings.themesList) {
 			new Setting(containerEl)
-				.setName(bp)
+				.setName(bp.repo)
 				.addButton((btn: ButtonComponent) => {
 					btn.setIcon("cross");
 					btn.setTooltip("Delete this beta theme");
@@ -106,7 +106,7 @@ export class BratSettingsTab extends PluginSettingTab {
 							btn.setButtonText("Click once more to confirm removal");
 						else {
 							btn.buttonEl.parentElement.parentElement.remove();
-							await themesDelete(this.plugin, bp);
+							await themesDelete(this.plugin, bp.repo);
 						}
 					});
 				})

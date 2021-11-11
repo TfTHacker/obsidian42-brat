@@ -26,9 +26,10 @@ export default class AddNewTheme extends Modal {
             return;
         }
         
-        await addBetaThemeToList(this.plugin, scrubbedAddress);
-        await themeInstallTheme(this.plugin, scrubbedAddress, themesDeriveBetaNameFromRepository(scrubbedAddress))
-        this.close();
+        if(await themeInstallTheme(this.plugin, scrubbedAddress, themesDeriveBetaNameFromRepository(scrubbedAddress))) {
+            await addBetaThemeToList(this.plugin, scrubbedAddress);
+            this.close();    
+        }
     }
 
     onOpen(): void {

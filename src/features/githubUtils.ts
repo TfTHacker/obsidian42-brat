@@ -15,9 +15,9 @@ export const grabReleaseFileFromRepository = async (repository: string, version:
     const URL = `https://github.com/${repository}/releases/download/${version}/${fileName}`;
     try {
         const download = await request({ url: URL });
-        return ( ( download === "Not Found" || download === `{"error":"Not Found"}`) ? null : download);
+        return ((download === "Not Found" || download === `{"error":"Not Found"}`) ? null : download);
     } catch (error) {
-        console.log("error in grabReleaseFileFromRepository", URL,  error)
+        console.log("error in grabReleaseFileFromRepository", URL, error)
     }
 }
 
@@ -41,7 +41,7 @@ export const grabManifestJsonFromRepository = async (repositoryPath: string, roo
 }
 
 
-export const grabCommmunityPluginList = async(): Promise<JSON> => {
+export const grabCommmunityPluginList = async (): Promise<JSON> => {
     const pluginListURL = `https://raw.githubusercontent.com/obsidianmd/obsidian-releases/HEAD/community-plugins.json`;
     try {
         const response = await request({ url: pluginListURL });
@@ -51,7 +51,7 @@ export const grabCommmunityPluginList = async(): Promise<JSON> => {
     }
 }
 
-export const grabCommmunityThemesList = async(): Promise<JSON> => {
+export const grabCommmunityThemesList = async (): Promise<JSON> => {
     const themesURL = `https://raw.githubusercontent.com/obsidianmd/obsidian-releases/HEAD/community-css-themes.json`;
     try {
         const response = await request({ url: themesURL });
@@ -62,13 +62,31 @@ export const grabCommmunityThemesList = async(): Promise<JSON> => {
 }
 
 
-export const grabCommmunityThemeObsidianCss = async(repositoryPath: string): Promise<string> => {
+export const grabCommmunityThemeObsidianCss = async (repositoryPath: string): Promise<string> => {
     const themesURL = `https://raw.githubusercontent.com/${repositoryPath}/HEAD/obsidian.css`;
-    console.log(themesURL)
     try {
         const response = await request({ url: themesURL });
         return (response === "404: Not Found" ? null : response);
     } catch (error) {
         console.log("error in grabCommmunityThemesList", error)
     }
+}
+
+export const grabLastCommitInfoForAFile = async (repositoryPath: string, path: string): Promise<string> => {
+    const url = `https://api.github.com/repos/${repositoryPath}/commits?path=${path}&page=1&per_page=1`;
+    console.log(url)
+    try {
+        const response = await request({ url: url });
+        return (response === "404: Not Found" ? null : JSON.parse(response));
+    } catch (error) {
+        console.log("error in grabCommmunityThemesList", error)
+    }
+}
+
+export const grabLastCommitDateForAFile = async (repositoryPath: string, path: string): Promise<string> => {
+    const test = await grabLastCommitInfoForAFile(repositoryPath, path);
+    if(test[0].commit.committer.date)
+        return test[0].commit.committer.date
+    else
+        return "";
 }
