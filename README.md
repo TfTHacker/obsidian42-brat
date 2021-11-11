@@ -5,9 +5,14 @@ Simply add the GitHub repository path for the beta Obsidian plugin to the list f
 
 # Help Contents
 - [Quick  Guide for using BRAT](#Quick-Guide-for-using-BRAT)
-  - Adding a beta plugin
-  - Updating beta plugins
-  - Stopping beta plugin updates/deleting a beta plugin/deleting-a-beta-plugin
+  - Plugins
+    - Adding a beta plugin
+    - Updating beta plugins
+    - Stopping beta plugin updates/deleting a beta plugin/deleting-a-beta-plugin
+  - Themes
+    - Grab a beta theme from a repository
+    - Update a beta theme from a repository
+    - Grab a community theme
 - [Plugins](/help/plugins.md)
   - Updating beta plugins
   - See if there are upates, but don't update them
@@ -16,23 +21,24 @@ Simply add the GitHub repository path for the beta Obsidian plugin to the list f
   - Enable/Disable a plugin
   - Little more explanation for those who like to read
 - [Themes](/help/themes.md)
- - Grab a beta theme from a repository
- - Updata a beta theme from a repository
- - Grab a community theme
- - Switch Active Theme
- - Settings for themes
+  - Grab a beta theme from a repository
+  - Updata a beta theme from a repository
+  - Grab a community theme
+  - Switch Active Theme
+  - Settings for themes
 - [Github](/help/github.md)
- - Open a GitHub Plugin repository
- - Open a GitHub Themes repository
+  - Open a GitHub plugin repository
+  - Open a GitHub phemes repository
 - [Logging](/help/logging.md)
- - Logging Support
+  - Logging Support
 - [For developers](/help/developers.md)
- - How Obsidian loads plugins
- - manifest-beta.json
- - How BRAT works
+  - How Obsidian loads plugins
+  - manifest-beta.json
+  - How BRAT works
 
 # Quick Guide for using BRAT
-## Adding a beta plugin
+## Plugins
+### Adding a beta plugin
 1. Install BRAT from the Community Plugins in Obsidian 
 2. Get the link to the GitHub repository you want to test. The plugin developer can provide you with this link. 
     > It will look something like: GitMurf/my-plugin or https://github.com/GitMurf/my-plugin
@@ -43,11 +49,11 @@ Simply add the GitHub repository path for the beta Obsidian plugin to the list f
 7. Refresh the list of plugins
 8. Find the beta plugin you just installed and Enable it.
 
-## Updating beta plugins
+### Updating beta plugins
 - Plugins can be updated using the command palette by running the command **Check for updates to all beta plugins and UPDATE**
 - Optionally, beta plugins can be configured to auto-update when starting Obsidian. This feature can be enabled in the **Obsidian42- BRAT" tab in settings.
 
-## Stopping beta plugin updates/deleting a beta plugin
+### Stopping beta plugin updates/deleting a beta plugin
 - Stopping updates to a beta plugin (Step 1)
   - In the BRAT tab in settings, click the button with an x next to the beta plugin you want to stop updating. In place of the x button, a button will appear for you to confirm removing the beta plugin from updating
   - When you remove the beta plugin from BRAT, the plugin in still installed in your Obsidian vault and will receive updates in the normal way through Obsidian's "check for updates" feature. If you really want to remove the plugin, make sure to do the following step.
@@ -56,6 +62,24 @@ Simply add the GitHub repository path for the beta Obsidian plugin to the list f
   - If you want to delete the plugin, you need to do one more step. Go to the Community Plugins tab in settings and find the beta plugin and uninstall it, just as you would uninstall any other plugin.
   - You also have to remove the reference to this beta plugin in BRAT as outined in the previous step 1. Otherwise BRAT will continue to update the plugin
 
+## Themes
+### Grab a beta theme from a repository
+BRAT helps you to test themes currently under development. To use this feature:
+
+1. Open the command palette and select the command **Grab a beta theme for testing from a Github repository**
+2. You are then prompted for the url path to the github repository where the theme is stored
+
+BRAT will then validate that a theme exists, download it and switch your current theme to this beta theme.
+
+Since this is a beta theme and does not yet have a community name,  BRAT assigns it a unique name using "BRAT-" in the beginning and adding the name of the Github user and repository.
+
+### Update a beta theme from a repository
+Using the theme update command, Brat will check  for all beta themese and see if there  is an update.  If there is an update, it downloads the update and notifies you.
+
+### Grab a community theme
+While BRAT is designed for testing themes, you can still install a theme already published to the community. This theme wil not be updated with the BRAT update feature.
+
+---
 
 # Say Thank You
 If you are enjoying this plugin then feel free to buying me a coffee on [https://ko-fi/TfTHacker](https://ko-fi.com/TfTHacker).
