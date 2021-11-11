@@ -2,7 +2,7 @@ import { Notice } from "obsidian";
 import ThePlugin from "../main";
 import { GenericFuzzySuggester, SuggesterItem } from "./GenericFuzzySuggester";
 import { grabCommmunityPluginList, grabCommmunityThemesList } from "../features/githubUtils";
-import { themesInstallFromCommunityList } from "../features/themes";
+import { themeseCheckAndUpdates, themesInstallFromCommunityList } from "../features/themes";
 import AddNewTheme from "./AddNewTheme";
 
 export default class PluginCommands {
@@ -11,28 +11,28 @@ export default class PluginCommands {
         {
             id: "BRAT-AddBetaPlugin",
             icon: "BratIcon",
-            name: "Add a beta plugin for testing",
+            name: "Plugins: Add a beta plugin for testing",
             showInRibbon: true,
             callback: async () => { await this.plugin.betaPlugins.displayAddNewPluginModal() }
         },
         {
             id: "BRAT-checkForUpdatesAndUpdate",
             icon: "BratIcon",
-            name: "Check for updates to all beta plugins and UPDATE",
+            name: "Plugins: Check for updates to all beta plugins and UPDATE",
             showInRibbon: true,
             callback: async () => { await this.plugin.betaPlugins.checkForUpdatesAndInstallUpdates(true, false) }
         },
         {
             id: "BRAT-checkForUpdatesAndDontUpdate",
             icon: "BratIcon",
-            name: "Only check for updates to beta plugins, but don't Update",
+            name: "Plugins: Only check for updates to beta plugins, but don't Update",
             showInRibbon: true,
             callback: async () => { await this.plugin.betaPlugins.checkForUpdatesAndInstallUpdates(true, true) }
         },
         {
             id: "BRAT-updateOnePlugin",
             icon: "BratIcon",
-            name: "Choose a single plugin to update",
+            name: "Plugins: Choose a single plugin to update",
             showInRibbon: true,
             callback: async () => {
                 const pluginList: SuggesterItem[] = Object.values(this.plugin.settings.pluginList).map((m) => { return { display: m, info: m } });
@@ -49,7 +49,7 @@ export default class PluginCommands {
         {
             id: "BRAT-restartPlugin",
             icon: "BratIcon",
-            name: "Restart a plugin that is already installed",
+            name: "Plugins: Restart a plugin that is already installed",
             showInRibbon: true,
             callback: async () => {
                 // @ts-ignore
@@ -65,7 +65,7 @@ export default class PluginCommands {
         {
             id: "BRAT-disablePlugin",
             icon: "BratIcon",
-            name: "Disable a plugin - toggle it off",
+            name: "Plugins: Disable a plugin - toggle it off",
             showInRibbon: true,
             callback: async () => {
                 const pluginList = this.plugin.betaPlugins.getEnabledDisabledPlugins(true).map(manifest => { return { display: `${manifest.name} (${manifest.id})`, info: manifest.id } });
@@ -81,7 +81,7 @@ export default class PluginCommands {
         {
             id: "BRAT-enablePlugin",
             icon: "BratIcon",
-            name: "Enable a plugin - toggle it on",
+            name: "Plugins: Enable a plugin - toggle it on",
             showInRibbon: true,
             callback: async () => {
                 const pluginList = this.plugin.betaPlugins.getEnabledDisabledPlugins(false).map(manifest => { return { display: `${manifest.name} (${manifest.id})`, info: manifest.id } });
@@ -97,7 +97,7 @@ export default class PluginCommands {
         {
             id: "BRAT-openGitHubRepository",
             icon: "BratIcon",
-            name: "Open the GitHub repository for a plugin",
+            name: "Plugins: Open the GitHub repository for a plugin",
             showInRibbon: true,
             callback: async () => {
                 const communityPlugins = await grabCommmunityPluginList();
@@ -114,7 +114,7 @@ export default class PluginCommands {
         {
             id: "BRAT-openGitHubRepoTheme",
             icon: "BratIcon",
-            name: "Open the GitHub repository for a theme ",
+            name: "Themes: Open the GitHub repository for a theme ",
             showInRibbon: true,
             callback: async () => {
                 const communityTheme = await grabCommmunityThemesList();
@@ -129,7 +129,7 @@ export default class PluginCommands {
         {
             id: "BRAT-opentPluginSettings",
             icon: "BratIcon",
-            name: "Open Plugin Settings Tab",
+            name: "Plugins: Open Plugin Settings Tab",
             showInRibbon: true,
             callback: async () => {
                 // @ts-ignore
@@ -150,21 +150,28 @@ export default class PluginCommands {
         {
             id: "BRAT-GrabCommunityTheme",
             icon: "BratIcon",
-            name: "Grab a community theme",
+            name: "Themes: Grab a community theme",
             showInRibbon: true,
             callback: async () => await themesInstallFromCommunityList(this.plugin)
         },
         {
             id: "BRAT-GrabBetaTheme",
             icon: "BratIcon",
-            name: "Grab a beta theme for testing from a Github repository",
+            name: "Themes: Grab a beta theme for testing from a Github repository",
             showInRibbon: true,
             callback: async () => { (new AddNewTheme(this.plugin)).open() }
         },
         {
+            id: "BRAT-updateBetaThemes",
+            icon: "BratIcon",
+            name: "Themes: Update beta themes",
+            showInRibbon: true,
+            callback: async () => await themeseCheckAndUpdates(this.plugin, true) 
+        },        
+        {
             id: "BRAT-switchTheme",
             icon: "BratIcon",
-            name: "Switch Active Theme ",
+            name: "Themes: Switch Active Theme ",
             showInRibbon: true,
             callback: async () => {
                 // @ts-ignore

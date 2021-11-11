@@ -86,3 +86,25 @@ export async function existBetaThemeinInList(plugin: ThePlugin, repositoryPath: 
     return testIfThemExists ? true : false;
 }
 
+
+/**
+ * Update the lastUpate field for the theme
+ *
+ * @param   {ThePlugin}         plugin          
+ * @param   {string<boolean>}   repositoryPath  path to the GitHub repository
+ * @param   {string<newDate>}   newDate  last update for this theme
+ *
+ * @return  {Promise<boolean>}  true if exists      
+ */
+ export function updateBetaThemeLastUpdateDate(plugin: ThePlugin, repositoryPath: string, newDate: string): void {
+    plugin.settings.themesList.forEach(t=>{
+        console.log(t,newDate)
+        if(t.repo === repositoryPath) {
+            t.lastUpdate = newDate;
+            plugin.saveSettings();
+        }
+    });
+
+
+}
+

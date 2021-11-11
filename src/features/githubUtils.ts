@@ -74,7 +74,6 @@ export const grabCommmunityThemeObsidianCss = async (repositoryPath: string): Pr
 
 export const grabLastCommitInfoForAFile = async (repositoryPath: string, path: string): Promise<string> => {
     const url = `https://api.github.com/repos/${repositoryPath}/commits?path=${path}&page=1&per_page=1`;
-    console.log(url)
     try {
         const response = await request({ url: url });
         return (response === "404: Not Found" ? null : JSON.parse(response));
@@ -85,8 +84,11 @@ export const grabLastCommitInfoForAFile = async (repositoryPath: string, path: s
 
 export const grabLastCommitDateForAFile = async (repositoryPath: string, path: string): Promise<string> => {
     const test = await grabLastCommitInfoForAFile(repositoryPath, path);
-    if(test[0].commit.committer.date)
+    //@ts-ignore
+    if(test[0].commit.committer.date){
+        //@ts-ignore
         return test[0].commit.committer.date
+    }
     else
         return "";
 }

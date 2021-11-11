@@ -241,7 +241,7 @@ export default class BetaPlugins {
         let newNotice: Notice;
         const msg1 = `Checking for plugin updates STARTED`;
         this.plugin.log(msg1, true);
-        if (showInfo) newNotice = new Notice(`BRAT\nChecking for plugin updates STARTED`, 30000);
+        if (showInfo) newNotice = new Notice(`BRAT\n${msg1}`, 30000);
         for (const bp of this.plugin.settings.pluginList) {
             await this.updatePlugin(bp, onlyCheckDontUpdate);
         }
@@ -249,7 +249,7 @@ export default class BetaPlugins {
         this.plugin.log(msg2, true);
         if (showInfo) {
             newNotice.hide();
-            new Notice(`BRAT\nChecking for plugin updates COMPLETED`, 10000);
+            new Notice(`BRAT\n${msg2}}`, 10000);
         }
     }
 
