@@ -98,7 +98,6 @@ export async function existBetaThemeinInList(plugin: ThePlugin, repositoryPath: 
  */
  export function updateBetaThemeLastUpdateDate(plugin: ThePlugin, repositoryPath: string, newDate: string): void {
     plugin.settings.themesList.forEach(t=>{
-        console.log(t,newDate)
         if(t.repo === repositoryPath) {
             t.lastUpdate = newDate;
             plugin.saveSettings();

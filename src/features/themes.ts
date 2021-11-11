@@ -4,10 +4,28 @@ import { GenericFuzzySuggester, SuggesterItem } from "../ui/GenericFuzzySuggeste
 import { updateBetaThemeLastUpdateDate } from "../ui/settings";
 import { grabCommmunityThemeObsidianCss, grabCommmunityThemesList, grabLastCommitDateForAFile } from "./githubUtils";
 
+
+/**
+ * Get the path to the themes folder fo rthis vault
+ *
+ * @param   {ThePlugin}  plugin  ThPlugin
+ *
+ * @return  {string}             path to themes folder
+ */
 export const themesRootPath = (plugin: ThePlugin): string => {
     return normalizePath(plugin.app.vault.configDir + "/themes") + "/";
 }
 
+
+/**
+ * Installs a theme, including downloading and registring it with BRAT
+ *
+ * @param   {ThePlugin}           plugin               ThePlugin
+ * @param   {string}              cssGithubRepository  The repository with the theme
+ * @param   {undefined<boolean>}  cssFileName          name of the css file that will be saved to the themes folder inthe vault
+ *
+ * @return  {Promise<boolean>}                         true for succcess
+ */
 export const themeInstallTheme = async (plugin: ThePlugin, cssGithubRepository: string, cssFileName = ""): Promise<boolean> => {
     const themeCSS = await grabCommmunityThemeObsidianCss(cssGithubRepository);
     if(!themeCSS) {
@@ -27,6 +45,15 @@ export const themeInstallTheme = async (plugin: ThePlugin, cssGithubRepository: 
     return true;
 }
 
+/**
+ * Saves the  theme file to the vault
+ *
+ * @param   {ThePlugin}      plugin       ThePlugin
+ * @param   {string}         cssFileName  file name to be used in the themes folder
+ * @param   {string<void>}   cssText      the css file contents
+ *
+ * @return  {Promise<void>}               
+ */
 export const themesSaveTheme = async (plugin: ThePlugin, cssFileName: string, cssText: string): Promise<void> => {
     const themesTargetFolderPath = themesRootPath(plugin);
     const adapter = plugin.app.vault.adapter;
@@ -34,6 +61,14 @@ export const themesSaveTheme = async (plugin: ThePlugin, cssFileName: string, cs
     await adapter.write(themesTargetFolderPath + cssFileName + ".css", cssText);
 }
 
+
+/**
+ * Install a theme from the community list. this is doing the same thing as the built in theme installer in obsidian, but this makes it fast to do through command palette
+ *
+ * @param   {ThePlugin<void>}  plugin  ThePlugin
+ *
+ * @return  {}            [return description]
+ */
 export const themesInstallFromCommunityList = async (plugin: ThePlugin): Promise<void> =>{
     const communityTheme = await grabCommmunityThemesList();
     const communityThemeList: SuggesterItem[] = Object.values(communityTheme).map((p) => { return { display: `Theme: ${p.name}  (${p.repo})`, info: p } });
@@ -44,12 +79,29 @@ export const themesInstallFromCommunityList = async (plugin: ThePlugin): Promise
     });
 }
 
+
+/**
+ * Generates a file name for the theme. It is based on the github repository theme name
+ *
+ * @param   {string}  cssGithubRepository  [cssGithubRepository description]
+ *
+ * @return  {string}                       [return description]
+ */
 export const themesDeriveBetaNameFromRepository = (cssGithubRepository: string): string => {
-    const betaName = "BRAT-" + cssGithubRepository.replace("/", "____");
+    const betaName = "BRAT-" + cssGithubRepository.replace("/", "----");
     return betaName.substr(0, 100);
 }
 
-export const themesDelete = async (plugin: ThePlugin, cssGithubRepository) => {
+
+/**
+ * Deletes a them from the BRAT list and also the physical theme css file in the vault
+ *
+ * @param   {ThePlugin}  plugin               ThePlugin
+ * @param   {string}     cssGithubRepository  Repository path
+ *
+ * @return  {void}
+ */
+export const themesDelete = async (plugin: ThePlugin, cssGithubRepository: string): void => {
     plugin.settings.themesList = plugin.settings.themesList.filter((t) => t.repo != cssGithubRepository);
     plugin.saveSettings();
     await plugin.app.vault.adapter.remove(themesRootPath(plugin) + themesDeriveBetaNameFromRepository(cssGithubRepository) + ".css");
@@ -58,6 +110,14 @@ export const themesDelete = async (plugin: ThePlugin, cssGithubRepository) => {
     new Notice(`BRAT\n${msg}`);
 }
 
+/**
+ * Checks  if there  are theme updates based on the commit date of the obsidian.css file on github in comparison to what is stored in the BRAT theme list
+ *
+ * @param   {ThePlugin}      plugin    ThePlugin
+ * @param   {boolean<void>}  showInfo  provide  notices during the update proces
+ *
+ * @return  {Promise<void>}            
+ */
 export const themeseCheckAndUpdates = async (plugin: ThePlugin, showInfo:boolean): Promise<void> => {
     let newNotice: Notice;
     const msg1 = `Checking for beta theme updates STARTED`;
@@ -76,6 +136,16 @@ export const themeseCheckAndUpdates = async (plugin: ThePlugin, showInfo:boolean
     }
 }
 
+/**
+ * Updates a theme already registered  with BRAT
+ *
+ * @param   {ThePlugin}           plugin               ThePlugin
+ * @param   {string}              cssGithubRepository  Repository path
+ * @param   {[type]}              oldFileDate          Old file date  from the BRAT theme list
+ * @param   {undefined<boolean>}  newFileDate          new date to use for this update
+ *
+ * @return  {Promise<boolean>}                         true if succeeds
+ */
 export const themeUpdateTheme = async (plugin: ThePlugin, cssGithubRepository: string, oldFileDate = "", newFileDate = ""): Promise<boolean> => {
     const themeCSS = await grabCommmunityThemeObsidianCss(cssGithubRepository);
     if(!themeCSS) {

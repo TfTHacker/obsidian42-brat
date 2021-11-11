@@ -23,6 +23,7 @@ Simply add the GitHub repository path for the beta Obsidian plugin to the list f
 - [Themes](/help/themes.md)
   - Switch active theme
   - Settings for themes
+  - Boring details about themes that are useful to know
 - [Github](/help/github.md)
   - Open a GitHub plugin repository
   - Open a GitHub phemes repository
