@@ -101,7 +101,7 @@ export const themesDeriveBetaNameFromRepository = (cssGithubRepository: string):
  *
  * @return  {void}
  */
-export const themesDelete = async (plugin: ThePlugin, cssGithubRepository: string): void => {
+export const themesDelete = async (plugin: ThePlugin, cssGithubRepository: string): Promise<void> => {
     plugin.settings.themesList = plugin.settings.themesList.filter((t) => t.repo != cssGithubRepository);
     plugin.saveSettings();
     await plugin.app.vault.adapter.remove(themesRootPath(plugin) + themesDeriveBetaNameFromRepository(cssGithubRepository) + ".css");

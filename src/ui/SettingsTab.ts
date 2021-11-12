@@ -29,6 +29,18 @@ export class BratSettingsTab extends PluginSettingTab {
 			})
 
 		new Setting(containerEl)
+			.setName('Auto-update themes at startup')
+			.setDesc('If enabled all beta themes will be checked for updates each time Obsidian starts.')
+			.addToggle((cb: ToggleComponent) => {
+				cb.setValue(this.plugin.settings.updateThemesAtStartup);
+				cb.onChange(async (value: boolean) => {
+					this.plugin.settings.updateThemesAtStartup = value;
+					await this.plugin.saveSettings();
+				});
+			})
+
+
+		new Setting(containerEl)
 			.setName('Ribbon Button')
 			.setDesc('Toggle ribbon button off and on.')
 			.addToggle((cb: ToggleComponent) => {

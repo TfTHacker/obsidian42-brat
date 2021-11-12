@@ -5,6 +5,7 @@ import BetaPlugins from "./features/BetaPlugins";
 import { addIcons } from "./ui/icons";
 import { logger } from "./utils/logging";
 import PluginCommands from "./ui/PluginCommands";
+import { themeseCheckAndUpdates } from "./features/themes";
 
 export default class ThePlugin extends Plugin {
 	appName = "Obsidian42 - Beta Reviewer's Auto-update Tool (BRAT)";
@@ -25,12 +26,15 @@ export default class ThePlugin extends Plugin {
 		addIcons();
 		if (this.settings.ribbonIconEnabled) this.showRibbonButton();
 
-		this.app.workspace.onLayoutReady((): void => {
-			if (this.settings.updateAtStartup) { // let obsidian load and calm down before check
+		this.app.workspace.onLayoutReady((): void => { // let obsidian load and calm down before check
+			if (this.settings.updateAtStartup) { 
 				setTimeout(async () => {
-					console.log("BRAT Autoupdate check started");
 					await this.betaPlugins.checkForUpdatesAndInstallUpdates(false)
-					console.log("BRAT Autoupdate check completed.")
+				}, 10000);
+			}
+			if (this.settings.updateThemesAtStartup) { 
+				setTimeout(async () => {
+					await themeseCheckAndUpdates(this, false);
 				}, 10000);
 			}
 		});

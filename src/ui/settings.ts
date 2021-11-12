@@ -10,6 +10,7 @@ export interface Settings {
     pluginList: string[];
     themesList: ThemeInforamtion[];
     updateAtStartup: boolean;
+    updateThemesAtStartup:  boolean;
     ribbonIconEnabled: boolean;
     loggingEnabled: boolean;
     loggingPath: string;
@@ -21,6 +22,7 @@ export const DEFAULT_SETTINGS: Settings = {
     pluginList: [],
     themesList: [],
     updateAtStartup: false,
+    updateThemesAtStartup: false,
     ribbonIconEnabled: true,
     loggingEnabled: false,
     loggingPath: "BRAT-log",
