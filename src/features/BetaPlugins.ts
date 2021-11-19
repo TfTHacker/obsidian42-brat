@@ -115,28 +115,28 @@ export default class BetaPlugins {
         const noticeTimeout = 10000;
         let primaryManifest = await this.validateRepository(repositoryPath, true, false); // attempt to get manifest-beta.json
         const usingBetaManifest: boolean = primaryManifest ? true : false;
-        if(usingBetaManifest===false) 
+        if (usingBetaManifest === false)
             primaryManifest = await this.validateRepository(repositoryPath, false, true); // attempt to get manifest.json
 
-        if(primaryManifest===null) {
+        if (primaryManifest === null) {
             const msg = `${repositoryPath}\nA manifest.json or manifest-beta.json file does not exist in the root directory of the repository. This plugin cannot be installed.`;
             this.plugin.log(msg, true);
             new Notice(`BRAT\n${msg}`, noticeTimeout);
             return false;
         }
-            
-        if(!primaryManifest.hasOwnProperty('version')) {
+
+        if (!primaryManifest.hasOwnProperty('version')) {
             const msg = `${repositoryPath}\nThe manifest${usingBetaManifest ? "-beta" : ""}.json file in the root directory of the repository does not have a version number in the file. This plugin cannot be installed.`;
             this.plugin.log(msg, true);
             new Notice(`BRAT\n${msg}`, noticeTimeout);
             return false;
         }
 
-        const getRelease = async ()=>{
+        const getRelease = async () => {
             const rFiles = await this.getAllReleaseFiles(repositoryPath, primaryManifest, usingBetaManifest);
-            if(usingBetaManifest || rFiles.manifest === null)  //if beta, use that manifest, or if there is no manifest in release, use the primaryManifest
+            if (usingBetaManifest || rFiles.manifest === null)  //if beta, use that manifest, or if there is no manifest in release, use the primaryManifest
                 rFiles.manifest = JSON.stringify(primaryManifest);
-    
+
             if (rFiles.mainJs === null) {
                 const msg = `${repositoryPath}\nThe release is not complete and cannot be download. main.js is missing from the Release`;
                 this.plugin.log(msg, true);
@@ -148,7 +148,7 @@ export default class BetaPlugins {
 
         if (updatePluginFiles === false) {
             const releaseFiles = await getRelease();
-            if (releaseFiles===null) return;
+            if (releaseFiles === null) return;
             await this.writeReleaseFilesToPluginFolder(primaryManifest.id, releaseFiles);
             await addBetaPluginToList(this.plugin, repositoryPath);
             //@ts-ignore
@@ -173,25 +173,25 @@ export default class BetaPlugins {
             const localManifestJSON = await JSON.parse(localManifestContents);
             if (localManifestJSON.version !== primaryManifest.version) { //manifest files are not the same, do an update
                 const releaseFiles = await getRelease();
-                if (releaseFiles===null) return;
+                if (releaseFiles === null) return;
 
                 if (seeIfUpdatedOnly) { // dont update, just report it
                     const msg = `There is an update available for ${primaryManifest.id} from version ${localManifestJSON.version} to ${primaryManifest.version}. `;
-                    this.plugin.log(msg + `[Release Info](https://github.com/${repositoryPath}/releases/tag/${primaryManifest.version})`, false);                    
-                    const newNotice: Notice = new Notice(`BRAT\n${msg}\n(Click for info)`,30000);
+                    this.plugin.log(msg + `[Release Info](https://github.com/${repositoryPath}/releases/tag/${primaryManifest.version})`, false);
+                    const newNotice: Notice = new Notice(`BRAT\n${msg}\n(Click for info)`, 30000);
                     //@ts-ignore
-                    newNotice.noticeEl.onclick = async () => { window.open(`https://github.com/${repositoryPath}/releases/tag/${primaryManifest.version}`) };
+                    newNotice.noticeEl.oncontextmenu = async () => { window.open(`https://github.com/${repositoryPath}/releases/tag/${primaryManifest.version}`) };
                 } else {
                     await this.writeReleaseFilesToPluginFolder(primaryManifest.id, releaseFiles);
                     //@ts-ignore
                     await this.plugin.app.plugins.loadManifests();
                     //@ts-ignore
-                    if(this.plugin.app.plugins.plugins[primaryManifest.id]?.manifest) await this.reloadPlugin(primaryManifest.id); //reload if enabled
+                    if (this.plugin.app.plugins.plugins[primaryManifest.id]?.manifest) await this.reloadPlugin(primaryManifest.id); //reload if enabled
                     const msg = `${primaryManifest.id}\nPlugin has been updated from version ${localManifestJSON.version} to ${primaryManifest.version}. `;
-                    this.plugin.log(msg + `[Release Info](https://github.com/${repositoryPath}/releases/tag/${primaryManifest.version})`, false);            
-                    const newNotice: Notice = new Notice(`BRAT\n${msg}\n(Click for info)`,30000);
+                    this.plugin.log(msg + `[Release Info](https://github.com/${repositoryPath}/releases/tag/${primaryManifest.version})`, false);
+                    const newNotice: Notice = new Notice(`BRAT\n${msg}\n(Click for info)`, 30000);
                     //@ts-ignore
-                    newNotice.noticeEl.onclick = async () => { window.open(`https://github.com/${repositoryPath}/releases/tag/${primaryManifest.version}`) };
+                    newNotice.noticeEl.oncontextmenu = async (e) => { window.open(`https://github.com/${repositoryPath}/releases/tag/${primaryManifest.version}`) };
                 }
             } else
                 if (reportIfNotUpdted) new Notice(`BRAT\nNo update available for ${repositoryPath}`, 3000);
@@ -274,14 +274,14 @@ export default class BetaPlugins {
      *
      * @return  {PluginManifest[]}           manifests  of plugins
      */
-    getEnabledDisabledPlugins( enabled: boolean): PluginManifest[] {
+    getEnabledDisabledPlugins(enabled: boolean): PluginManifest[] {
         // @ts-ignore
         const pl = this.plugin.app.plugins;
         const manifests: PluginManifest[] = Object.values(pl.manifests);
         // @ts-ignore
-        const enabledPlugins: PluginManifest[] = Object.values(pl.plugins).map(p=>p.manifest);
-        return  enabled ? 
-                manifests.filter(manifest => enabledPlugins.find(pluginName=> manifest.id===pluginName.id)) :
-                manifests.filter(manifest => !enabledPlugins.find(pluginName=> manifest.id===pluginName.id));
+        const enabledPlugins: PluginManifest[] = Object.values(pl.plugins).map(p => p.manifest);
+        return enabled ?
+            manifests.filter(manifest => enabledPlugins.find(pluginName => manifest.id === pluginName.id)) :
+            manifests.filter(manifest => !enabledPlugins.find(pluginName => manifest.id === pluginName.id));
     }
 }

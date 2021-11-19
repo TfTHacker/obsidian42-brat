@@ -37,7 +37,7 @@ export const themeInstallTheme = async (plugin: ThePlugin, cssGithubRepository: 
     plugin.log(msg + `[Theme Info](https://github.com/${cssGithubRepository})`, false);
     const newNotice: Notice = new Notice(`BRAT\n${msg}\n(Click for info)`, 10000);
     //@ts-ignore
-    newNotice.noticeEl.onclick = async () => { window.open(`https://github.com/${cssGithubRepository}`) };
+    newNotice.noticeEl.oncontextmenu = async () => { window.open(`https://github.com/${cssGithubRepository}`) };
     setTimeout(() => {
         // @ts-ignore            
         plugin.app.customCss.setTheme(cssFileName);
