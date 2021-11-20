@@ -87,10 +87,3 @@ Please also help spread the word by sharing your enthusiasim for this plugin on 
 You can find me on Twitter [@TfTHacker](https://twitter.com/TfTHacker)
 
 [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/N4N16TNFD)
-
-Also
-
-- Bitcoin address: bc1qgx052tja4fsh5fv65rr6ceytj8zmjplvauxcuk
-- Bitcoin cash: qp40hnhm24v785pyzl8dvsax9tzc2tur8vx32lshn4
-- Ethereum address: 0xb29782A4EA6e02BbdF296671D8576bB045abf8AE
-- Binance address: bnb18p4adhzlhvsxudkrduxqng9em992fj0raa5d6d
