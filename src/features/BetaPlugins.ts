@@ -249,7 +249,7 @@ export default class BetaPlugins {
         this.plugin.log(msg2, true);
         if (showInfo) {
             newNotice.hide();
-            new Notice(`BRAT\n${msg2}}`, 10000);
+            new Notice(`BRAT\n${msg2}`, 10000);
         }
     }
 
