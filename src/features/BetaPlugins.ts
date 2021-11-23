@@ -191,7 +191,7 @@ export default class BetaPlugins {
                     this.plugin.log(msg + `[Release Info](https://github.com/${repositoryPath}/releases/tag/${primaryManifest.version})`, false);
                     const newNotice: Notice = new Notice(`BRAT\n${msg}\n(Click for info)`, 30000);
                     //@ts-ignore
-                    newNotice.noticeEl.oncontextmenu = async (e) => { window.open(`https://github.com/${repositoryPath}/releases/tag/${primaryManifest.version}`) };
+                    newNotice.noticeEl.oncontextmenu = async () => { window.open(`https://github.com/${repositoryPath}/releases/tag/${primaryManifest.version}`) };
                 }
             } else
                 if (reportIfNotUpdted) new Notice(`BRAT\nNo update available for ${repositoryPath}`, 3000);

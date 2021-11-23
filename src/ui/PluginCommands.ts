@@ -176,6 +176,7 @@ export default class PluginCommands {
             callback: async () => {
                 // @ts-ignore
                 const communityThemeList: SuggesterItem[] = Object.values(this.plugin.app.customCss.themes).map((t) => { return { display: t, info: t } });
+                communityThemeList.unshift({ display: "Obsidian Default Theme", info: "" });
                 const gfs = new GenericFuzzySuggester(this.plugin);
                 gfs.setSuggesterData(communityThemeList);
                 await gfs.display(async (results) => {
