@@ -49,7 +49,7 @@ Simply add the GitHub repository path for the beta Obsidian plugin to the list f
 
 ### Updating beta plugins
 - Plugins can be updated using the command palette by running the command **Check for updates to all beta plugins and UPDATE**
-- Optionally, beta plugins can be configured to auto-update when starting Obsidian. This feature can be enabled in the **Obsidian42- BRAT" tab in settings.
+- Optionally, beta plugins can be configured to auto-update when starting Obsidian. This feature can be enabled in the **Obsidian42- BRAT" tab in settings.  
 
 ### Stopping beta plugin updates/deleting a beta plugin
 - Stopping updates to a beta plugin (Step 1)
