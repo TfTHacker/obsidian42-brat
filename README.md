@@ -34,7 +34,7 @@ Simply add the GitHub repository path for the beta Obsidian plugin to the list f
   - manifest-beta.json
   - How BRAT works
 
-# Quick Guide for using BRAT
+# Quick Guide for using BRAT  
 ## Plugins
 ### Adding a beta plugin
 1. Install BRAT from the Community Plugins in Obsidian 
