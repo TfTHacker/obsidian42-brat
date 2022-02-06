@@ -1,9 +1,9 @@
-import { Notice } from "obsidian";
 import ThePlugin from "../main";
 import { GenericFuzzySuggester, SuggesterItem } from "./GenericFuzzySuggester";
 import { grabCommmunityPluginList, grabCommmunityThemesList } from "../features/githubUtils";
 import { themeseCheckAndUpdates, themesInstallFromCommunityList } from "../features/themes";
 import AddNewTheme from "./AddNewTheme";
+import { ToastMessage } from "../utils/notifications";
 
 export default class PluginCommands {
     plugin: ThePlugin;
@@ -41,7 +41,7 @@ export default class PluginCommands {
                 await gfs.display(async (results) => {
                     const msg = `Checking for updates for ${results.info}`;
                     this.plugin.log(msg,true);
-                    new Notice(`BRAT\n${msg}`, 3000);
+                    ToastMessage(this.plugin, `\n${msg}`, 3);
                     await this.plugin.betaPlugins.updatePlugin(results.info, false, true);
                 });
             }
@@ -57,7 +57,7 @@ export default class PluginCommands {
                 const gfs = new GenericFuzzySuggester(this.plugin);
                 gfs.setSuggesterData(pluginList);
                 await gfs.display(async (results) => {
-                    new Notice(`${results.info}\nPlugin reloading .....`, 5000);
+                    ToastMessage(this.plugin, `${results.info}\nPlugin reloading .....`, 5);
                     await this.plugin.betaPlugins.reloadPlugin(results.info);
                 });
             }

@@ -1,6 +1,7 @@
-import { Modal, Notice, Setting } from 'obsidian';
+import { Modal, Setting } from 'obsidian';
 import { themeInstallTheme, themesDeriveBetaNameFromRepository } from '../features/themes';
 import ThePlugin from '../main';
+import { ToastMessage } from '../utils/notifications';
 import { addBetaThemeToList, existBetaThemeinInList } from './settings';
 
 /**
@@ -22,7 +23,7 @@ export default class AddNewTheme extends Modal {
         if (this.address === "") return;
         const scrubbedAddress = this.address.replace("https://github.com/", "");
         if (await existBetaThemeinInList(this.plugin, scrubbedAddress)) {
-            new Notice(`BRAT\nThis plugin is already in the list for beta testing`, 10000);
+            ToastMessage(this.plugin, `This plugin is already in the list for beta testing`, 10);
             return;
         }
         

@@ -3,7 +3,7 @@ import ThePlugin from "../main";
 import { GenericFuzzySuggester, SuggesterItem } from "../ui/GenericFuzzySuggester";
 import { updateBetaThemeLastUpdateDate } from "../ui/settings";
 import { grabCommmunityThemeObsidianCss, grabCommmunityThemesList, grabLastCommitDateForAFile } from "./githubUtils";
-
+import { ToastMessage } from "../utils/notifications";
 
 /**
  * Get the path to the themes folder fo rthis vault
@@ -29,15 +29,13 @@ export const themesRootPath = (plugin: ThePlugin): string => {
 export const themeInstallTheme = async (plugin: ThePlugin, cssGithubRepository: string, cssFileName = ""): Promise<boolean> => {
     const themeCSS = await grabCommmunityThemeObsidianCss(cssGithubRepository);
     if(!themeCSS) {
-        new Notice("BRAT\nThere is no obsidian.css file in the root path of this repository, so there is no theme to install.")
+        ToastMessage(plugin,"There is no obsidian.css file in the root path of this repository, so there is no theme to install.")
         return false;
     }
     await themesSaveTheme(plugin, cssFileName, themeCSS);
     const msg = `${cssFileName} theme installed from ${cssGithubRepository}. `;
     plugin.log(msg + `[Theme Info](https://github.com/${cssGithubRepository})`, false);
-    const newNotice: Notice = new Notice(`BRAT\n${msg}\n(Click for info)`, 10000);
-    //@ts-ignore
-    newNotice.noticeEl.oncontextmenu = async () => { window.open(`https://github.com/${cssGithubRepository}`) };
+    ToastMessage(plugin,`${msg}`,10, async ()=>{ window.open(`https://github.com/${cssGithubRepository}`)});
     setTimeout(() => {
         // @ts-ignore            
         plugin.app.customCss.setTheme(cssFileName);
@@ -107,7 +105,7 @@ export const themesDelete = async (plugin: ThePlugin, cssGithubRepository: strin
     await plugin.app.vault.adapter.remove(themesRootPath(plugin) + themesDeriveBetaNameFromRepository(cssGithubRepository) + ".css");
     const msg = `Removed ${cssGithubRepository} from BRAT themes list and deleted from vault`;
     plugin.log(msg, true);
-    new Notice(`BRAT\n${msg}`);
+    ToastMessage(plugin, `${msg}`);
 }
 
 /**
@@ -132,9 +130,9 @@ export const themeseCheckAndUpdates = async (plugin: ThePlugin, showInfo:boolean
     plugin.log(msg2, true);
     if (showInfo) {
         newNotice.hide();
-        new Notice(`BRAT\n${msg2}`, 10000);
+        ToastMessage(plugin, `${msg2}`);
     }
-}
+} 
 
 /**
  * Updates a theme already registered  with BRAT
@@ -149,7 +147,7 @@ export const themeseCheckAndUpdates = async (plugin: ThePlugin, showInfo:boolean
 export const themeUpdateTheme = async (plugin: ThePlugin, cssGithubRepository: string, oldFileDate = "", newFileDate = ""): Promise<boolean> => {
     const themeCSS = await grabCommmunityThemeObsidianCss(cssGithubRepository);
     if(!themeCSS) {
-        new Notice("BRAT\nThere is no obsidian.css file in the root path of the ${cssGithubRepository} repository, so this theme cannot be updated.")
+        ToastMessage(plugin, "There is no obsidian.css file in the root path of the ${cssGithubRepository} repository, so this theme cannot be updated.")
         return false;
     }
     const cssFileName = themesDeriveBetaNameFromRepository(cssGithubRepository);
@@ -157,8 +155,6 @@ export const themeUpdateTheme = async (plugin: ThePlugin, cssGithubRepository: s
     updateBetaThemeLastUpdateDate(plugin, cssGithubRepository, newFileDate);
     const msg = `${cssFileName} theme updated from ${cssGithubRepository}. From date: ${oldFileDate} to ${newFileDate} `;
     plugin.log(msg + `[Theme Info](https://github.com/${cssGithubRepository})`, false);
-    const newNotice: Notice = new Notice(`BRAT\n${msg}\n(Click for info)`, 20000);
-    //@ts-ignore
-    newNotice.noticeEl.onclick = async () => { window.open(`https://github.com/${cssGithubRepository}`) };
+    ToastMessage(plugin, `${msg}`, 20, async ()=>{window.open(`https://github.com/${cssGithubRepository}`)}   );
     return true;
 }

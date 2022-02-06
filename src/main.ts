@@ -30,12 +30,12 @@ export default class ThePlugin extends Plugin {
 			if (this.settings.updateAtStartup) { 
 				setTimeout(async () => {
 					await this.betaPlugins.checkForUpdatesAndInstallUpdates(false)
-				}, 10000);
+				}, 60000);
 			}
 			if (this.settings.updateThemesAtStartup) { 
 				setTimeout(async () => {
 					await themeseCheckAndUpdates(this, false);
-				}, 10000);
+				}, 120000);
 			}
 		});
 	}

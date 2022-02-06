@@ -1,6 +1,7 @@
-import { Modal, Notice, Setting } from 'obsidian';
+import { Modal, Setting } from 'obsidian';
 import BetaPlugins from '../features/BetaPlugins';
 import ThePlugin from '../main';
+import { ToastMessage } from '../utils/notifications';
 import { existBetaPluginInList } from './settings';
 
 /**
@@ -24,7 +25,7 @@ export default class AddNewPluginModal extends Modal {
         if (this.address === "") return;
         const scrubbedAddress = this.address.replace("https://github.com/","");
         if (await existBetaPluginInList(this.plugin, scrubbedAddress)) {
-            new Notice(`BRAT\nThis plugin is already in the list for beta testing`, 10000);
+            ToastMessage(this.plugin, `This plugin is already in the list for beta testing`, 10);
             return;
         }
         const result = await this.betaPlugins.addPlugin(scrubbedAddress);

@@ -1,8 +1,9 @@
 import ThePlugin from "../main";
 import AddNewPluginModal from "../ui/AddNewPluginModal";
 import { grabManifestJsonFromRepository, grabReleaseFileFromRepository } from "./githubUtils";
-import { normalizePath, Notice, PluginManifest } from "obsidian";
+import { normalizePath, PluginManifest, Notice } from "obsidian";
 import { addBetaPluginToList } from "../ui/settings";
+import { ToastMessage } from "../utils/notifications";
 
 /**
  * all the files needed for a plugin based on the release files are hre
@@ -39,24 +40,24 @@ export default class BetaPlugins {
      * @param   {string}                     repositoryPath   GithubUser/RepositoryName (example: TfThacker/obsidian42-brat)
      * @param   {[type]}                     getBetaManifest  test the beta version of the manifest, not at the root
      * @param   {[type]}                     false            [false description]
-     * @param   {[type]}                     reportIsues      will display notices as it finds issues
+     * @param   {[type]}                     reportIssues      will display notices as it finds issues
      *
      * @return  {Promise<PluginManifest>}                     the manifest file if found, or null if its incomplete
      */
-    async validateRepository(repositoryPath: string, getBetaManifest = false, reportIsues = false): Promise<PluginManifest> {
-        const noticeTimeout = 15000;
+    async validateRepository(repositoryPath: string, getBetaManifest = false, reportIssues = false): Promise<PluginManifest> {
+        const noticeTimeout = 15;
         const manifestJson = await grabManifestJsonFromRepository(repositoryPath, !getBetaManifest);
         if (!manifestJson) { // this is a plugin with a manifest json, try to see if there is a beta version
-            if (reportIsues) new Notice(`BRAT\n${repositoryPath}\nThis does not seem to be an obsidian plugin, as there is no manifest.json file.`, noticeTimeout);
+            if (reportIssues) ToastMessage(this.plugin, `${repositoryPath}\nThis does not seem to be an obsidian plugin, as there is no manifest.json file.`, noticeTimeout);
             return null;
         }
         // Test that the mainfest has some key elements, like ID and version
         if (!("id" in manifestJson)) { // this is a plugin with a manifest json, try to see if there is a beta version
-            if (reportIsues) new Notice(`BRAT\n${repositoryPath}\nThe plugin id attribute for the release is missing from the manifest file`, noticeTimeout);
+            if (reportIssues) ToastMessage(this.plugin,`${repositoryPath}\nThe plugin id attribute for the release is missing from the manifest file`, noticeTimeout);
             return null;
         }
         if (!("version" in manifestJson)) { // this is a plugin with a manifest json, try to see if there is a beta version
-            if (reportIsues) new Notice(`BRAT\n${repositoryPath}\nThe version attribute for the release is missing from the manifest file`, noticeTimeout);
+            if (reportIssues) ToastMessage(this.plugin,`${repositoryPath}\nThe version attribute for the release is missing from the manifest file`, noticeTimeout);
             return null;
         }
         return manifestJson;
@@ -112,7 +113,7 @@ export default class BetaPlugins {
      * @return  {Promise<boolean>}                       true if succeeds
      */
     async addPlugin(repositoryPath: string, updatePluginFiles = false, seeIfUpdatedOnly = false, reportIfNotUpdted = false): Promise<boolean> {
-        const noticeTimeout = 10000;
+        const noticeTimeout = 10;
         let primaryManifest = await this.validateRepository(repositoryPath, true, false); // attempt to get manifest-beta.json
         const usingBetaManifest: boolean = primaryManifest ? true : false;
         if (usingBetaManifest === false)
@@ -121,14 +122,14 @@ export default class BetaPlugins {
         if (primaryManifest === null) {
             const msg = `${repositoryPath}\nA manifest.json or manifest-beta.json file does not exist in the root directory of the repository. This plugin cannot be installed.`;
             this.plugin.log(msg, true);
-            new Notice(`BRAT\n${msg}`, noticeTimeout);
+            ToastMessage(this.plugin, `${msg}`, noticeTimeout);
             return false;
         }
 
         if (!primaryManifest.hasOwnProperty('version')) {
             const msg = `${repositoryPath}\nThe manifest${usingBetaManifest ? "-beta" : ""}.json file in the root directory of the repository does not have a version number in the file. This plugin cannot be installed.`;
             this.plugin.log(msg, true);
-            new Notice(`BRAT\n${msg}`, noticeTimeout);
+            ToastMessage(this.plugin, `${msg}`, noticeTimeout);
             return false;
         }
 
@@ -140,7 +141,7 @@ export default class BetaPlugins {
             if (rFiles.mainJs === null) {
                 const msg = `${repositoryPath}\nThe release is not complete and cannot be download. main.js is missing from the Release`;
                 this.plugin.log(msg, true);
-                new Notice(`BRAT\n${msg}`, noticeTimeout);
+                ToastMessage(this.plugin, `${msg}`, noticeTimeout);
                 return null;
             }
             return rFiles;
@@ -155,7 +156,7 @@ export default class BetaPlugins {
             await this.plugin.app.plugins.loadManifests();
             const msg = `${repositoryPath}\nThe plugin has been registered with BRAT. You may still need to enable it the Community Plugin List.`;
             this.plugin.log(msg, true);
-            new Notice(`BRAT\n${msg}`, noticeTimeout);
+            ToastMessage(this.plugin, msg, noticeTimeout);
         } else {
             // test if the plugin needs to be updated
             const pluginTargetFolderPath = this.plugin.app.vault.configDir + "/plugins/" + primaryManifest.id + "/";
@@ -178,9 +179,7 @@ export default class BetaPlugins {
                 if (seeIfUpdatedOnly) { // dont update, just report it
                     const msg = `There is an update available for ${primaryManifest.id} from version ${localManifestJSON.version} to ${primaryManifest.version}. `;
                     this.plugin.log(msg + `[Release Info](https://github.com/${repositoryPath}/releases/tag/${primaryManifest.version})`, false);
-                    const newNotice: Notice = new Notice(`BRAT\n${msg}\n(Click for info)`, 30000);
-                    //@ts-ignore
-                    newNotice.noticeEl.oncontextmenu = async () => { window.open(`https://github.com/${repositoryPath}/releases/tag/${primaryManifest.version}`) };
+                    ToastMessage(this.plugin, msg, 30, async () => { window.open(`https://github.com/${repositoryPath}/releases/tag/${primaryManifest.version}`)});
                 } else {
                     await this.writeReleaseFilesToPluginFolder(primaryManifest.id, releaseFiles);
                     //@ts-ignore
@@ -189,12 +188,10 @@ export default class BetaPlugins {
                     if (this.plugin.app.plugins.plugins[primaryManifest.id]?.manifest) await this.reloadPlugin(primaryManifest.id); //reload if enabled
                     const msg = `${primaryManifest.id}\nPlugin has been updated from version ${localManifestJSON.version} to ${primaryManifest.version}. `;
                     this.plugin.log(msg + `[Release Info](https://github.com/${repositoryPath}/releases/tag/${primaryManifest.version})`, false);
-                    const newNotice: Notice = new Notice(`BRAT\n${msg}\n(Click for info)`, 30000);
-                    //@ts-ignore
-                    newNotice.noticeEl.oncontextmenu = async () => { window.open(`https://github.com/${repositoryPath}/releases/tag/${primaryManifest.version}`) };
+                    ToastMessage(this.plugin, msg, 30, async () => { window.open(`https://github.com/${repositoryPath}/releases/tag/${primaryManifest.version}`) } );
                 }
             } else
-                if (reportIfNotUpdted) new Notice(`BRAT\nNo update available for ${repositoryPath}`, 3000);
+                if (reportIfNotUpdted) ToastMessage(this.plugin, `No update available for ${repositoryPath}`, 3);
         }
         return true;
     }
@@ -227,7 +224,7 @@ export default class BetaPlugins {
     async updatePlugin(repositoryPath: string, onlyCheckDontUpdate = false, reportIfNotUpdted = false): Promise<boolean> {
         const result = await this.addPlugin(repositoryPath, true, onlyCheckDontUpdate, reportIfNotUpdted);
         if (result === false && onlyCheckDontUpdate === false)
-            new Notice(`BRAT\n${repositoryPath}\nUpdate of plugin failed.`)
+        ToastMessage(this.plugin, `${repositoryPath}\nUpdate of plugin failed.`)
         return result;
     }
 
@@ -249,7 +246,7 @@ export default class BetaPlugins {
         this.plugin.log(msg2, true);
         if (showInfo) {
             newNotice.hide();
-            new Notice(`BRAT\n${msg2}`, 10000);
+            ToastMessage(this.plugin, msg2, 10);
         }
     }
 
