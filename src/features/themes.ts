@@ -120,7 +120,7 @@ export const themeseCheckAndUpdates = async (plugin: ThePlugin, showInfo:boolean
     let newNotice: Notice;
     const msg1 = `Checking for beta theme updates STARTED`;
     plugin.log(msg1, true);
-    if (showInfo) newNotice = new Notice(`BRAT\n${msg1}`, 30000);
+    if (showInfo && plugin.settings.notificationsEnabled) newNotice = new Notice(`BRAT\n${msg1}`, 30000);
     for(const t of plugin.settings.themesList) {
         const lastUpdateOnline = await grabLastCommitDateForAFile(t.repo, "obsidian.css");
         if(lastUpdateOnline!==t.lastUpdate) 
@@ -129,8 +129,8 @@ export const themeseCheckAndUpdates = async (plugin: ThePlugin, showInfo:boolean
     const msg2 = `Checking for beta theme updates COMPLETED`;
     plugin.log(msg2, true);
     if (showInfo) {
-        newNotice.hide();
-        ToastMessage(plugin, `${msg2}`);
+        if(plugin.settings.notificationsEnabled) newNotice.hide();
+        ToastMessage(plugin, msg2);
     }
 } 
 

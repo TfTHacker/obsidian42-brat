@@ -16,6 +16,7 @@ export interface Settings {
     loggingPath: string;
     loggingVerboseEnabled: boolean;
     debuggingMode: boolean;
+    notificationsEnabled: boolean;
 }
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -27,7 +28,8 @@ export const DEFAULT_SETTINGS: Settings = {
     loggingEnabled: false,
     loggingPath: "BRAT-log",
     loggingVerboseEnabled: false,
-    debuggingMode: true
+    debuggingMode: true,
+    notificationsEnabled: true
 }
 
 /**

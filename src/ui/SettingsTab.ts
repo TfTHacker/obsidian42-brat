@@ -128,6 +128,17 @@ export class BratSettingsTab extends PluginSettingTab {
 		containerEl.createEl("h2", { text: "Monitoring" });
 
 		new Setting(containerEl)
+			.setName('Enable Notifications')
+			.setDesc('BRAT will provide popup notifications for its various activities. Turn this off means  no notifications from BRAT.')
+			.addToggle((cb: ToggleComponent) => {
+				cb.setValue(this.plugin.settings.notificationsEnabled);
+				cb.onChange(async (value: boolean) => {
+					this.plugin.settings.notificationsEnabled = value;
+					await this.plugin.saveSettings();
+				});
+			})
+
+		new Setting(containerEl)
 			.setName('Enable Logging')
 			.setDesc('Plugin updates will be logged to a file in the log file.')
 			.addToggle((cb: ToggleComponent) => {
