@@ -4,6 +4,7 @@ import { GenericFuzzySuggester, SuggesterItem } from "../ui/GenericFuzzySuggeste
 import { updateBetaThemeLastUpdateDate } from "../ui/settings";
 import { grabCommmunityThemeObsidianCss, grabCommmunityThemesList, grabLastCommitDateForAFile } from "./githubUtils";
 import { ToastMessage } from "../utils/notifications";
+import { isConnectedToInternet } from "../utils/internetconnection";
 
 /**
  * Get the path to the themes folder fo rthis vault
@@ -117,6 +118,10 @@ export const themesDelete = async (plugin: ThePlugin, cssGithubRepository: strin
  * @return  {Promise<void>}            
  */
 export const themeseCheckAndUpdates = async (plugin: ThePlugin, showInfo:boolean): Promise<void> => {
+    if(await isConnectedToInternet()===false) { 
+        console.log("BRAT: No internet detected.") 
+        return;
+    }
     let newNotice: Notice;
     const msg1 = `Checking for beta theme updates STARTED`;
     plugin.log(msg1, true);

@@ -4,6 +4,8 @@ import { grabManifestJsonFromRepository, grabReleaseFileFromRepository } from ".
 import { normalizePath, PluginManifest, Notice } from "obsidian";
 import { addBetaPluginToList } from "../ui/settings";
 import { ToastMessage } from "../utils/notifications";
+import { isConnectedToInternet } from "../utils/internetconnection";
+import { Console } from "console";
 
 /**
  * all the files needed for a plugin based on the release files are hre
@@ -229,12 +231,16 @@ export default class BetaPlugins {
     }
 
     /**
-     * walks through the list  of plugins and performs anupdate
+     * walks through the list  of plugins and performs an update
      *
      * @param   {boolean}           showInfo  should this with a started/completed message - useful when ran from CP
      * @return  {Promise<void>}              
      */
     async checkForUpdatesAndInstallUpdates(showInfo = false, onlyCheckDontUpdate = false): Promise<void> {
+        if(await isConnectedToInternet()===false) { 
+            console.log("BRAT: No internet detected.") 
+            return;
+        }
         let newNotice: Notice;
         const msg1 = `Checking for plugin updates STARTED`;
         this.plugin.log(msg1, true);
