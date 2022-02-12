@@ -15,11 +15,11 @@
     "url": "git://github.com/TfTHacker/obsidian42-brat.git"
   },
   "devDependencies": {
-    "@types/node": "^17.0.15",
-    "@typescript-eslint/eslint-plugin": "^5.3.0",
-    "@typescript-eslint/parser": "^5.3.0",
-    "esbuild": "0.14.18",
-    "eslint": "^8.8.0",
+    "@types/node": "^17.0.17",
+    "@typescript-eslint/eslint-plugin": "^5.11.0",
+    "@typescript-eslint/parser": "^5.11.0",
+    "esbuild": "0.14.3",
+    "eslint": "^8.9.0",
     "obsidian": "^0.13.21",
     "tslib": "^2.3.1",
     "typescript": "^4.4.4"
