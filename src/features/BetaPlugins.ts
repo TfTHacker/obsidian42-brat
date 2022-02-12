@@ -5,7 +5,6 @@ import { normalizePath, PluginManifest, Notice } from "obsidian";
 import { addBetaPluginToList } from "../ui/settings";
 import { ToastMessage } from "../utils/notifications";
 import { isConnectedToInternet } from "../utils/internetconnection";
-import { Console } from "console";
 
 /**
  * all the files needed for a plugin based on the release files are hre
