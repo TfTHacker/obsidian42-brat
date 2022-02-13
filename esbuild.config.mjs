@@ -15,6 +15,7 @@ esbuild.build({
     logLevel: "info",
     sourcemap: prod ? false : "inline",
     treeShaking: true,
+    minify: true,
     outfile: "build/main.js",
 }).catch(() => process.exit(1));
 
