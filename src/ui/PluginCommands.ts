@@ -95,7 +95,7 @@ export default class PluginCommands {
             }
         },
         {
-            id: "BRAT-openGitHubRepository",
+            id: "BRAT-openGitHubZRepository",
             icon: "BratIcon",
             name: "Plugins: Open the GitHub repository for a plugin",
             showInRibbon: true,
@@ -114,7 +114,7 @@ export default class PluginCommands {
         {
             id: "BRAT-openGitHubRepoTheme",
             icon: "BratIcon",
-            name: "Themes: Open the GitHub repository for a theme ",
+            name: "Themes: Open the GitHub repository for a theme (appearance)",
             showInRibbon: true,
             callback: async () => {
                 const communityTheme = await grabCommmunityThemesList();
