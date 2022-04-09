@@ -28,5 +28,5 @@ This is the info you need: The GitHub user name for the developer followed by th
 
 `TfTHacker/obsidian42-brat`
 
-That is all you need. Once you have the repository path, open the command palette and find the "Add a beta plugin for testing" command and then you will be prompted for the repository path. Once you add it, this will install the beta plugin into your vault.
+That is all you need. Once you have the repository path, open the command palette and find the "Add a beta plugin for testing" (or "Add a beta plugin with frozen version for testing") command and then you will be prompted for the repository path. Once you add it, this will install the beta plugin into your vault.
 

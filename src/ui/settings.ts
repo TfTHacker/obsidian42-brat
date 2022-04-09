@@ -6,8 +6,14 @@ export interface ThemeInforamtion {
     lastUpdate: string;
 }
 
+export interface PluginFrozenVersion {
+    repo: string;
+    version: string;
+}
+
 export interface Settings {
     pluginList: string[];
+    pluginSubListFrozenVersion: PluginFrozenVersion[],
     themesList: ThemeInforamtion[];
     updateAtStartup: boolean;
     updateThemesAtStartup:  boolean;
@@ -21,6 +27,7 @@ export interface Settings {
 
 export const DEFAULT_SETTINGS: Settings = {
     pluginList: [],
+    pluginSubListFrozenVersion: [],
     themesList: [],
     updateAtStartup: false,
     updateThemesAtStartup: false,
@@ -37,12 +44,27 @@ export const DEFAULT_SETTINGS: Settings = {
  *
  * @param   {ThePlugin}      plugin         
  * @param   {string<void>}   repositoryPath  path to the GitHub repository
+ * @param   {string}         specifyVersion  if the plugin needs to stay at the frozen version, we need to also record the version
  *
  * @return  {Promise<void>}                  
  */
-export async function addBetaPluginToList(plugin: ThePlugin, repositoryPath: string): Promise<void> {
+export async function addBetaPluginToList(plugin: ThePlugin, repositoryPath: string, specifyVersion = ""): Promise<void> {
+    let save = false;
     if (!plugin.settings.pluginList.contains(repositoryPath)) {
         plugin.settings.pluginList.unshift(repositoryPath);
+        save = true;
+    }
+    if (
+        specifyVersion !== "" 
+        && (plugin.settings.pluginSubListFrozenVersion.filter(x => x.repo === repositoryPath).length === 0)
+    ) {
+        plugin.settings.pluginSubListFrozenVersion.unshift({
+            repo: repositoryPath,
+            version: specifyVersion
+        });
+        save = true;
+    }
+    if (save) {
         plugin.saveSettings();
     }
 }

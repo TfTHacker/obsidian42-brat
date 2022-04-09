@@ -13,29 +13,42 @@ export default class PluginCommands {
             icon: "BratIcon",
             name: "Plugins: Add a beta plugin for testing",
             showInRibbon: true,
-            callback: async () => { await this.plugin.betaPlugins.displayAddNewPluginModal() }
+            callback: async () => { await this.plugin.betaPlugins.displayAddNewPluginModal(false, false) }
+        },
+        {
+            id: "BRAT-AddBetaPluginWithFrozenVersion",
+            icon: "BratIcon",
+            name: "Plugins: Add a beta plugin with frozen version for testing",
+            showInRibbon: true,
+            callback: async () => { await this.plugin.betaPlugins.displayAddNewPluginModal(false, true) }
         },
         {
             id: "BRAT-checkForUpdatesAndUpdate",
             icon: "BratIcon",
-            name: "Plugins: Check for updates to all beta plugins and UPDATE",
+            name: "Plugins: Check for updates to all beta plugins w/o frozen version and UPDATE",
             showInRibbon: true,
             callback: async () => { await this.plugin.betaPlugins.checkForUpdatesAndInstallUpdates(true, false) }
         },
         {
             id: "BRAT-checkForUpdatesAndDontUpdate",
             icon: "BratIcon",
-            name: "Plugins: Only check for updates to beta plugins, but don't Update",
+            name: "Plugins: Only check for updates to beta plugins w/o frozen version, but don't Update",
             showInRibbon: true,
             callback: async () => { await this.plugin.betaPlugins.checkForUpdatesAndInstallUpdates(true, true) }
         },
         {
             id: "BRAT-updateOnePlugin",
             icon: "BratIcon",
-            name: "Plugins: Choose a single plugin to update",
+            name: "Plugins: Choose a single plugin w/o frozen version to update",
             showInRibbon: true,
             callback: async () => {
-                const pluginList: SuggesterItem[] = Object.values(this.plugin.settings.pluginList).map((m) => { return { display: m, info: m } });
+                const pluginSubListFrozenVersionNames = 
+                    new Set(this.plugin.settings.pluginSubListFrozenVersion.map(f => f.repo));
+                const pluginList: SuggesterItem[] = 
+                    Object
+                        .values(this.plugin.settings.pluginList)
+                        .filter((f) => !pluginSubListFrozenVersionNames.has(f))
+                        .map((m) => { return { display: m, info: m } });
                 const gfs = new GenericFuzzySuggester(this.plugin);
                 gfs.setSuggesterData(pluginList);
                 await gfs.display(async (results) => {
