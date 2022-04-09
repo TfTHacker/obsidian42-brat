@@ -12,6 +12,7 @@ export default class AddNewPluginModal extends Modal {
     betaPlugins: BetaPlugins;
     address: string;
     openSettingsTabAfterwards: boolean;
+    version: string;
 
     constructor(plugin: ThePlugin, betaPlugins: BetaPlugins, openSettingsTabAfterwards = false) {
         super(plugin.app);
@@ -19,6 +20,7 @@ export default class AddNewPluginModal extends Modal {
         this.betaPlugins = betaPlugins;
         this.address = "";
         this.openSettingsTabAfterwards = openSettingsTabAfterwards;
+        this.version = "";
     }
 
     async submitForm(): Promise<void> {
@@ -28,7 +30,7 @@ export default class AddNewPluginModal extends Modal {
             ToastMessage(this.plugin, `This plugin is already in the list for beta testing`, 10);
             return;
         }
-        const result = await this.betaPlugins.addPlugin(scrubbedAddress);
+        const result = await this.betaPlugins.addPlugin(scrubbedAddress, false, false, false, this.version);
         if (result) {
             this.close();
         }
@@ -39,7 +41,7 @@ export default class AddNewPluginModal extends Modal {
         this.contentEl.createEl('form', {}, (formEl) => {
             new Setting(formEl)
                 .addText((textEl) => {
-                    textEl.setPlaceholder('Repository (example: TfTHacker/obsidian-brat');
+                    textEl.setPlaceholder('Repository (example: TfTHacker/obsidian-brat)');
                     textEl.onChange((value) => {
                         this.address = value.trim();
                     });
@@ -54,6 +56,18 @@ export default class AddNewPluginModal extends Modal {
                         const title = document.querySelector(".setting-item-info");
                         if (title) title.remove();
                         textEl.inputEl.focus()
+                    }, 10);
+                });
+            new Setting(formEl)
+                .addText((textEl) => {
+                    textEl.setPlaceholder('Specify Version If Needed (example: 1.0.0), Leave It Empty If Not Needed');
+                    textEl.onChange((value) => {
+                        this.version = value.trim();
+                    });
+                    textEl.inputEl.style.width = "100%";
+                    window.setTimeout(() => {
+                        const title = document.querySelector(".setting-item-info");
+                        if (title) title.remove();
                     }, 10);
                 });
 
