@@ -70,14 +70,20 @@ export default class BetaPlugins {
      * @param   {string}                        repositoryPath  path to the GitHub repository
      * @param   {PluginManifest<ReleaseFiles>}  manifest        manifest file
      * @param   {boolean}                       getManifest     grab the remote manifest file
+     * @param   {string}                        specifyVersion  grab the specified version if set
      *
      * @return  {Promise<ReleaseFiles>}                         all relase files as strings based on the ReleaseFiles interaface
      */
-    async getAllReleaseFiles(repositoryPath: string, manifest: PluginManifest, getManifest: boolean): Promise<ReleaseFiles> {
+    async getAllReleaseFiles(repositoryPath: string, manifest: PluginManifest, getManifest: boolean, specifyVersion = ""): Promise<ReleaseFiles> {
+        const version = specifyVersion === "" ? manifest.version : specifyVersion;
+
+        // if we have version specified, we always want to get the remote manifest file.
+        const reallyGetManifestOrNot = getManifest || (specifyVersion !== "");
+
         return {
-            mainJs: await grabReleaseFileFromRepository(repositoryPath, manifest.version, "main.js"),
-            manifest: getManifest ? await grabReleaseFileFromRepository(repositoryPath, manifest.version, "manifest.json") : null,
-            styles: await grabReleaseFileFromRepository(repositoryPath, manifest.version, "styles.css")
+            mainJs: await grabReleaseFileFromRepository(repositoryPath, version, "main.js"),
+            manifest: reallyGetManifestOrNot ? await grabReleaseFileFromRepository(repositoryPath, version, "manifest.json") : null,
+            styles: await grabReleaseFileFromRepository(repositoryPath, version, "styles.css")
         }
     }
 
@@ -110,10 +116,11 @@ export default class BetaPlugins {
      * @param   {boolean}             updatePluginFiles  true if this is just an update not an install
      * @param   {boolean}             seeIfUpdatedOnly   if true, and updatePluginFiles true, will just check for updates, but not do the update. will report to user that there is a new plugin
      * @param   {boolean}             reportIfNotUpdted  if true, report if an update has not succed
+     * @param   {string}              specifyVersion     if not empty, need to install a specified version instead of the value in manifest{-beta}.json
      *
      * @return  {Promise<boolean>}                       true if succeeds
      */
-    async addPlugin(repositoryPath: string, updatePluginFiles = false, seeIfUpdatedOnly = false, reportIfNotUpdted = false): Promise<boolean> {
+    async addPlugin(repositoryPath: string, updatePluginFiles = false, seeIfUpdatedOnly = false, reportIfNotUpdted = false, specifyVersion = ""): Promise<boolean> {
         const noticeTimeout = 10;
         let primaryManifest = await this.validateRepository(repositoryPath, true, false); // attempt to get manifest-beta.json
         const usingBetaManifest: boolean = primaryManifest ? true : false;
@@ -135,7 +142,7 @@ export default class BetaPlugins {
         }
 
         const getRelease = async () => {
-            const rFiles = await this.getAllReleaseFiles(repositoryPath, primaryManifest, usingBetaManifest);
+            const rFiles = await this.getAllReleaseFiles(repositoryPath, primaryManifest, usingBetaManifest, specifyVersion);
             if (usingBetaManifest || rFiles.manifest === null)  //if beta, use that manifest, or if there is no manifest in release, use the primaryManifest
                 rFiles.manifest = JSON.stringify(primaryManifest);
 
@@ -155,7 +162,8 @@ export default class BetaPlugins {
             await addBetaPluginToList(this.plugin, repositoryPath);
             //@ts-ignore
             await this.plugin.app.plugins.loadManifests();
-            const msg = `${repositoryPath}\nThe plugin has been registered with BRAT. You may still need to enable it the Community Plugin List.`;
+            const versionText = specifyVersion === "" ? "" : ` (version: ${specifyVersion})`;
+            const msg = `${repositoryPath}${versionText}\nThe plugin has been registered with BRAT. You may still need to enable it the Community Plugin List.`;
             this.plugin.log(msg, true);
             ToastMessage(this.plugin, msg, noticeTimeout);
         } else {
