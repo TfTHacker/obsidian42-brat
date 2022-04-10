@@ -28,10 +28,11 @@ export default class BetaPlugins {
     /**
      * opens the AddNewPluginModal to get info for  a new beta plugin
      * @param   {boolean}   openSettingsTabAfterwards will open settings screen afterwards. Used when this command is called from settings tab
+     * @param   {boolean}   useFrozenVersion          install the plugin using frozen version.
      * @return  {<Promise><void>}
      */
-    async displayAddNewPluginModal(openSettingsTabAfterwards = false): Promise<void> {
-        const newPlugin = new AddNewPluginModal(this.plugin, this, openSettingsTabAfterwards);
+    async displayAddNewPluginModal(openSettingsTabAfterwards = false, useFrozenVersion = false): Promise<void> {
+        const newPlugin = new AddNewPluginModal(this.plugin, this, openSettingsTabAfterwards, useFrozenVersion);
         newPlugin.open();
     }
 
@@ -70,14 +71,20 @@ export default class BetaPlugins {
      * @param   {string}                        repositoryPath  path to the GitHub repository
      * @param   {PluginManifest<ReleaseFiles>}  manifest        manifest file
      * @param   {boolean}                       getManifest     grab the remote manifest file
+     * @param   {string}                        specifyVersion  grab the specified version if set
      *
      * @return  {Promise<ReleaseFiles>}                         all relase files as strings based on the ReleaseFiles interaface
      */
-    async getAllReleaseFiles(repositoryPath: string, manifest: PluginManifest, getManifest: boolean): Promise<ReleaseFiles> {
+    async getAllReleaseFiles(repositoryPath: string, manifest: PluginManifest, getManifest: boolean, specifyVersion = ""): Promise<ReleaseFiles> {
+        const version = specifyVersion === "" ? manifest.version : specifyVersion;
+
+        // if we have version specified, we always want to get the remote manifest file.
+        const reallyGetManifestOrNot = getManifest || (specifyVersion !== "");
+
         return {
-            mainJs: await grabReleaseFileFromRepository(repositoryPath, manifest.version, "main.js"),
-            manifest: getManifest ? await grabReleaseFileFromRepository(repositoryPath, manifest.version, "manifest.json") : null,
-            styles: await grabReleaseFileFromRepository(repositoryPath, manifest.version, "styles.css")
+            mainJs: await grabReleaseFileFromRepository(repositoryPath, version, "main.js"),
+            manifest: reallyGetManifestOrNot ? await grabReleaseFileFromRepository(repositoryPath, version, "manifest.json") : null,
+            styles: await grabReleaseFileFromRepository(repositoryPath, version, "styles.css")
         }
     }
 
@@ -110,10 +117,11 @@ export default class BetaPlugins {
      * @param   {boolean}             updatePluginFiles  true if this is just an update not an install
      * @param   {boolean}             seeIfUpdatedOnly   if true, and updatePluginFiles true, will just check for updates, but not do the update. will report to user that there is a new plugin
      * @param   {boolean}             reportIfNotUpdted  if true, report if an update has not succed
+     * @param   {string}              specifyVersion     if not empty, need to install a specified version instead of the value in manifest{-beta}.json
      *
      * @return  {Promise<boolean>}                       true if succeeds
      */
-    async addPlugin(repositoryPath: string, updatePluginFiles = false, seeIfUpdatedOnly = false, reportIfNotUpdted = false): Promise<boolean> {
+    async addPlugin(repositoryPath: string, updatePluginFiles = false, seeIfUpdatedOnly = false, reportIfNotUpdted = false, specifyVersion = ""): Promise<boolean> {
         const noticeTimeout = 10;
         let primaryManifest = await this.validateRepository(repositoryPath, true, false); // attempt to get manifest-beta.json
         const usingBetaManifest: boolean = primaryManifest ? true : false;
@@ -135,7 +143,7 @@ export default class BetaPlugins {
         }
 
         const getRelease = async () => {
-            const rFiles = await this.getAllReleaseFiles(repositoryPath, primaryManifest, usingBetaManifest);
+            const rFiles = await this.getAllReleaseFiles(repositoryPath, primaryManifest, usingBetaManifest, specifyVersion);
             if (usingBetaManifest || rFiles.manifest === null)  //if beta, use that manifest, or if there is no manifest in release, use the primaryManifest
                 rFiles.manifest = JSON.stringify(primaryManifest);
 
@@ -152,26 +160,38 @@ export default class BetaPlugins {
             const releaseFiles = await getRelease();
             if (releaseFiles === null) return;
             await this.writeReleaseFilesToPluginFolder(primaryManifest.id, releaseFiles);
-            await addBetaPluginToList(this.plugin, repositoryPath);
+            await addBetaPluginToList(this.plugin, repositoryPath, specifyVersion);
             //@ts-ignore
             await this.plugin.app.plugins.loadManifests();
-            const msg = `${repositoryPath}\nThe plugin has been registered with BRAT. You may still need to enable it the Community Plugin List.`;
+            const versionText = specifyVersion === "" ? "" : ` (version: ${specifyVersion})`;
+            const msg = `${repositoryPath}${versionText}\nThe plugin has been registered with BRAT. You may still need to enable it the Community Plugin List.`;
             this.plugin.log(msg, true);
             ToastMessage(this.plugin, msg, noticeTimeout);
         } else {
             // test if the plugin needs to be updated
+            // if a specified version is provided, then we shall skip the update
             const pluginTargetFolderPath = this.plugin.app.vault.configDir + "/plugins/" + primaryManifest.id + "/";
             let localManifestContents = null;
             try {
                 localManifestContents = await this.plugin.app.vault.adapter.read(pluginTargetFolderPath + "manifest.json")
             } catch (e) {
                 if (e.errno === -4058) { // file does not exist, try installing the plugin
-                    await this.addPlugin(repositoryPath, false, usingBetaManifest);
+                    await this.addPlugin(repositoryPath, false, usingBetaManifest, false, specifyVersion);
                     return true; // even though failed, return true since install will be attempted
                 }
                 else
                     console.log("BRAT - Local Manifest Load", primaryManifest.id, JSON.stringify(e, null, 2));
             }
+
+            if (
+                specifyVersion !== "" 
+                || this.plugin.settings.pluginSubListFrozenVersion.map(x=>x.repo).includes(repositoryPath)
+            ) {
+                // skip the frozen version plugin
+                ToastMessage(this.plugin, `The version of ${repositoryPath} is frozen, not updating.`, 3);
+                return false;
+            }
+
             const localManifestJSON = await JSON.parse(localManifestContents);
             if (localManifestJSON.version !== primaryManifest.version) { //manifest files are not the same, do an update
                 const releaseFiles = await getRelease();
@@ -230,7 +250,7 @@ export default class BetaPlugins {
     }
 
     /**
-     * walks through the list  of plugins and performs an update
+     * walks through the list of plugins without frozen version and performs an update
      *
      * @param   {boolean}           showInfo  should this with a started/completed message - useful when ran from CP
      * @return  {Promise<void>}              
@@ -244,7 +264,12 @@ export default class BetaPlugins {
         const msg1 = `Checking for plugin updates STARTED`;
         this.plugin.log(msg1, true);
         if (showInfo && this.plugin.settings.notificationsEnabled) newNotice = new Notice(`BRAT\n${msg1}`, 30000);
+        const pluginSubListFrozenVersionNames = 
+            new Set(this.plugin.settings.pluginSubListFrozenVersion.map(f => f.repo));
         for (const bp of this.plugin.settings.pluginList) {
+            if (pluginSubListFrozenVersionNames.has(bp)) {
+                continue;
+            }
             await this.updatePlugin(bp, onlyCheckDontUpdate);
         }
         const msg2 = `Checking for plugin updates COMPLETED`;
@@ -266,6 +291,10 @@ export default class BetaPlugins {
         const msg = `Removed ${repositoryPath} from BRAT plugin list`;
         this.plugin.log(msg, true);
         this.plugin.settings.pluginList = this.plugin.settings.pluginList.filter((b) => b != repositoryPath);
+        this.plugin.settings.pluginSubListFrozenVersion = 
+            this.plugin.settings.pluginSubListFrozenVersion.filter(
+                (b) => b.repo != repositoryPath
+            );
         this.plugin.saveSettings();
     }
 

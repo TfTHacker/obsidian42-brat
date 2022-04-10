@@ -40,7 +40,7 @@ Simply add the GitHub repository path for the beta Obsidian plugin to the list f
 1. Install BRAT from the Community Plugins in Obsidian 
 2. Get the link to the GitHub repository you want to test. The plugin developer can provide you with this link. 
     > It will look something like: GitMurf/my-plugin or https://github.com/GitMurf/my-plugin
-3. Open the command palette and run the command **BRAT: Add a beta plugin for testing**
+3. Open the command palette and run the command **BRAT: Add a beta plugin for testing** (If you want the plugin version to be frozen, use the command **BRAT: Add a beta plugin with frozen version for testing**.)
 4. Using the link from step 2, copy that into the modal that opens up
 5. Click on **Add Plugin** -- wait a few seconds and BRAT will tell you what is going on
 6. After BRAT confirms the installation, in Settings go to the **Community plugins ** tab.

@@ -12,13 +12,17 @@ export default class AddNewPluginModal extends Modal {
     betaPlugins: BetaPlugins;
     address: string;
     openSettingsTabAfterwards: boolean;
+    readonly useFrozenVersion: boolean;
+    version: string;
 
-    constructor(plugin: ThePlugin, betaPlugins: BetaPlugins, openSettingsTabAfterwards = false) {
+    constructor(plugin: ThePlugin, betaPlugins: BetaPlugins, openSettingsTabAfterwards = false, useFrozenVersion = false) {
         super(plugin.app);
         this.plugin = plugin;
         this.betaPlugins = betaPlugins;
         this.address = "";
         this.openSettingsTabAfterwards = openSettingsTabAfterwards;
+        this.useFrozenVersion = useFrozenVersion;
+        this.version = "";
     }
 
     async submitForm(): Promise<void> {
@@ -28,7 +32,7 @@ export default class AddNewPluginModal extends Modal {
             ToastMessage(this.plugin, `This plugin is already in the list for beta testing`, 10);
             return;
         }
-        const result = await this.betaPlugins.addPlugin(scrubbedAddress);
+        const result = await this.betaPlugins.addPlugin(scrubbedAddress, false, false, false, this.version);
         if (result) {
             this.close();
         }
@@ -39,14 +43,19 @@ export default class AddNewPluginModal extends Modal {
         this.contentEl.createEl('form', {}, (formEl) => {
             new Setting(formEl)
                 .addText((textEl) => {
-                    textEl.setPlaceholder('Repository (example: TfTHacker/obsidian-brat');
+                    textEl.setPlaceholder('Repository (example: TfTHacker/obsidian-brat)');
                     textEl.onChange((value) => {
                         this.address = value.trim();
                     });
                     textEl.inputEl.addEventListener('keydown', async (e: KeyboardEvent) => {
                         if (e.key === 'Enter' && this.address !== ' ') {
-                            e.preventDefault();
-                            await this.submitForm();
+                            if (
+                                (this.useFrozenVersion && this.version !== "") 
+                                || (!this.useFrozenVersion)
+                            ) {
+                                e.preventDefault();
+                                await this.submitForm();
+                            }
                         }
                     });
                     textEl.inputEl.style.width = "100%";
@@ -56,6 +65,21 @@ export default class AddNewPluginModal extends Modal {
                         textEl.inputEl.focus()
                     }, 10);
                 });
+
+            if (this.useFrozenVersion) {
+                new Setting(formEl)
+                    .addText((textEl) => {
+                        textEl.setPlaceholder('Specify The Version (example: 1.0.0)');
+                        textEl.onChange((value) => {
+                            this.version = value.trim();
+                        });
+                        textEl.inputEl.style.width = "100%";
+                        window.setTimeout(() => {
+                            const title = document.querySelector(".setting-item-info");
+                            if (title) title.remove();
+                        }, 10);
+                    });
+            }
 
             formEl.createDiv('modal-button-container', (buttonContainerEl) => {
                 buttonContainerEl
@@ -71,7 +95,14 @@ export default class AddNewPluginModal extends Modal {
             // invoked when button is clicked. 
             formEl.addEventListener('submit', async (e: Event) => {
                 e.preventDefault();
-                if (this.address !== '') await this.submitForm();
+                if (this.address !== '') {
+                    if (
+                        (this.useFrozenVersion && this.version !== "") 
+                        || (!this.useFrozenVersion)
+                    ) {
+                        await this.submitForm();
+                    }
+                }
             });
         });
     }
