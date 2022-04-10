@@ -69,7 +69,7 @@ export default class AddNewPluginModal extends Modal {
             if (this.useFrozenVersion) {
                 new Setting(formEl)
                     .addText((textEl) => {
-                        textEl.setPlaceholder('Specify The Version (example: 1.0.0)');
+                        textEl.setPlaceholder('Specify the release version tag (example: 1.0.0)');
                         textEl.onChange((value) => {
                             this.version = value.trim();
                         });

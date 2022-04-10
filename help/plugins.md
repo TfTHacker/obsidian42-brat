@@ -5,6 +5,9 @@ Also, in the settings tab for BRAT, you can configure that at startup of Obsidia
 
 Please note, it might take 5 to 15 minutes for an updated beta plugin to update. This has to do with how GitHub caches information. So, if the developer tells you an update is available, you might need to wait a brief period of time before check updates works.
 
+## Frozen version based on a release tag
+BRAT will monitor and update plugins as they are updated in their GitHub repositories. However, if you want to freeze the version of a plugin, you can do so by using the command "BRAT: Add a beta plugin with frozen version based on a release tag". This will install the plugin with the version you specify, but not update it when other plugins are updated.
+
 ## See if there are upates, but don't update them
 The command palette command "Only check for updates to beta plugins, but don't Update" will look for updates to beta plugins, but will not do any updates.
 

@@ -19,7 +19,7 @@ export class BratSettingsTab extends PluginSettingTab {
 
 		new Setting(containerEl)
 			.setName('Auto-update plugins at startup')
-			.setDesc('If enabled all beta plugins will be checked for updates each time Obsidian starts.')
+			.setDesc('If enabled all beta plugins will be checked for updates each time Obsidian starts. Note: this does not update frozen version plugins.')
 			.addToggle((cb: ToggleComponent) => {
 				cb.setValue(this.plugin.settings.updateAtStartup);
 				cb.onChange(async (value: boolean) => {
@@ -57,7 +57,7 @@ export class BratSettingsTab extends PluginSettingTab {
 
 		containerEl.createEl("hr");
 		containerEl.createEl("h2", { text: "Beta Plugin List" });
-		containerEl.createEl("div", { text: `The following is a list of beta plugins added via the command palette "Add a beta plugin for testing" or "Add a beta plugin with frozen version for testing". ` });
+		containerEl.createEl("div", { text: `The following is a list of beta plugins added via the command palette "Add a beta plugin for testing" or "Add a beta plugin with frozen version for testing". A frozen version is a specific release of a plugin based on its releease tag. ` });
 		containerEl.createEl("p");
 		containerEl.createEl("div", { text: `Click the x button next to a plugin to remove it from the list.` });
 		containerEl.createEl("p");
