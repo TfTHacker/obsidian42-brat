@@ -86,7 +86,7 @@ export default class PluginCommands {
                 gfs.setSuggesterData(pluginList);
                 await gfs.display(async (results) => {
                     this.plugin.log(`${results.display} plugin disabled`, false);
-                    console.log(results.info)
+                    if(this.plugin.settings.debuggingMode) console.log(results.info)
                     // @ts-ignore
                     await this.plugin.app.plugins.disablePluginAndSave(results.info);
                 });
@@ -114,7 +114,7 @@ export default class PluginCommands {
             name: "Plugins: Open the GitHub repository for a plugin",
             showInRibbon: true,
             callback: async () => {
-                const communityPlugins = await grabCommmunityPluginList();
+                const communityPlugins = await grabCommmunityPluginList(this.plugin.settings.debuggingMode);
                 const communityPluginList: SuggesterItem[] = Object.values(communityPlugins).map((p) => { return { display: `Plugin: ${p.name}  (${p.repo})`, info: p.repo } });
                 const bratList: SuggesterItem[] = Object.values(this.plugin.settings.pluginList).map((p) => { return { display: "BRAT: " + p, info: p } });
                 communityPluginList.forEach(si => bratList.push(si));
@@ -131,7 +131,7 @@ export default class PluginCommands {
             name: "Themes: Open the GitHub repository for a theme (appearance)",
             showInRibbon: true,
             callback: async () => {
-                const communityTheme = await grabCommmunityThemesList();
+                const communityTheme = await grabCommmunityThemesList(this.plugin.settings.debuggingMode);
                 const communityThemeList: SuggesterItem[] = Object.values(communityTheme).map((p) => { return { display: `Theme: ${p.name}  (${p.repo})`, info: p.repo } });
                 const gfs = new GenericFuzzySuggester(this.plugin);
                 gfs.setSuggesterData(communityThemeList);

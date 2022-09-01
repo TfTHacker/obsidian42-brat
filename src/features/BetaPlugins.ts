@@ -82,9 +82,9 @@ export default class BetaPlugins {
         const reallyGetManifestOrNot = getManifest || (specifyVersion !== "");
 
         return {
-            mainJs: await grabReleaseFileFromRepository(repositoryPath, version, "main.js"),
-            manifest: reallyGetManifestOrNot ? await grabReleaseFileFromRepository(repositoryPath, version, "manifest.json") : "",
-            styles: await grabReleaseFileFromRepository(repositoryPath, version, "styles.css")
+            mainJs: await grabReleaseFileFromRepository(repositoryPath, version, "main.js", this.plugin.settings.debuggingMode),
+            manifest: reallyGetManifestOrNot ? await grabReleaseFileFromRepository(repositoryPath, version, "manifest.json", this.plugin.settings.debuggingMode) : "",
+            styles: await grabReleaseFileFromRepository(repositoryPath, version, "styles.css", this.plugin.settings.debuggingMode)
         }
     }
 
@@ -232,7 +232,10 @@ export default class BetaPlugins {
         try {
             await plugins.disablePlugin(pluginName);
             await plugins.enablePlugin(pluginName);
-        } catch (e) { console.log("reload plugin", e) }
+        } catch (e) { 
+            if(this.plugin.settings.debuggingMode)
+                console.log("reload plugin", e) 
+        }
     }
 
     /**

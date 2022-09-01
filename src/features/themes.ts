@@ -28,7 +28,7 @@ export const themesRootPath = (plugin: ThePlugin): string => {
  * @return  {Promise<boolean>}                         true for succcess
  */
 export const themeInstallTheme = async (plugin: ThePlugin, cssGithubRepository: string, cssFileName = ""): Promise<boolean> => {
-    const themeCSS = await grabCommmunityThemeObsidianCss(cssGithubRepository);
+    const themeCSS = await grabCommmunityThemeObsidianCss(cssGithubRepository, plugin.settings.debuggingMode);
     if(!themeCSS) {
         ToastMessage(plugin,"There is no obsidian.css file in the root path of this repository, so there is no theme to install.")
         return false;
@@ -69,7 +69,7 @@ export const themesSaveTheme = async (plugin: ThePlugin, cssFileName: string, cs
  * @return  {}            [return description]
  */
 export const themesInstallFromCommunityList = async (plugin: ThePlugin): Promise<void> =>{
-    const communityTheme = await grabCommmunityThemesList();
+    const communityTheme = await grabCommmunityThemesList(plugin.settings.debuggingMode);
     const communityThemeList: SuggesterItem[] = Object.values(communityTheme).map((p) => { return { display: `Theme: ${p.name}  (${p.repo})`, info: p } });
     const gfs = new GenericFuzzySuggester(plugin);
     gfs.setSuggesterData(communityThemeList);
@@ -150,7 +150,7 @@ export const themeseCheckAndUpdates = async (plugin: ThePlugin, showInfo:boolean
  * @return  {Promise<boolean>}                         true if succeeds
  */
 export const themeUpdateTheme = async (plugin: ThePlugin, cssGithubRepository: string, oldFileDate = "", newFileDate = ""): Promise<boolean> => {
-    const themeCSS = await grabCommmunityThemeObsidianCss(cssGithubRepository);
+    const themeCSS = await grabCommmunityThemeObsidianCss(cssGithubRepository, plugin.settings.debuggingMode);
     if(!themeCSS) {
         ToastMessage(plugin, "There is no obsidian.css file in the root path of the ${cssGithubRepository} repository, so this theme cannot be updated.")
         return false;
