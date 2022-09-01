@@ -37,7 +37,9 @@ export const grabManifestJsonFromRepository = async (repositoryPath: string, roo
         const response = await request({ url: manifestJsonPath });
         return (response === "404: Not Found" ? null : await JSON.parse(response));
     } catch (error) {
-        if(debugLogging) console.log(`error in grabManifestJsonFromRepository for ${manifestJsonPath}`, error);
+        if(error!="Error: Request failed, status 404" && debugLogging)  { //normal error, ignore
+            console.log(`error in grabManifestJsonFromRepository for ${manifestJsonPath}`, error);
+        }
         return null;
     }
 }
