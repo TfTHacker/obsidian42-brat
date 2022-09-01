@@ -86,8 +86,9 @@ export default class PluginCommands {
                 gfs.setSuggesterData(pluginList);
                 await gfs.display(async (results) => {
                     this.plugin.log(`${results.display} plugin disabled`, false);
+                    console.log(results.info)
                     // @ts-ignore
-                    await this.plugin.app.plugins.disablePlugin(results.info);
+                    await this.plugin.app.plugins.disablePluginAndSave(results.info);
                 });
             }
         },
@@ -103,7 +104,7 @@ export default class PluginCommands {
                 await gfs.display(async (results) => {
                     this.plugin.log(`${results.display} plugin enabled`, false);
                     // @ts-ignore
-                    await this.plugin.app.plugins.enablePlugin(results.info);
+                    await this.plugin.app.plugins.enablePluginAndSave(results.info);
                 });
             }
         },

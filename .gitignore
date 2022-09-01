@@ -8,7 +8,6 @@ package-lock.json
 # build
 build
 *.js.map
-dict-MyDict.json
 
-# obsidian
-build/data.json
+# other
+**/.DS_Store

@@ -10,9 +10,9 @@ import { isConnectedToInternet } from "../utils/internetconnection";
  * all the files needed for a plugin based on the release files are hre
  */
 interface ReleaseFiles {
-    mainJs: string;
-    manifest: string;
-    styles: string;
+    mainJs: string | null;
+    manifest: string | null;
+    styles: string | null;
 }
 
 /**
@@ -46,9 +46,9 @@ export default class BetaPlugins {
      *
      * @return  {Promise<PluginManifest>}                     the manifest file if found, or null if its incomplete
      */
-    async validateRepository(repositoryPath: string, getBetaManifest = false, reportIssues = false): Promise<PluginManifest> {
+    async validateRepository(repositoryPath: string, getBetaManifest = false, reportIssues = false): Promise<PluginManifest|null> {
         const noticeTimeout = 15;
-        const manifestJson = await grabManifestJsonFromRepository(repositoryPath, !getBetaManifest);
+        const manifestJson = await grabManifestJsonFromRepository(repositoryPath, !getBetaManifest, this.plugin.settings.debuggingMode);
         if (!manifestJson) { // this is a plugin with a manifest json, try to see if there is a beta version
             if (reportIssues) ToastMessage(this.plugin, `${repositoryPath}\nThis does not seem to be an obsidian plugin, as there is no manifest.json file.`, noticeTimeout);
             return null;
@@ -83,7 +83,7 @@ export default class BetaPlugins {
 
         return {
             mainJs: await grabReleaseFileFromRepository(repositoryPath, version, "main.js"),
-            manifest: reallyGetManifestOrNot ? await grabReleaseFileFromRepository(repositoryPath, version, "manifest.json") : null,
+            manifest: reallyGetManifestOrNot ? await grabReleaseFileFromRepository(repositoryPath, version, "manifest.json") : "",
             styles: await grabReleaseFileFromRepository(repositoryPath, version, "styles.css")
         }
     }
@@ -143,8 +143,9 @@ export default class BetaPlugins {
         }
 
         const getRelease = async () => {
-            const rFiles = await this.getAllReleaseFiles(repositoryPath, primaryManifest, usingBetaManifest, specifyVersion);
-            if (usingBetaManifest || rFiles.manifest === null)  //if beta, use that manifest, or if there is no manifest in release, use the primaryManifest
+            
+            const rFiles = await this.getAllReleaseFiles(repositoryPath, primaryManifest as PluginManifest, usingBetaManifest, specifyVersion);
+            if (usingBetaManifest || rFiles.manifest === "")  //if beta, use that manifest, or if there is no manifest in release, use the primaryManifest
                 rFiles.manifest = JSON.stringify(primaryManifest);
 
             if (rFiles.mainJs === null) {
@@ -158,7 +159,7 @@ export default class BetaPlugins {
 
         if (updatePluginFiles === false) {
             const releaseFiles = await getRelease();
-            if (releaseFiles === null) return;
+            if (releaseFiles === null) return false;
             await this.writeReleaseFilesToPluginFolder(primaryManifest.id, releaseFiles);
             await addBetaPluginToList(this.plugin, repositoryPath, specifyVersion);
             //@ts-ignore
@@ -171,11 +172,11 @@ export default class BetaPlugins {
             // test if the plugin needs to be updated
             // if a specified version is provided, then we shall skip the update
             const pluginTargetFolderPath = this.plugin.app.vault.configDir + "/plugins/" + primaryManifest.id + "/";
-            let localManifestContents = null;
+            let localManifestContents = "";
             try {
                 localManifestContents = await this.plugin.app.vault.adapter.read(pluginTargetFolderPath + "manifest.json")
             } catch (e) {
-                if (e.errno === -4058) { // file does not exist, try installing the plugin
+                if (e.errno === -4058 || e.errno === -2) { // file does not exist, try installing the plugin
                     await this.addPlugin(repositoryPath, false, usingBetaManifest, false, specifyVersion);
                     return true; // even though failed, return true since install will be attempted
                 }
@@ -195,7 +196,7 @@ export default class BetaPlugins {
             const localManifestJSON = await JSON.parse(localManifestContents);
             if (localManifestJSON.version !== primaryManifest.version) { //manifest files are not the same, do an update
                 const releaseFiles = await getRelease();
-                if (releaseFiles === null) return;
+                if (releaseFiles === null) return false;
 
                 if (seeIfUpdatedOnly) { // dont update, just report it
                     const msg = `There is an update available for ${primaryManifest.id} from version ${localManifestJSON.version} to ${primaryManifest.version}. `;
