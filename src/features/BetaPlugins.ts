@@ -142,7 +142,7 @@ export default class BetaPlugins {
             return false;
         }
 
-        const getRelease = async () => {
+        const getRelease = async () => { 
             
             const rFiles = await this.getAllReleaseFiles(repositoryPath, primaryManifest as PluginManifest, usingBetaManifest, specifyVersion);
             if (usingBetaManifest || rFiles.manifest === "")  //if beta, use that manifest, or if there is no manifest in release, use the primaryManifest
