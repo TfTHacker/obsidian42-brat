@@ -16,7 +16,8 @@ export default class ThePlugin extends Plugin {
 	commands: PluginCommands;
 
 	async onload(): Promise<void> {
-		console.log("loading Obsidian42 - BRAT");
+		console.log("loading Obsidian42 - BRAT");		
+
 		await this.loadSettings();
 		this.addSettingTab(new BratSettingsTab(this.app, this));
 

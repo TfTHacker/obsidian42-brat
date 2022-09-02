@@ -1,7 +1,7 @@
 import ThePlugin from "../main";
 import AddNewPluginModal from "../ui/AddNewPluginModal";
 import { grabManifestJsonFromRepository, grabReleaseFileFromRepository } from "./githubUtils";
-import { normalizePath, PluginManifest, Notice } from "obsidian";
+import { normalizePath, PluginManifest, Notice, requireApiVersion, apiVersion } from "obsidian";
 import { addBetaPluginToList } from "../ui/settings";
 import { ToastMessage } from "../utils/notifications";
 import { isConnectedToInternet } from "../utils/internetconnection";
@@ -10,9 +10,9 @@ import { isConnectedToInternet } from "../utils/internetconnection";
  * all the files needed for a plugin based on the release files are hre
  */
 interface ReleaseFiles {
-    mainJs: string | null;
-    manifest: string | null;
-    styles: string | null;
+    mainJs:     string | null;
+    manifest:   string | null;
+    styles:     string | null;
 }
 
 /**
@@ -66,7 +66,7 @@ export default class BetaPlugins {
     }
 
     /**
-     * Gets all the relese files based on the version number in the manifest
+     * Gets all the release files based on the version number in the manifest
      *
      * @param   {string}                        repositoryPath  path to the GitHub repository
      * @param   {PluginManifest<ReleaseFiles>}  manifest        manifest file
@@ -110,8 +110,8 @@ export default class BetaPlugins {
     }
 
     /**
-     * Primary function for adding a new beta plugin to obsidian. Also this function is use for updating
-     * existing plugins.
+     * Primary function for adding a new beta plugin to Obsidian. 
+     * Also this function is used for updating existing plugins.
      *
      * @param   {string}              repositoryPath     path to GitHub repository formated as USERNAME/repository
      * @param   {boolean}             updatePluginFiles  true if this is just an update not an install
@@ -140,6 +140,20 @@ export default class BetaPlugins {
             this.plugin.log(msg, true);
             ToastMessage(this.plugin, `${msg}`, noticeTimeout);
             return false;
+        }
+
+        // Check manifest minAppVersion and current version of Obisidan, don't load plugin if not compatible
+        if(primaryManifest.hasOwnProperty('minAppVersion')) { 
+            if( !requireApiVersion(primaryManifest.minAppVersion) ) {
+                const msg = `Plugin: ${repositoryPath}\n\n`+
+                            `The manifest${usingBetaManifest ? "-beta" : ""}.json for this plugin indicates that the Obsidian ` +
+                            `version of the app needs to be ${primaryManifest.minAppVersion}, ` +
+                            `but this installation of Obsidian is ${apiVersion}. \n\nYou will need to update your ` +
+                            `Obsidian to use this plugin or contact the plugin developer for more information.`;
+                this.plugin.log(msg, true);
+                ToastMessage(this.plugin, `${msg}`, 30);
+                return false;    
+            }
         }
 
         const getRelease = async () => { 
