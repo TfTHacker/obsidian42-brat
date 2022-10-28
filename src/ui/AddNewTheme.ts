@@ -38,7 +38,7 @@ export default class AddNewTheme extends Modal {
         this.contentEl.createEl('form', {}, (formEl) => {
             new Setting(formEl)
                 .addText((textEl) => {
-                    textEl.setPlaceholder('Repository (example: GitubUserName/repository-name');
+                    textEl.setPlaceholder('Repository (example: https://github.com/GitubUserName/repository-name');
                     textEl.onChange((value) => {
                         this.address = value.trim();
                     });
