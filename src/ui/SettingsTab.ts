@@ -2,6 +2,7 @@ import { App, PluginSettingTab, Setting, ToggleComponent, ButtonComponent } from
 import { themesDelete } from '../features/themes';
 import ThePlugin from '../main';
 import AddNewTheme from './AddNewTheme';
+import { promotionalLinks } from './Promotional';
 
 export class BratSettingsTab extends PluginSettingTab {
 	plugin: ThePlugin;
@@ -15,7 +16,11 @@ export class BratSettingsTab extends PluginSettingTab {
 		const { containerEl } = this;
 		containerEl.empty();
 
-		containerEl.createEl('h2', { text: this.plugin.appName });
+		promotionalLinks(containerEl, true)
+
+		containerEl.createEl('h1', { text: this.plugin.appName }) 
+		// .style.marginTop = "50px";
+		containerEl.createEl('h2', { text: "by TfTHacker" }) 
 
 		new Setting(containerEl)
 			.setName('Auto-update plugins at startup')

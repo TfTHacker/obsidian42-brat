@@ -15,14 +15,14 @@
     "url": "git://github.com/TfTHacker/obsidian42-brat.git"
   },
   "devDependencies": {
-    "@types/node": "^18.7.14",
-    "@typescript-eslint/eslint-plugin": "^5.36.1",
-    "@typescript-eslint/parser": "^5.36.1",
-    "esbuild": "0.15.12",
-    "eslint": "^8.23.0",
-    "obsidian": "^0.16.3",
+    "@types/node": "^18.14.11",
+    "@typescript-eslint/eslint-plugin": "^5.57.0",
+    "@typescript-eslint/parser": "^5.57.0",
+    "esbuild": "0.16.7",
+    "eslint": "^8.37.0",
+    "obsidian": "latest",
     "tslib": "^2.3.1",
-    "typescript": "4.8.4"
+    "typescript": "5.0.3"
   },
   "dependencies": {
     "obsidian-daily-notes-interface": "^0.9.4"

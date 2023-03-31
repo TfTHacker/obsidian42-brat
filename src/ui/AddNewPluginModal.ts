@@ -2,6 +2,7 @@ import { Modal, Setting } from 'obsidian';
 import BetaPlugins from '../features/BetaPlugins';
 import ThePlugin from '../main';
 import { ToastMessage } from '../utils/notifications';
+import { promotionalLinks } from './Promotional';
 import { existBetaPluginInList } from './settings';
 
 /**
@@ -41,6 +42,7 @@ export default class AddNewPluginModal extends Modal {
     onOpen(): void {
         this.contentEl.createEl('h4', { text: "Github repository for beta plugin:" });
         this.contentEl.createEl('form', {}, (formEl) => {
+            formEl.addClass("brat-modal")
             new Setting(formEl)
                 .addText((textEl) => {
                     textEl.setPlaceholder('Repository (example: https://github.com/GitubUserName/repository-name)');
@@ -59,11 +61,6 @@ export default class AddNewPluginModal extends Modal {
                         }
                     });
                     textEl.inputEl.style.width = "100%";
-                    window.setTimeout(() => {
-                        const title = document.querySelector(".setting-item-info");
-                        if (title) title.remove();
-                        textEl.inputEl.focus()
-                    }, 10);
                 });
 
             if (this.useFrozenVersion) {
@@ -74,10 +71,6 @@ export default class AddNewPluginModal extends Modal {
                             this.version = value.trim();
                         });
                         textEl.inputEl.style.width = "100%";
-                        window.setTimeout(() => {
-                            const title = document.querySelector(".setting-item-info");
-                            if (title) title.remove();
-                        }, 10);
                     });
             }
 
@@ -91,6 +84,23 @@ export default class AddNewPluginModal extends Modal {
                     text: 'Add Plugin',
                 });
             });
+
+            const newDiv = formEl.createDiv();
+            newDiv.style.borderTop = "1px solid #ccc";
+            newDiv.style.marginTop = "30px";
+            const byTfThacker = newDiv.createSpan();
+            byTfThacker.innerHTML = "BRAT by <a href='https://bit.ly/o42-twitter'>TFTHacker</a>";
+            byTfThacker.style.fontStyle = "italic";
+            newDiv.appendChild(byTfThacker);
+            promotionalLinks(newDiv, false);
+
+            window.setTimeout(() => {
+                const title = formEl.querySelectorAll(".brat-modal .setting-item-info");
+                title.forEach((titleEl) => {
+                    titleEl.remove();
+                })
+            }, 50)
+
 
             // invoked when button is clicked. 
             formEl.addEventListener('submit', async (e: Event) => {

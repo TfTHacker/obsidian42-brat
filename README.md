@@ -80,10 +80,10 @@ Simply add the GitHub repository path for the beta Obsidian plugin to the list f
 ---
 
 # Say Thank You
-If you are enjoying this plugin then feel free to buying me a coffee on [https://ko-fi/TfTHacker](https://ko-fi.com/TfTHacker).
+If you are enjoying this plugin then feel free to [buying me a coffee](https://bit.ly/o42-kofi).
 
 Please also help spread the word by sharing your enthusiasim for this plugin on Twitter, Reddit, or any other social media platform you regularly use. 
 
-You can find me on Twitter [@TfTHacker](https://twitter.com/TfTHacker)
+You can find me on Twitter [@TfTHacker](https://bit.ly/o42-twitter) and at [Medium](https://bit.ly/o42-medium). 
 
-[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/N4N16TNFD)
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://bit.ly/o42-kofi)
