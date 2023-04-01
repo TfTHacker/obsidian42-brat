@@ -6,6 +6,7 @@ import { addIcons } from "./ui/icons";
 import { logger } from "./utils/logging";
 import PluginCommands from "./ui/PluginCommands";
 import { themeseCheckAndUpdates } from "./features/themes";
+import BratAPI, { initilizeAPI } from "./utils/BratAPI";
 
 export default class ThePlugin extends Plugin {
 	appName = "Obsidian42 - Beta Reviewer's Auto-update Tool (BRAT)";
@@ -14,6 +15,7 @@ export default class ThePlugin extends Plugin {
 	betaPlugins: BetaPlugins;
 	ribbonIcon: HTMLElement;
 	commands: PluginCommands;
+	bratAPI: BratAPI
 
 	async onload(): Promise<void> {
 		console.log("loading Obsidian42 - BRAT");		
@@ -38,6 +40,10 @@ export default class ThePlugin extends Plugin {
 					await themeseCheckAndUpdates(this, false);
 				}, 120000);
 			}
+			setTimeout(async () => {
+				this.bratAPI = new BratAPI(this);
+				globalThis.bratAPI = this.bratAPI;
+			}, 500);
 		});
 	}
 

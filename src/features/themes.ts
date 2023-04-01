@@ -2,7 +2,7 @@ import { normalizePath, Notice } from "obsidian";
 import ThePlugin from "../main";
 import { GenericFuzzySuggester, SuggesterItem } from "../ui/GenericFuzzySuggester";
 import { updateBetaThemeLastUpdateDate } from "../ui/settings";
-import { grabCommmunityThemeObsidianCss, grabCommmunityThemesList, grabLastCommitDateForAFile } from "./githubUtils";
+import { grabCommmunityThemeCssFile, grabCommmunityThemeManifestFile, grabCommmunityThemesList, grabLastCommitDateForAFile } from "./githubUtils";
 import { ToastMessage } from "../utils/notifications";
 import { isConnectedToInternet } from "../utils/internetconnection";
 
@@ -28,18 +28,28 @@ export const themesRootPath = (plugin: ThePlugin): string => {
  * @return  {Promise<boolean>}                         true for succcess
  */
 export const themeInstallTheme = async (plugin: ThePlugin, cssGithubRepository: string, cssFileName = ""): Promise<boolean> => {
-    const themeCSS = await grabCommmunityThemeObsidianCss(cssGithubRepository, plugin.settings.debuggingMode);
+    const themeCSS = await grabCommmunityThemeCssFile(cssGithubRepository, plugin.settings.debuggingMode);
     if(!themeCSS) {
-        ToastMessage(plugin,"There is no obsidian.css file in the root path of this repository, so there is no theme to install.")
+        ToastMessage(plugin,"There is no theme.css file in the root path of this repository, so there is no theme to install.")
         return false;
     }
-    await themesSaveTheme(plugin, cssFileName, themeCSS);
-    const msg = `${cssFileName} theme installed from ${cssGithubRepository}. `;
+
+    const themeManifest = await grabCommmunityThemeManifestFile(cssGithubRepository, plugin.settings.debuggingMode);
+    if(!themeManifest) {
+        ToastMessage(plugin,"There is no manifest.json file in the root path of this repository, so theme cannot be installed.")
+        return false;
+    }
+
+    await themesSaveTheme(plugin, cssFileName, themeCSS, themeManifest);
+
+    const manifestInfo = await JSON.parse(themeManifest);
+
+    const msg = `${manifestInfo.name} theme installed from ${cssGithubRepository}. `;
     plugin.log(msg + `[Theme Info](https://github.com/${cssGithubRepository})`, false);
     ToastMessage(plugin,`${msg}`,10, async ()=>{ window.open(`https://github.com/${cssGithubRepository}`)});
     setTimeout(() => {
         // @ts-ignore            
-        plugin.app.customCss.setTheme(cssFileName);
+        plugin.app.customCss.setTheme(manifestInfo.name);
     }, 500);
     return true;
 }
@@ -47,17 +57,22 @@ export const themeInstallTheme = async (plugin: ThePlugin, cssGithubRepository: 
 /**
  * Saves the  theme file to the vault
  *
- * @param   {ThePlugin}      plugin       ThePlugin
- * @param   {string}         cssFileName  file name to be used in the themes folder
- * @param   {string<void>}   cssText      the css file contents
+ * @param   {ThePlugin}      plugin         ThePlugin
+ * @param   {string}         cssFileName    file name to be used in the themes folder
+ * @param   {string<void>}   cssText        the css file contents
+ * @param   {string<void>}   manifestFile   the css file contents
  *
  * @return  {Promise<void>}               
  */
-export const themesSaveTheme = async (plugin: ThePlugin, cssFileName: string, cssText: string): Promise<void> => {
-    const themesTargetFolderPath = themesRootPath(plugin);
+export const themesSaveTheme = async (plugin: ThePlugin, cssFileName: string, cssText: string, manifestFile: string): Promise<void> => {
+    const manifestInfo = await JSON.parse(manifestFile);
+    const themeTargetFolderPath = normalizePath(themesRootPath(plugin) + manifestInfo.name);
+
     const adapter = plugin.app.vault.adapter;
-    if (await adapter.exists(themesTargetFolderPath) === false) await adapter.mkdir(themesTargetFolderPath);
-    await adapter.write(themesTargetFolderPath + cssFileName + ".css", cssText);
+    if (await adapter.exists(themeTargetFolderPath) === false) await adapter.mkdir(themeTargetFolderPath);
+
+    await adapter.write( normalizePath(themeTargetFolderPath + "/theme.css"), cssText);
+    await adapter.write( normalizePath(themeTargetFolderPath + "/manifest.json"), manifestFile);
 }
 
 
@@ -93,7 +108,7 @@ export const themesDeriveBetaNameFromRepository = (cssGithubRepository: string):
 
 
 /**
- * Deletes a them from the BRAT list and also the physical theme css file in the vault
+ * Deletes a them from the BRAT list (Does not physically delete the theme)
  *
  * @param   {ThePlugin}  plugin               ThePlugin
  * @param   {string}     cssGithubRepository  Repository path
@@ -103,8 +118,7 @@ export const themesDeriveBetaNameFromRepository = (cssGithubRepository: string):
 export const themesDelete = async (plugin: ThePlugin, cssGithubRepository: string): Promise<void> => {
     plugin.settings.themesList = plugin.settings.themesList.filter((t) => t.repo != cssGithubRepository);
     plugin.saveSettings();
-    await plugin.app.vault.adapter.remove(themesRootPath(plugin) + themesDeriveBetaNameFromRepository(cssGithubRepository) + ".css");
-    const msg = `Removed ${cssGithubRepository} from BRAT themes list and deleted from vault`;
+    const msg = `Removed ${cssGithubRepository} from BRAT themes list and will no longer be updated. However, the theme files still exist in the vault. To remove them, go into Settings > Appearance and uninstall the theme.`;
     plugin.log(msg, true);
     ToastMessage(plugin, `${msg}`);
 }
@@ -150,9 +164,9 @@ export const themeseCheckAndUpdates = async (plugin: ThePlugin, showInfo:boolean
  * @return  {Promise<boolean>}                         true if succeeds
  */
 export const themeUpdateTheme = async (plugin: ThePlugin, cssGithubRepository: string, oldFileDate = "", newFileDate = ""): Promise<boolean> => {
-    const themeCSS = await grabCommmunityThemeObsidianCss(cssGithubRepository, plugin.settings.debuggingMode);
+    const themeCSS = await grabCommmunityThemeCssFile(cssGithubRepository, plugin.settings.debuggingMode);
     if(!themeCSS) {
-        ToastMessage(plugin, "There is no obsidian.css file in the root path of the ${cssGithubRepository} repository, so this theme cannot be updated.")
+        ToastMessage(plugin, "There is no theme.css file in the root path of the ${cssGithubRepository} repository, so this theme cannot be updated.")
         return false;
     }
     const cssFileName = themesDeriveBetaNameFromRepository(cssGithubRepository);
@@ -163,3 +177,4 @@ export const themeUpdateTheme = async (plugin: ThePlugin, cssGithubRepository: s
     ToastMessage(plugin, `${msg}`, 20, async ()=>{window.open(`https://github.com/${cssGithubRepository}`)}   );
     return true;
 }
+

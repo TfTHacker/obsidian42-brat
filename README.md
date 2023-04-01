@@ -21,7 +21,6 @@ Simply add the GitHub repository path for the beta Obsidian plugin to the list f
   - Enable/Disable a plugin
   - Little more explanation for those who like to read
 - [Themes](/help/themes.md)
-  - Switch active theme
   - Settings for themes
   - Boring details about themes that are useful to know
 - [Github](/help/github.md)
@@ -69,13 +68,12 @@ Simply add the GitHub repository path for the beta Obsidian plugin to the list f
 
 - BRAT will then validate that a theme exists, download it and switch your current theme to this beta theme.
 
-- Since this is a beta theme and does not yet have a community name,  BRAT assigns it a unique name using "BRAT-" in the beginning and adding the name of the Github user and repository.
 
 ### Update a beta theme from a repository
-- Using the theme update command, Brat will check  for all beta themese and see if there  is an update.  If there is an update, it downloads the update and notifies you.
+- Using the theme update command, BRAT will check for all beta themese and see if there  is an update.  If there is an update, it downloads the update and notifies you.
 
 ### Grab a community theme
-- While BRAT is designed for testing themes, you can still install a theme already published to the community. This theme wil not be updated with the BRAT update feature.
+- While BRAT is designed for testing themes, you can still install a theme already published to the community. This theme will not be updated with the BRAT update feature.
 
 ---
 

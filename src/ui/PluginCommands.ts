@@ -183,24 +183,6 @@ export default class PluginCommands {
             callback: async () => await themeseCheckAndUpdates(this.plugin, true) 
         },        
         {
-            id: "BRAT-switchTheme",
-            icon: "BratIcon",
-            name: "Themes: Switch Active Theme ",
-            showInRibbon: true,
-            callback: async () => {
-                // @ts-ignore
-                const communityThemeList: SuggesterItem[] = Object.values(this.plugin.app.customCss.themes).map((t) => { return { display: t, info: t } });
-                communityThemeList.unshift({ display: "Obsidian Default Theme", info: "" });
-                const gfs = new GenericFuzzySuggester(this.plugin);
-                gfs.setSuggesterData(communityThemeList);
-                await gfs.display(async (results) => {
-                    this.plugin.log(`Switched to theme ${results.display}`, false);
-                    // @ts-ignore
-                    this.plugin.app.customCss.setTheme(results.info);
-                });
-            }
-        },
-        {
             id: "BRAT-allCommands",
             icon: "BratIcon",
             name: "All Commands list",

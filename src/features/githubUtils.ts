@@ -68,16 +68,28 @@ export const grabCommmunityThemesList = async (debugLogging = true): Promise<JSO
 }
 
 
-export const grabCommmunityThemeObsidianCss = async (repositoryPath: string, debugLogging = true): Promise<string|null> => {
-    const themesURL = `https://raw.githubusercontent.com/${repositoryPath}/HEAD/obsidian.css`;
+export const grabCommmunityThemeCssFile = async (repositoryPath: string, debugLogging = true): Promise<string|null> => {
+    const themesURL = `https://raw.githubusercontent.com/${repositoryPath}/HEAD/theme.css`;
     try {
         const response = await request({ url: themesURL });
         return (response === "404: Not Found" ? null : response);
     } catch (error) {
-        if(debugLogging) console.log("error in grabCommmunityThemesList", error)
+        if(debugLogging) console.log("error in grabCommmunityThemeCssFile", error)
         return null;
     }
 }
+
+export const grabCommmunityThemeManifestFile = async (repositoryPath: string, debugLogging = true): Promise<string|null> => {
+    const themesURL = `https://raw.githubusercontent.com/${repositoryPath}/HEAD/manifest.json`;
+    try {
+        const response = await request({ url: themesURL });
+        return (response === "404: Not Found" ? null : response);
+    } catch (error) {
+        if(debugLogging) console.log("error in grabCommmunityThemeManifestFile", error)
+        return null;
+    }
+}
+
 
 export const grabLastCommitInfoForAFile = async (repositoryPath: string, path: string, debugLogging = true): Promise<string|null> => {
     const url = `https://api.github.com/repos/${repositoryPath}/commits?path=${path}&page=1&per_page=1`;
@@ -85,7 +97,7 @@ export const grabLastCommitInfoForAFile = async (repositoryPath: string, path: s
         const response = await request({ url: url });
         return (response === "404: Not Found" ? null : JSON.parse(response));
     } catch (error) {
-        if(debugLogging) console.log("error in grabCommmunityThemesList", error)
+        if(debugLogging) console.log("error in grabLastCommitInfoForAFile", error)
         return null;
     }
 }
