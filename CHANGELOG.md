@@ -1,4 +1,4 @@
-# 0.7.0
+# 0.7.0 (PENDING)
 
 - Major updates to theme features
   - Update: now supports the Obsidian 1.0 themes architecture change (no longer using obsidian.css, rather using theme.css & manifest.json)
