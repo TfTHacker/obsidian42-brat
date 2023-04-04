@@ -93,7 +93,7 @@ export async function existBetaPluginInList(plugin: ThePlugin, repositoryPath: s
  export async function addBetaThemeToList(plugin: ThePlugin, repositoryPath: string): Promise<void> {
      const newTheme: ThemeInforamtion = { 
          repo: repositoryPath, 
-         lastUpdate: await grabLastCommitDateForAFile(repositoryPath, "obsidian.css")
+         lastUpdate: await grabLastCommitDateForAFile(repositoryPath, "theme.css")
     }
     plugin.settings.themesList.unshift(newTheme);
     plugin.saveSettings();
@@ -129,7 +129,5 @@ export async function existBetaThemeinInList(plugin: ThePlugin, repositoryPath: 
             plugin.saveSettings();
         }
     });
-
-
 }
 

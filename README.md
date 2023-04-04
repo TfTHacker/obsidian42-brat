@@ -10,9 +10,8 @@ Simply add the GitHub repository path for the beta Obsidian plugin to the list f
     - Updating beta plugins
     - Stopping beta plugin updates/deleting a beta plugin/deleting-a-beta-plugin
   - Themes
-    - Grab a beta theme from a repository
+    - Grab a beta theme from a repository (either theme.css or theme-beta.css)
     - Update a beta theme from a repository
-    - Grab a community theme
 - [Plugins](/help/plugins.md)
   - Updating beta plugins
   - See if there are upates, but don't update them

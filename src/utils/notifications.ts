@@ -10,7 +10,7 @@ import ThePlugin from "../main";
  * @param   {null}       contextMenuCallback function to call if right mouse clicked
  * @return  {void}                         
  */
-export function ToastMessage(plugin: ThePlugin, msg: string, timeoutInSeconds = 10, contextMenuCallback = null): void {
+export function ToastMessage(plugin: ThePlugin, msg: string, timeoutInSeconds = 10, contextMenuCallback?:()=>void): void {
     if(plugin.settings.notificationsEnabled===false) return;
     const additionalInfo = contextMenuCallback  ? 
                             (Platform.isDesktop ? "(click=dismiss, right-click=Info)" : "(click=dismiss)") : "";

@@ -68,8 +68,8 @@ export const grabCommmunityThemesList = async (debugLogging = true): Promise<JSO
 }
 
 
-export const grabCommmunityThemeCssFile = async (repositoryPath: string, debugLogging = true): Promise<string|null> => {
-    const themesURL = `https://raw.githubusercontent.com/${repositoryPath}/HEAD/theme.css`;
+export const grabCommmunityThemeCssFile = async (repositoryPath: string, betaVersion = false, debugLogging = true): Promise<string|null> => {
+    const themesURL = `https://raw.githubusercontent.com/${repositoryPath}/HEAD/theme${betaVersion ? "-beta" : ""}.css`;
     try {
         const response = await request({ url: themesURL });
         return (response === "404: Not Found" ? null : response);

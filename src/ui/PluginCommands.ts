@@ -1,7 +1,7 @@
 import ThePlugin from "../main";
 import { GenericFuzzySuggester, SuggesterItem } from "./GenericFuzzySuggester";
 import { grabCommmunityPluginList, grabCommmunityThemesList } from "../features/githubUtils";
-import { themeseCheckAndUpdates, themesInstallFromCommunityList } from "../features/themes";
+import { themeseCheckAndUpdates } from "../features/themes";
 import AddNewTheme from "./AddNewTheme";
 import { ToastMessage } from "../utils/notifications";
 
@@ -160,13 +160,6 @@ export default class PluginCommands {
                     settings.openTabById(results.info);
                 });
             }
-        },
-        {
-            id: "BRAT-GrabCommunityTheme",
-            icon: "BratIcon",
-            name: "Themes: Grab a community theme",
-            showInRibbon: true,
-            callback: async () => await themesInstallFromCommunityList(this.plugin)
         },
         {
             id: "BRAT-GrabBetaTheme",
