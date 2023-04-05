@@ -5,8 +5,8 @@ import BetaPlugins from "./features/BetaPlugins";
 import { addIcons } from "./ui/icons";
 import { logger } from "./utils/logging";
 import PluginCommands from "./ui/PluginCommands";
-import { themeseCheckAndUpdates } from "./features/themes";
-import BratAPI, { initilizeAPI } from "./utils/BratAPI";
+import { themesCheckAndUpdates } from "./features/themes";
+import BratAPI from "./utils/BratAPI";
 
 export default class ThePlugin extends Plugin {
 	appName = "Obsidian42 - Beta Reviewer's Auto-update Tool (BRAT)";
@@ -37,7 +37,7 @@ export default class ThePlugin extends Plugin {
 			}
 			if (this.settings.updateThemesAtStartup) { 
 				setTimeout(async () => {
-					await themeseCheckAndUpdates(this, false);
+					await themesCheckAndUpdates(this, false);
 				}, 120000);
 			}
 			setTimeout(async () => {

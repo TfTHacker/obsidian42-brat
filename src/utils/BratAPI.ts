@@ -1,6 +1,7 @@
-import { themeInstallTheme, themesDelete, themeseCheckAndUpdates } from "../features/themes";
+import { grabChecksumOfThemeCssFile, grabCommmunityThemeCssFile, grabLastCommitDateForAFile } from "../features/githubUtils";
+import { themeSave, themeDelete, themesCheckAndUpdates } from "../features/themes";
 import ThePlugin from "../main";
-import { Settings, addBetaThemeToList } from "../ui/settings";
+import { Settings } from "../ui/settings";
 
 
 // This module is for API access for use in debuging console 
@@ -21,20 +22,36 @@ export default class BratAPI {
     themes = {
 
         themeseCheckAndUpates: async (showInfo: boolean): Promise<void> => {
-            await themeseCheckAndUpdates(this.plugin, showInfo);
+            await themesCheckAndUpdates(this.plugin, showInfo);
         },
 
         themeInstallTheme: async (cssGithubRepository: string): Promise<void> => {
             const scrubbedAddress = cssGithubRepository.replace("https://github.com/", "");
-            await themeInstallTheme(this.plugin, scrubbedAddress);
-            await addBetaThemeToList(this.plugin, scrubbedAddress);
+            await themeSave(this.plugin, scrubbedAddress, true);
         },
 
         themesDelete: async (cssGithubRepository: string): Promise<void> => {
             const scrubbedAddress = cssGithubRepository.replace("https://github.com/", "");
-            await themesDelete(this.plugin, scrubbedAddress)
-        }
+            await themeDelete(this.plugin, scrubbedAddress)
+        },
 
+        grabCommmunityThemeCssFile: async (repositoryPath: string, betaVersion = false): Promise<string|null> =>  {
+            return await grabCommmunityThemeCssFile(repositoryPath, betaVersion, this.plugin.settings.debuggingMode);
+        },
+
+        grabChecksumOfThemeCssFile: async (repositoryPath: string, betaVersion = false): Promise<string> =>  {
+            return await grabChecksumOfThemeCssFile(repositoryPath, betaVersion, this.plugin.settings.debuggingMode);
+        },
+
+        grabLastCommitDateForAFile: async (repositoryPath: string, path: string): Promise<string> => {
+            // example await grabLastCommitDateForAFile(t.repo, "theme-beta.css");
+            return await grabLastCommitDateForAFile(repositoryPath, path)
+        },
+
+
+
+
+        
     }
 
 }

@@ -1,5 +1,5 @@
 import { App, PluginSettingTab, Setting, ToggleComponent, ButtonComponent } from 'obsidian';
-import { themesDelete } from '../features/themes';
+import { themeDelete } from '../features/themes';
 import ThePlugin from '../main';
 import AddNewTheme from './AddNewTheme';
 import { promotionalLinks } from './Promotional';
@@ -155,7 +155,7 @@ export class BratSettingsTab extends PluginSettingTab {
 							btn.setButtonText("Click once more to confirm removal");
 						else {
 							btn.buttonEl.parentElement.parentElement.remove();
-							await themesDelete(this.plugin, bp.repo);
+							await themeDelete(this.plugin, bp.repo);
 						}
 					});
 				})

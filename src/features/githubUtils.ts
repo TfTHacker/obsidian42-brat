@@ -68,7 +68,7 @@ export const grabCommmunityThemesList = async (debugLogging = true): Promise<JSO
 }
 
 
-export const grabCommmunityThemeCssFile = async (repositoryPath: string, betaVersion = false, debugLogging = true): Promise<string|null> => {
+export const grabCommmunityThemeCssFile = async (repositoryPath: string, betaVersion = false, debugLogging): Promise<string|null> => {
     const themesURL = `https://raw.githubusercontent.com/${repositoryPath}/HEAD/theme${betaVersion ? "-beta" : ""}.css`;
     try {
         const response = await request({ url: themesURL });
@@ -90,6 +90,22 @@ export const grabCommmunityThemeManifestFile = async (repositoryPath: string, de
     }
 }
 
+const checksum = (str: string): number => {
+    let sum = 0;
+    for (let i = 0; i < str.length; i++) {
+        sum += str.charCodeAt(i);
+    }
+    return sum;
+}
+
+export const checksumForString = (str: string): string => {
+    return checksum(str).toString();
+}
+
+export const grabChecksumOfThemeCssFile = async (repositoryPath: string, betaVersion, debugLogging): Promise<string> =>{
+    const themeCSS = await grabCommmunityThemeCssFile(repositoryPath, betaVersion, debugLogging)
+    return themeCSS ? checksumForString(themeCSS) : "0";
+}
 
 export const grabLastCommitInfoForAFile = async (repositoryPath: string, path: string, debugLogging = true): Promise<string|null> => {
     const url = `https://api.github.com/repos/${repositoryPath}/commits?path=${path}&page=1&per_page=1`;
@@ -112,3 +128,4 @@ export const grabLastCommitDateForAFile = async (repositoryPath: string, path: s
     else
         return "";
 }
+

@@ -1,7 +1,7 @@
 import ThePlugin from "../main";
 import { GenericFuzzySuggester, SuggesterItem } from "./GenericFuzzySuggester";
 import { grabCommmunityPluginList, grabCommmunityThemesList } from "../features/githubUtils";
-import { themeseCheckAndUpdates } from "../features/themes";
+import { themesCheckAndUpdates } from "../features/themes";
 import AddNewTheme from "./AddNewTheme";
 import { ToastMessage } from "../utils/notifications";
 
@@ -173,7 +173,7 @@ export default class PluginCommands {
             icon: "BratIcon",
             name: "Themes: Update beta themes",
             showInRibbon: true,
-            callback: async () => await themeseCheckAndUpdates(this.plugin, true) 
+            callback: async () => await themesCheckAndUpdates(this.plugin, true) 
         },        
         {
             id: "BRAT-allCommands",

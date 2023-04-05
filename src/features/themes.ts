@@ -1,39 +1,26 @@
 import { normalizePath, Notice } from "obsidian";
 import ThePlugin from "../main";
-import { updateBetaThemeLastUpdateDate } from "../ui/settings";
-import { grabCommmunityThemeCssFile, grabCommmunityThemeManifestFile, grabLastCommitDateForAFile } from "./githubUtils";
+import { addBetaThemeToList, updateBetaThemeLastUpdateChecksum } from "../ui/settings";
+import { checksumForString, grabChecksumOfThemeCssFile, grabCommmunityThemeCssFile, grabCommmunityThemeManifestFile } from "./githubUtils";
 import { ToastMessage } from "../utils/notifications";
 import { isConnectedToInternet } from "../utils/internetconnection";
 
-/**
- * Get the path to the themes folder fo rthis vault
- *
- * @param   {ThePlugin}  plugin  ThPlugin
- *
- * @return  {string}             path to themes folder
- */
-export const themesRootPath = (plugin: ThePlugin): string => {
-    return normalizePath(plugin.app.vault.configDir + "/themes") + "/";
-}
-
 
 /**
- * Installs a theme, including downloading and registring it with BRAT
+ * Installs or updates a theme
  *
- * @param   {ThePlugin}           plugin               ThePlugin
- * @param   {string}              cssGithubRepository  The repository with the theme
- * @param   {undefined<boolean>}  cssFileName          name of the css file that will be saved to the themes folder in the vault
+ * @param   {ThePlugin}     plugin               ThePlugin
+ * @param   {string}        cssGithubRepository  The repository with the theme
+ * @param   {boolean}       newInstall           true = New theme install, false update the theme
  *
- * @return  {Promise<boolean>}                         true for succcess
+ * @return  {Promise<boolean>}                   true for succcess
  */
-export const themeInstallTheme = async (plugin: ThePlugin, cssGithubRepository: string): Promise<boolean> => {
+export const themeSave = async (plugin: ThePlugin, cssGithubRepository: string, newInstall: boolean): Promise<boolean> => {
     let themeCSS = await grabCommmunityThemeCssFile(cssGithubRepository, true, plugin.settings.debuggingMode); //test for themes-beta.css
-    
-    if(!themeCSS) 
-        themeCSS = await grabCommmunityThemeCssFile(cssGithubRepository, false, plugin.settings.debuggingMode); // grabe themes.css if no beta
+    if(!themeCSS) themeCSS = await grabCommmunityThemeCssFile(cssGithubRepository, false, plugin.settings.debuggingMode); // grabe themes.css if no beta
 
     if(!themeCSS) {
-        ToastMessage(plugin,"There is no theme.css file in the root path of this repository, so there is no theme to install.")
+        ToastMessage(plugin,"There is no theme.css or theme-beta.css file in the root path of this repository, so there is no theme to install.")
         return false;
     }
 
@@ -43,54 +30,34 @@ export const themeInstallTheme = async (plugin: ThePlugin, cssGithubRepository: 
         return false;
     }
 
-    await themesSaveTheme(plugin, themeCSS, themeManifest);
-
     const manifestInfo = await JSON.parse(themeManifest);
 
-    const msg = `${manifestInfo.name} theme installed from ${cssGithubRepository}. `;
-    plugin.log(msg + `[Theme Info](https://github.com/${cssGithubRepository})`, false);
-    ToastMessage(plugin,`${msg}`,10, async ():Promise<void>=>{ window.open(`https://github.com/${cssGithubRepository}`)});
-    setTimeout(() => {
-        // @ts-ignore            
-        plugin.app.customCss.setTheme(manifestInfo.name);
-    }, 500);
-    return true;
-}
-
-/**
- * Saves the  theme file to the vault
- *
- * @param   {ThePlugin}      plugin         ThePlugin
- * @param   {string<void>}   cssText        the css file contents
- * @param   {string<void>}   manifestFile   the css file contents
- *
- * @return  {Promise<void>}               
- */
-export const themesSaveTheme = async (plugin: ThePlugin, cssText: string, manifestFile: string): Promise<void> => {
-    const manifestInfo = await JSON.parse(manifestFile);
     const themeTargetFolderPath = normalizePath(themesRootPath(plugin) + manifestInfo.name);
 
     const adapter = plugin.app.vault.adapter;
     if (await adapter.exists(themeTargetFolderPath) === false) await adapter.mkdir(themeTargetFolderPath);
 
-    await adapter.write( normalizePath(themeTargetFolderPath + "/theme.css"), cssText);
-    await adapter.write( normalizePath(themeTargetFolderPath + "/manifest.json"), manifestFile);
-}
+    await adapter.write( normalizePath(themeTargetFolderPath + "/theme.css"), themeCSS);
+    await adapter.write( normalizePath(themeTargetFolderPath + "/manifest.json"), themeManifest);
 
-/**
- * Deletes a them from the BRAT list (Does not physically delete the theme)
- *
- * @param   {ThePlugin}  plugin               ThePlugin
- * @param   {string}     cssGithubRepository  Repository path
- *
- * @return  {void}
- */
-export const themesDelete = async (plugin: ThePlugin, cssGithubRepository: string): Promise<void> => {
-    plugin.settings.themesList = plugin.settings.themesList.filter((t) => t.repo != cssGithubRepository);
-    plugin.saveSettings();
-    const msg = `Removed ${cssGithubRepository} from BRAT themes list and will no longer be updated. However, the theme files still exist in the vault. To remove them, go into Settings > Appearance and uninstall the theme.`;
-    plugin.log(msg, true);
-    ToastMessage(plugin, `${msg}`);
+    updateBetaThemeLastUpdateChecksum(plugin, cssGithubRepository, checksumForString(themeCSS))
+
+    let msg = ``;
+    
+    if(newInstall) {
+        await addBetaThemeToList(plugin, cssGithubRepository, themeCSS);
+        msg = `${manifestInfo.name} theme installed from ${cssGithubRepository}. `;
+        setTimeout(() => {
+            // @ts-ignore            
+            plugin.app.customCss.setTheme(manifestInfo.name);
+        }, 500);    
+    } else {
+        msg = `${manifestInfo.name} theme updated from ${cssGithubRepository}.`;
+    }
+
+    plugin.log(msg + `[Theme Info](https://github.com/${cssGithubRepository})`, false);
+    ToastMessage(plugin,`${msg}`,20, async ():Promise<void>=>{ window.open(`https://github.com/${cssGithubRepository}`)});
+    return true;
 }
 
 /**
@@ -101,7 +68,7 @@ export const themesDelete = async (plugin: ThePlugin, cssGithubRepository: strin
  *
  * @return  {Promise<void>}            
  */
-export const themeseCheckAndUpdates = async (plugin: ThePlugin, showInfo:boolean): Promise<void> => {
+export const themesCheckAndUpdates = async (plugin: ThePlugin, showInfo: boolean): Promise<void> => {
     if(await isConnectedToInternet()===false) { 
         console.log("BRAT: No internet detected.") 
         return;
@@ -111,9 +78,12 @@ export const themeseCheckAndUpdates = async (plugin: ThePlugin, showInfo:boolean
     plugin.log(msg1, true);
     if (showInfo && plugin.settings.notificationsEnabled) newNotice = new Notice(`BRAT\n${msg1}`, 30000);
     for(const t of plugin.settings.themesList) {
-        const lastUpdateOnline = await grabLastCommitDateForAFile(t.repo, "theme.css");
+        // first test to see if theme-beta.css exists
+        let lastUpdateOnline = await grabChecksumOfThemeCssFile(t.repo, true, plugin.settings.debuggingMode);
+        // if theme-beta.css does NOT exist, try to get theme.css
+        if(lastUpdateOnline==="0") lastUpdateOnline = await grabChecksumOfThemeCssFile(t.repo, false, plugin.settings.debuggingMode);
         if(lastUpdateOnline!==t.lastUpdate) 
-            await themeUpdateTheme(plugin, t.repo, t.lastUpdate, lastUpdateOnline);
+            await themeSave(plugin,t.repo,false)
     }
     const msg2 = `Checking for beta theme updates COMPLETED`;
     plugin.log(msg2, true);
@@ -124,40 +94,30 @@ export const themeseCheckAndUpdates = async (plugin: ThePlugin, showInfo:boolean
 } 
 
 /**
- * Updates a theme already registered  with BRAT
+ * Deletes a theme from the BRAT list (Does not physically delete the theme)
  *
- * @param   {ThePlugin}           plugin               ThePlugin
- * @param   {string}              cssGithubRepository  Repository path
- * @param   {string}              oldFileDate          Old file date  from the BRAT theme list
- * @param   {string}  newFileDate          new date to use for this update
+ * @param   {ThePlugin}  plugin               ThePlugin
+ * @param   {string}     cssGithubRepository  Repository path
  *
- * @return  {Promise<boolean>}                         true if succeeds
+ * @return  {void}
  */
-export const themeUpdateTheme = async (plugin: ThePlugin, cssGithubRepository: string, oldFileDate = "", newFileDate = ""): Promise<boolean> => {
+export const themeDelete = async (plugin: ThePlugin, cssGithubRepository: string): Promise<void> => {
+    plugin.settings.themesList = plugin.settings.themesList.filter((t) => t.repo != cssGithubRepository);
+    plugin.saveSettings();
+    const msg = `Removed ${cssGithubRepository} from BRAT themes list and will no longer be updated. However, the theme files still exist in the vault. To remove them, go into Settings > Appearance and remove the theme.`;
+    plugin.log(msg, true);
+    ToastMessage(plugin, `${msg}`);
+}
 
-    let themeCSS = await grabCommmunityThemeCssFile(cssGithubRepository, true, plugin.settings.debuggingMode); //test for themes-beta.css
-    
-    if(!themeCSS) 
-        themeCSS = await grabCommmunityThemeCssFile(cssGithubRepository, false, plugin.settings.debuggingMode); // grabe themes.css if no beta
 
-    if(!themeCSS) {
-        ToastMessage(plugin, `There is no theme.css file in the root path of the ${cssGithubRepository} repository, so this theme cannot be updated.`);
-        return false;
-    }
-
-    const themeManifest = await grabCommmunityThemeManifestFile(cssGithubRepository, plugin.settings.debuggingMode);
-    if(!themeManifest) {
-        ToastMessage(plugin, `There is no manifest.json file in the root path of this repository, so theme cannot be installed.`);
-        return false;
-    }
-
-    const manifestInfo = await JSON.parse(themeManifest);
-
-    await themesSaveTheme(plugin, themeCSS, themeManifest);
-    updateBetaThemeLastUpdateDate(plugin, cssGithubRepository, newFileDate);
-    const msg = `${manifestInfo.name} theme updated from ${cssGithubRepository}. From date: ${oldFileDate} to ${newFileDate} `;
-    plugin.log(msg + `[Theme Info](https://github.com/${cssGithubRepository})`, false);
-    ToastMessage(plugin, `${msg}`, 20, async ()=>{window.open(`https://github.com/${cssGithubRepository}`)} );
-    return true;
+/**
+ * Get the path to the themes folder fo rthis vault
+ *
+ * @param   {ThePlugin}  plugin  ThPlugin
+ *
+ * @return  {string}             path to themes folder
+ */
+export const themesRootPath = (plugin: ThePlugin): string => {
+    return normalizePath(plugin.app.vault.configDir + "/themes") + "/";
 }
 

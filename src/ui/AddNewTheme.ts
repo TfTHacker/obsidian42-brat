@@ -1,8 +1,8 @@
 import { Modal, Setting } from 'obsidian';
-import { themeInstallTheme } from '../features/themes';
+import { themeSave } from '../features/themes';
 import ThePlugin from '../main';
 import { ToastMessage } from '../utils/notifications';
-import { addBetaThemeToList, existBetaThemeinInList } from './settings';
+import {  existBetaThemeinInList } from './settings';
 import { promotionalLinks } from './Promotional';
 
 /**
@@ -28,8 +28,7 @@ export default class AddNewTheme extends Modal {
             return;
         }
         
-        if(await themeInstallTheme(this.plugin, scrubbedAddress)) {
-            await addBetaThemeToList(this.plugin, scrubbedAddress);
+        if(await themeSave(this.plugin, scrubbedAddress, true)) {
             this.close();    
         }
     }

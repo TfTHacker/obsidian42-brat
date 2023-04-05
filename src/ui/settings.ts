@@ -1,9 +1,9 @@
-import { grabLastCommitDateForAFile } from "../features/githubUtils";
+import { checksumForString } from "../features/githubUtils";
 import ThePlugin from "../main";
 
 export interface ThemeInforamtion {
     repo: string;
-    lastUpdate: string;
+    lastUpdate: string; //checksum of theme file (either theme.css or theme-beta.css)
 }
 
 export interface PluginFrozenVersion {
@@ -87,13 +87,14 @@ export async function existBetaPluginInList(plugin: ThePlugin, repositoryPath: s
  *
  * @param   {ThePlugin}      plugin         
  * @param   {string<void>}   repositoryPath  path to the GitHub repository
+ * @param   {string<void>}   themeCSS  raw text of the theme. It is checksummed and this is used for tracking if changes occurred to the theme
  *
  * @return  {Promise<void>}                  
  */
- export async function addBetaThemeToList(plugin: ThePlugin, repositoryPath: string): Promise<void> {
+ export async function addBetaThemeToList(plugin: ThePlugin, repositoryPath: string, themeCSS: string): Promise<void> {
      const newTheme: ThemeInforamtion = { 
          repo: repositoryPath, 
-         lastUpdate: await grabLastCommitDateForAFile(repositoryPath, "theme.css")
+         lastUpdate: checksumForString(themeCSS)
     }
     plugin.settings.themesList.unshift(newTheme);
     plugin.saveSettings();
@@ -118,14 +119,13 @@ export async function existBetaThemeinInList(plugin: ThePlugin, repositoryPath: 
  *
  * @param   {ThePlugin}         plugin          
  * @param   {string<boolean>}   repositoryPath  path to the GitHub repository
- * @param   {string<newDate>}   newDate  last update for this theme
+ * @param   {string<checksum>}  checksum  checksum of file. In past we used the date of file update, but this proved to not be consisent with the GitHub cache.
  *
- * @return  {Promise<boolean>}  true if exists      
  */
- export function updateBetaThemeLastUpdateDate(plugin: ThePlugin, repositoryPath: string, newDate: string): void {
+ export function updateBetaThemeLastUpdateChecksum(plugin: ThePlugin, repositoryPath: string, checksum: string): void {
     plugin.settings.themesList.forEach(t=>{
         if(t.repo === repositoryPath) {
-            t.lastUpdate = newDate;
+            t.lastUpdate = checksum;
             plugin.saveSettings();
         }
     });
