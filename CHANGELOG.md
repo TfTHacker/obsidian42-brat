@@ -10,7 +10,7 @@
 
 #### Removed
 - The ability to "switch themes" is removed as this feature was sherlocked and natively added to Obsidian in the command palette with the "Change Theme" command
-- BRAT had the ability to install any community themes from the official community theme list. However, since Obsidian improved the themes UI, this feature became redudant and so was removed.
+- BRAT had the ability to install any community theme from the official community theme list. However, since Obsidian improved the themes UI, this feature became redundant and so was removed.
 
 
 
