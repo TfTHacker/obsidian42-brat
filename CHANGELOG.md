@@ -1,5 +1,7 @@
-# 0.7.0 (PENDING)
+# 0.7.1 (Pending)
+- Fix: if the url ends with .git, the Add New Plugin form will strip the .git extension. This makes it easier to sue the github copy code button url with BRAT (fix for https://github.com/TfTHacker/obsidian42-brat/issues/55)
 
+# 0.7.0 
 ## Major updates to **THEMES** support
 #### New
 - BRAT now supports the Obsidian 1.0+ changes to the way Themes are handled (no longer using obsidian.css, rather using theme.css & manifest.json)

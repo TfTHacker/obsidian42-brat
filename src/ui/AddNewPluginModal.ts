@@ -28,7 +28,9 @@ export default class AddNewPluginModal extends Modal {
 
     async submitForm(): Promise<void> {
         if (this.address === "") return;
-        const scrubbedAddress = this.address.replace("https://github.com/","");
+        let scrubbedAddress = this.address.replace("https://github.com/","");
+        if (scrubbedAddress.endsWith(".git")) 
+            scrubbedAddress = scrubbedAddress.slice(0, -4);
         if (await existBetaPluginInList(this.plugin, scrubbedAddress)) {
             ToastMessage(this.plugin, `This plugin is already in the list for beta testing`, 10);
             return;
