@@ -8,9 +8,7 @@ Simply add the GitHub repository path for the beta Obsidian plugin to the list f
 Learn more about BRAT in the DOCUMENTATION found at: https://tfthacker.com/BRAT
 
 ## Say Thank You
-If you are interested in reading articles written by me, please check out my articles on Medium: https://bit.ly/o42-medium.
-
-If you are enjoying this plugin then feel free to buying me a coffee on [https://ko-fi/TfTHacker](https://ko-fi.com/TfTHacker).
+If you are enjoying this plugin then feel free to buying me a coffee on [https://ko-fi/TfTHacker](https://ko-fi.com/TfTHacker) or stop by my website and check out some of my tools. https://tfthacker.com
 
 Please also help spread the word by sharing your enthusiasim for this plugin on Twitter, Reddit, or any other social media platform you regularly use. 
 
