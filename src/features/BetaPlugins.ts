@@ -118,10 +118,11 @@ export default class BetaPlugins {
      * @param   {boolean}             seeIfUpdatedOnly   if true, and updatePluginFiles true, will just check for updates, but not do the update. will report to user that there is a new plugin
      * @param   {boolean}             reportIfNotUpdted  if true, report if an update has not succed
      * @param   {string}              specifyVersion     if not empty, need to install a specified version instead of the value in manifest{-beta}.json
+     * @param   {boolean}             forceReinstall     if true, will force a reinstall of the plugin, even if it is already installed
      *
      * @return  {Promise<boolean>}                       true if succeeds
      */
-    async addPlugin(repositoryPath: string, updatePluginFiles = false, seeIfUpdatedOnly = false, reportIfNotUpdted = false, specifyVersion = ""): Promise<boolean> {
+    async addPlugin(repositoryPath: string, updatePluginFiles = false, seeIfUpdatedOnly = false, reportIfNotUpdted = false, specifyVersion = "", forceReinstall = false ): Promise<boolean> {
         const noticeTimeout = 10;
         let primaryManifest = await this.validateRepository(repositoryPath, true, false); // attempt to get manifest-beta.json
         const usingBetaManifest: boolean = primaryManifest ? true : false;
@@ -171,17 +172,24 @@ export default class BetaPlugins {
             return rFiles;
         }
 
-        if (updatePluginFiles === false) {
+        if (updatePluginFiles === false || forceReinstall === true) {
             const releaseFiles = await getRelease();
             if (releaseFiles === null) return false;
             await this.writeReleaseFilesToPluginFolder(primaryManifest.id, releaseFiles);
-            await addBetaPluginToList(this.plugin, repositoryPath, specifyVersion);
+            if(forceReinstall === false) //only add to list if not a force reinstall
+                await addBetaPluginToList(this.plugin, repositoryPath, specifyVersion);
             //@ts-ignore
             await this.plugin.app.plugins.loadManifests();
-            const versionText = specifyVersion === "" ? "" : ` (version: ${specifyVersion})`;
-            const msg = `${repositoryPath}${versionText}\nThe plugin has been registered with BRAT. You may still need to enable it the Community Plugin List.`;
-            this.plugin.log(msg, true);
-            ToastMessage(this.plugin, msg, noticeTimeout);
+            if (forceReinstall === true) {
+                await this.reloadPlugin(primaryManifest.id); //reload if enabled
+                this.plugin.log(`${repositoryPath} reinstalled`, true);
+                ToastMessage(this.plugin, `${repositoryPath}\nPlugin has been reinstalled and reloaded.`, noticeTimeout);
+            } else {
+                const versionText = specifyVersion === "" ? "" : ` (version: ${specifyVersion})`;
+                const msg = `${repositoryPath}${versionText}\nThe plugin has been registered with BRAT. You may still need to enable it the Community Plugin List.`;
+                this.plugin.log(msg, true);
+                ToastMessage(this.plugin, msg, noticeTimeout);
+            }
         } else {
             // test if the plugin needs to be updated
             // if a specified version is provided, then we shall skip the update
@@ -260,8 +268,8 @@ export default class BetaPlugins {
      *
      * @return  {Promise<void>}                  
      */
-    async updatePlugin(repositoryPath: string, onlyCheckDontUpdate = false, reportIfNotUpdted = false): Promise<boolean> {
-        const result = await this.addPlugin(repositoryPath, true, onlyCheckDontUpdate, reportIfNotUpdted);
+    async updatePlugin(repositoryPath: string, onlyCheckDontUpdate = false, reportIfNotUpdted = false, forceReinstall = false): Promise<boolean> {
+        const result = await this.addPlugin(repositoryPath, true, onlyCheckDontUpdate, reportIfNotUpdted, "", forceReinstall);
         if (result === false && onlyCheckDontUpdate === false)
         ToastMessage(this.plugin, `${repositoryPath}\nUpdate of plugin failed.`)
         return result;

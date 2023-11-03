@@ -2,8 +2,6 @@
 
 export const promotionalLinks = (containerEl: HTMLElement, settingsTab = true) : HTMLElement => {
 
-    const linkHeight = settingsTab ? 40 : 30;
-
     const linksDiv = containerEl.createEl("div");
     linksDiv.style.float = "right";
     

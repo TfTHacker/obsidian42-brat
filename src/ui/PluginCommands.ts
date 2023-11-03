@@ -53,12 +53,36 @@ export default class PluginCommands {
                 gfs.setSuggesterData(pluginList);
                 await gfs.display(async (results) => {
                     const msg = `Checking for updates for ${results.info}`;
-                    this.plugin.log(msg,true);
+                    this.plugin.log(msg, true);
                     ToastMessage(this.plugin, `\n${msg}`, 3);
                     await this.plugin.betaPlugins.updatePlugin(results.info, false, true);
                 });
             }
         },
+        {
+            id: "BRAT-reinstallOnePlugin",
+            icon: "BratIcon",
+            name: "Plugins: Choose a single plugin to reinstall",
+            showInRibbon: true,
+            callback: async () => {
+                const pluginSubListFrozenVersionNames = 
+                    new Set(this.plugin.settings.pluginSubListFrozenVersion.map(f => f.repo));
+                const pluginList: SuggesterItem[] = 
+                    Object
+                        .values(this.plugin.settings.pluginList)
+                        .filter((f) => !pluginSubListFrozenVersionNames.has(f))
+                        .map((m) => { return { display: m, info: m } });
+                const gfs = new GenericFuzzySuggester(this.plugin);
+                gfs.setSuggesterData(pluginList);
+                await gfs.display(async (results) => {
+                    console.log(results)
+                    const msg = `Reinstalling ${results.info}`;
+                    ToastMessage(this.plugin, `\n${msg}`, 3);
+                    this.plugin.log(msg, true);
+                    await this.plugin.betaPlugins.updatePlugin(results.info, false, false, true);
+                });
+            }
+        },        
         {
             id: "BRAT-restartPlugin",
             icon: "BratIcon",
