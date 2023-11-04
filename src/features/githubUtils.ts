@@ -68,7 +68,7 @@ export const grabCommmunityThemesList = async (debugLogging = true): Promise<JSO
 }
 
 
-export const grabCommmunityThemeCssFile = async (repositoryPath: string, betaVersion = false, debugLogging): Promise<string|null> => {
+export const grabCommmunityThemeCssFile = async (repositoryPath: string, betaVersion = false, debugLogging: boolean): Promise<string|null> => {
     const themesURL = `https://raw.githubusercontent.com/${repositoryPath}/HEAD/theme${betaVersion ? "-beta" : ""}.css`;
     try {
         const response = await request({ url: themesURL });
@@ -102,7 +102,7 @@ export const checksumForString = (str: string): string => {
     return checksum(str).toString();
 }
 
-export const grabChecksumOfThemeCssFile = async (repositoryPath: string, betaVersion, debugLogging): Promise<string> =>{
+export const grabChecksumOfThemeCssFile = async (repositoryPath: string, betaVersion: boolean, debugLogging: boolean): Promise<string> =>{
     const themeCSS = await grabCommmunityThemeCssFile(repositoryPath, betaVersion, debugLogging)
     return themeCSS ? checksumForString(themeCSS) : "0";
 }

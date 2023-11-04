@@ -42,11 +42,10 @@ export default class ThePlugin extends Plugin {
 			}
 			setTimeout(async () => {
 				this.bratAPI = new BratAPI(this);
-				globalThis.bratAPI = this.bratAPI;
+				(globalThis as any).bratAPI = this.bratAPI;
 			}, 500);
 		});
 	}
-
 	showRibbonButton(): void { this.ribbonIcon = this.addRibbonIcon("BratIcon", "BRAT", async () => this.commands.ribbonDisplayCommands()) }
 
 	log(textToLog: string, verbose = false): void { logger(this, textToLog, verbose) }

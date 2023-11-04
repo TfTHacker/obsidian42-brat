@@ -96,7 +96,7 @@ export class BratSettingsTab extends PluginSettingTab {
 						if (btn.buttonEl.textContent === "")
 							btn.setButtonText("Click once more to confirm removal");
 						else {
-							btn.buttonEl.parentElement.parentElement.remove();
+							btn.buttonEl.parentElement!.parentElement!.remove();
 							await this.plugin.betaPlugins.deletePlugin(bp)
 						}
 					});
@@ -123,7 +123,7 @@ export class BratSettingsTab extends PluginSettingTab {
 						if (btn.buttonEl.textContent === "")
 							btn.setButtonText("Click once more to confirm removal");
 						else {
-							btn.buttonEl.parentElement.parentElement.remove();
+							btn.buttonEl.parentElement!.parentElement!.remove();
 							await this.plugin.betaPlugins.deletePlugin(bp.repo);
 						}
 					});
@@ -154,7 +154,7 @@ export class BratSettingsTab extends PluginSettingTab {
 						if (btn.buttonEl.textContent === "")
 							btn.setButtonText("Click once more to confirm removal");
 						else {
-							btn.buttonEl.parentElement.parentElement.remove();
+							btn.buttonEl.parentElement!.parentElement!.remove();
 							await themeDelete(this.plugin, bp.repo);
 						}
 					});

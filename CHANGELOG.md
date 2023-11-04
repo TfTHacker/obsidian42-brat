@@ -1,6 +1,7 @@
 # 0.7.1 (Pending)
 - New: Can now force a reinstall of a beta plugin. This might be useful when a local file gets corrupted and you want to replace it with the current file in the release. Addresses https://github.com/TfTHacker/obsidian42-brat/issues/62)
 - Fix: if the url ends with .git, the Add New Plugin form will strip the .git extension. This makes it easier to sue the github copy code button url with BRAT (fix for https://github.com/TfTHacker/obsidian42-brat/issues/55)
+- Updates: updated to newest esbuild and also all project dependenices
 
 # 0.7.0 
 ## Major updates to **THEMES** support

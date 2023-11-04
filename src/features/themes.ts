@@ -88,7 +88,7 @@ export const themesCheckAndUpdates = async (plugin: ThePlugin, showInfo: boolean
     const msg2 = `Checking for beta theme updates COMPLETED`;
     plugin.log(msg2, true);
     if (showInfo) {
-        if(plugin.settings.notificationsEnabled) newNotice.hide();
+        if(plugin.settings.notificationsEnabled) newNotice!.hide();
         ToastMessage(plugin, msg2);
     }
 } 

@@ -5,7 +5,7 @@
   "main": "main.js",
   "scripts": {
     "dev": "node esbuild.config.mjs",
-    "build": "node esbuild.config.mjs production",
+    "build": "tsc -noEmit -skipLibCheck && node esbuild.config.mjs production",
     "lint": "eslint . --ext .ts"
   },
   "author": "TfT Hacker",
@@ -18,8 +18,9 @@
     "@types/node": "^20.8.10",
     "@typescript-eslint/eslint-plugin": "^6.9.1",
     "@typescript-eslint/parser": "^6.9.1",
-    "esbuild": "0.16.7",
-    "eslint": "^8.52.0",
+    "builtin-modules": "3.3.0",
+    "eslint": "^8.53.0",
+    "esbuild": "0.19.5",
     "obsidian": "latest",
     "tslib": "^2.6.2",
     "typescript": "5.2.2"

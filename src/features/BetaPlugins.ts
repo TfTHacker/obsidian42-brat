@@ -104,8 +104,8 @@ export default class BetaPlugins {
             // if plugin folder doesnt exist or manifest.json doesn't exist, create it and save the plugin files
             await adapter.mkdir(pluginTargetFolderPath);
         }
-        await adapter.write(pluginTargetFolderPath + "main.js", relFiles.mainJs);
-        await adapter.write(pluginTargetFolderPath + "manifest.json", relFiles.manifest);
+        await adapter.write(pluginTargetFolderPath + "main.js", relFiles.mainJs!);
+        await adapter.write(pluginTargetFolderPath + "manifest.json", relFiles.manifest!);
         if (relFiles.styles) await adapter.write(pluginTargetFolderPath + "styles.css", relFiles.styles);
     }
 
@@ -223,7 +223,7 @@ export default class BetaPlugins {
                 if (seeIfUpdatedOnly) { // dont update, just report it
                     const msg = `There is an update available for ${primaryManifest.id} from version ${localManifestJSON.version} to ${primaryManifest.version}. `;
                     this.plugin.log(msg + `[Release Info](https://github.com/${repositoryPath}/releases/tag/${primaryManifest.version})`, false);
-                    ToastMessage(this.plugin, msg, 30, async () => { window.open(`https://github.com/${repositoryPath}/releases/tag/${primaryManifest.version}`)});
+                    ToastMessage(this.plugin, msg, 30, async () => { window.open(`https://github.com/${repositoryPath}/releases/tag/${primaryManifest!.version}`)});
                 } else {
                     await this.writeReleaseFilesToPluginFolder(primaryManifest.id, releaseFiles);
                     //@ts-ignore
@@ -232,7 +232,7 @@ export default class BetaPlugins {
                     if (this.plugin.app.plugins.plugins[primaryManifest.id]?.manifest) await this.reloadPlugin(primaryManifest.id); //reload if enabled
                     const msg = `${primaryManifest.id}\nPlugin has been updated from version ${localManifestJSON.version} to ${primaryManifest.version}. `;
                     this.plugin.log(msg + `[Release Info](https://github.com/${repositoryPath}/releases/tag/${primaryManifest.version})`, false);
-                    ToastMessage(this.plugin, msg, 30, async () => { window.open(`https://github.com/${repositoryPath}/releases/tag/${primaryManifest.version}`) } );
+                    ToastMessage(this.plugin, msg, 30, async () => { window.open(`https://github.com/${repositoryPath}/releases/tag/${primaryManifest!.version}`) } );
                 }
             } else
                 if (reportIfNotUpdted) ToastMessage(this.plugin, `No update available for ${repositoryPath}`, 3);
@@ -301,7 +301,7 @@ export default class BetaPlugins {
         const msg2 = `Checking for plugin updates COMPLETED`;
         this.plugin.log(msg2, true);
         if (showInfo) {
-            newNotice.hide();
+            newNotice!.hide();
             ToastMessage(this.plugin, msg2, 10);
         }
     }

@@ -38,7 +38,7 @@ export class GenericFuzzySuggester extends FuzzySuggestModal<SuggesterItem>{
     renderSuggestion(item: FuzzyMatch<SuggesterItem>, el: HTMLElement): void { el.createEl('div', { text: item.item.display }) }
 
     enterTrigger(evt: KeyboardEvent): void {
-        const selectedText = document.querySelector(".suggestion-item.is-selected div").textContent;
+        const selectedText = document.querySelector(".suggestion-item.is-selected div")!.textContent;
         const item = this.data.find(i => i.display === selectedText);
         if (item) {
             this.invokeCallback(item, evt);

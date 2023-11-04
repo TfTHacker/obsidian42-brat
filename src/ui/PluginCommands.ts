@@ -75,7 +75,6 @@ export default class PluginCommands {
                 const gfs = new GenericFuzzySuggester(this.plugin);
                 gfs.setSuggesterData(pluginList);
                 await gfs.display(async (results) => {
-                    console.log(results)
                     const msg = `Reinstalling ${results.info}`;
                     ToastMessage(this.plugin, `\n${msg}`, 3);
                     this.plugin.log(msg, true);
@@ -139,7 +138,7 @@ export default class PluginCommands {
             showInRibbon: true,
             callback: async () => {
                 const communityPlugins = await grabCommmunityPluginList(this.plugin.settings.debuggingMode);
-                const communityPluginList: SuggesterItem[] = Object.values(communityPlugins).map((p) => { return { display: `Plugin: ${p.name}  (${p.repo})`, info: p.repo } });
+                const communityPluginList: SuggesterItem[] = Object.values(communityPlugins!).map((p) => { return { display: `Plugin: ${p.name}  (${p.repo})`, info: p.repo } });
                 const bratList: SuggesterItem[] = Object.values(this.plugin.settings.pluginList).map((p) => { return { display: "BRAT: " + p, info: p } });
                 communityPluginList.forEach(si => bratList.push(si));
                 const gfs = new GenericFuzzySuggester(this.plugin);
@@ -156,7 +155,7 @@ export default class PluginCommands {
             showInRibbon: true,
             callback: async () => {
                 const communityTheme = await grabCommmunityThemesList(this.plugin.settings.debuggingMode);
-                const communityThemeList: SuggesterItem[] = Object.values(communityTheme).map((p) => { return { display: `Theme: ${p.name}  (${p.repo})`, info: p.repo } });
+                const communityThemeList: SuggesterItem[] = Object.values(communityTheme!).map((p) => { return { display: `Theme: ${p.name}  (${p.repo})`, info: p.repo } });
                 const gfs = new GenericFuzzySuggester(this.plugin);
                 gfs.setSuggesterData(communityThemeList);
                 await gfs.display(async (results) => {
