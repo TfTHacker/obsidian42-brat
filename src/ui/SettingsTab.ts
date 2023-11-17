@@ -56,7 +56,6 @@ export class BratSettingsTab extends PluginSettingTab {
 						this.plugin.ribbonIcon.remove();
 					else
 						this.plugin.showRibbonButton();
-					await this.plugin.saveSettings();
 				});
 			})			
 
