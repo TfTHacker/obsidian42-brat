@@ -1,2 +1,22 @@
-npm node_modules
-build
+# first use !negation to whitelist stuff that was ignored by default
+# directories
+!.github/
+!.config/
+# files
+!.commitlintrc.cjs
+!.prettierrc.json
+!.remarkrc.cjs
+
+# ignoring css still
+# *.css
+
+# Dependency directories
+node_modules/
+jspm_packages/
+pnpm-lock.yaml
+package-lock.json
+
+.vscode/
+
+# Obsidian
+main.js
