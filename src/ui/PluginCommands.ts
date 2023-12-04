@@ -38,7 +38,7 @@ export default class PluginCommands {
       name: 'Plugins: Check for updates to all beta plugins and UPDATE',
       showInRibbon: true,
       callback: async () => {
-        await this.plugin.betaPlugins.checkForUpdatesAndInstallUpdates(true, false);
+        await this.plugin.betaPlugins.checkForPluginUpdatesAndInstallUpdates(true, false);
       },
     },
     {
@@ -47,7 +47,7 @@ export default class PluginCommands {
       name: "Plugins: Only check for updates to beta plugins, but don't Update",
       showInRibbon: true,
       callback: async () => {
-        await this.plugin.betaPlugins.checkForUpdatesAndInstallUpdates(true, true);
+        await this.plugin.betaPlugins.checkForPluginUpdatesAndInstallUpdates(true, true);
       },
     },
     {
@@ -68,7 +68,7 @@ export default class PluginCommands {
         gfs.setSuggesterData(pluginList);
         gfs.display((results) => {
           const msg = `Checking for updates for ${results.info as string}`;
-          this.plugin.log(msg, true);
+          void this.plugin.log(msg, true);
           toastMessage(this.plugin, `\n${msg}`, 3);
           void this.plugin.betaPlugins.updatePlugin(results.info as string, false, true);
         });
@@ -93,7 +93,7 @@ export default class PluginCommands {
         gfs.display((results) => {
           const msg = `Reinstalling ${results.info as string}`;
           toastMessage(this.plugin, `\n${msg}`, 3);
-          this.plugin.log(msg, true);
+          void this.plugin.log(msg, true);
           void this.plugin.betaPlugins.updatePlugin(
             results.info as string,
             false,
@@ -140,7 +140,7 @@ export default class PluginCommands {
         const gfs = new GenericFuzzySuggester(this.plugin);
         gfs.setSuggesterData(pluginList);
         gfs.display((results) => {
-          this.plugin.log(`${results.display} plugin disabled`, false);
+          void this.plugin.log(`${results.display} plugin disabled`, false);
           if (this.plugin.settings.debuggingMode) console.log(results.info);
           void this.plugin.app.plugins.disablePluginAndSave(results.info as string);
         });
@@ -160,7 +160,7 @@ export default class PluginCommands {
         const gfs = new GenericFuzzySuggester(this.plugin);
         gfs.setSuggesterData(pluginList);
         gfs.display((results) => {
-          this.plugin.log(`${results.display} plugin enabled`, false);
+          void this.plugin.log(`${results.display} plugin enabled`, false);
           void this.plugin.app.plugins.enablePluginAndSave(results.info as string);
         });
       },

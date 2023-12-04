@@ -91,7 +91,7 @@ export const themeSave = async (
     msg = `${manifestInfo.name} theme updated from ${cssGithubRepository}.`;
   }
 
-  plugin.log(msg + `[Theme Info](https://github.com/${cssGithubRepository})`, false);
+  void plugin.log(msg + `[Theme Info](https://github.com/${cssGithubRepository})`, false);
   toastMessage(plugin, `${msg}`, 20, (): void => {
     window.open(`https://github.com/${cssGithubRepository}`);
   });
@@ -115,7 +115,7 @@ export const themesCheckAndUpdates = async (
   }
   let newNotice: Notice | undefined;
   const msg1 = `Checking for beta theme updates STARTED`;
-  plugin.log(msg1, true);
+  await plugin.log(msg1, true);
   if (showInfo && plugin.settings.notificationsEnabled)
     newNotice = new Notice(`BRAT\n${msg1}`, 30000);
   for (const t of plugin.settings.themesList) {
@@ -136,7 +136,9 @@ export const themesCheckAndUpdates = async (
     if (lastUpdateOnline !== t.lastUpdate) await themeSave(plugin, t.repo, false);
   }
   const msg2 = `Checking for beta theme updates COMPLETED`;
-  plugin.log(msg2, true);
+  (async (): Promise<void> => {
+    await plugin.log(msg2, true);
+  })();
   if (showInfo) {
     if (plugin.settings.notificationsEnabled && newNotice) newNotice.hide();
     toastMessage(plugin, msg2);
@@ -156,7 +158,7 @@ export const themeDelete = (plugin: ThePlugin, cssGithubRepository: string): voi
   );
   void plugin.saveSettings();
   const msg = `Removed ${cssGithubRepository} from BRAT themes list and will no longer be updated. However, the theme files still exist in the vault. To remove them, go into Settings > Appearance and remove the theme.`;
-  plugin.log(msg, true);
+  void plugin.log(msg, true);
   toastMessage(plugin, `${msg}`);
 };
 

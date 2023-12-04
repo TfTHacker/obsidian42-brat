@@ -199,6 +199,16 @@ export default class BetaPlugins {
     specifyVersion = '',
     forceReinstall = false
   ): Promise<boolean> {
+    console.log(
+      'BRAT: addPlugin',
+      repositoryPath,
+      updatePluginFiles,
+      seeIfUpdatedOnly,
+      reportIfNotUpdted,
+      specifyVersion,
+      forceReinstall
+    );
+
     const noticeTimeout = 10;
     // attempt to get manifest-beta.json
     let primaryManifest = await this.validateRepository(repositoryPath, true, false);
@@ -209,7 +219,7 @@ export default class BetaPlugins {
 
     if (primaryManifest === null) {
       const msg = `${repositoryPath}\nA manifest.json or manifest-beta.json file does not exist in the root directory of the repository. This plugin cannot be installed.`;
-      this.plugin.log(msg, true);
+      await this.plugin.log(msg, true);
       toastMessage(this.plugin, `${msg}`, noticeTimeout);
       return false;
     }
@@ -218,7 +228,7 @@ export default class BetaPlugins {
       const msg = `${repositoryPath}\nThe manifest${
         usingBetaManifest ? '-beta' : ''
       }.json file in the root directory of the repository does not have a version number in the file. This plugin cannot be installed.`;
-      this.plugin.log(msg, true);
+      await this.plugin.log(msg, true);
       toastMessage(this.plugin, `${msg}`, noticeTimeout);
       return false;
     }
@@ -234,15 +244,15 @@ export default class BetaPlugins {
           `version of the app needs to be ${primaryManifest.minAppVersion}, ` +
           `but this installation of Obsidian is ${apiVersion}. \n\nYou will need to update your ` +
           `Obsidian to use this plugin or contact the plugin developer for more information.`;
-        this.plugin.log(msg, true);
+        await this.plugin.log(msg, true);
         toastMessage(this.plugin, `${msg}`, 30);
         return false;
       }
     }
 
-    type ErrnoType = {
+    interface ErrnoType {
       errno: number;
-    };
+    }
 
     const getRelease = async () => {
       const rFiles = await this.getAllReleaseFiles(
@@ -258,7 +268,7 @@ export default class BetaPlugins {
 
       if (usingBetaManifest || rFiles.mainJs === null) {
         const msg = `${repositoryPath}\nThe release is not complete and cannot be download. main.js is missing from the Release`;
-        this.plugin.log(msg, true);
+        await this.plugin.log(msg, true);
         toastMessage(this.plugin, `${msg}`, noticeTimeout);
         return null;
       }
@@ -276,7 +286,7 @@ export default class BetaPlugins {
       if (forceReinstall) {
         // reload if enabled
         await this.reloadPlugin(primaryManifest.id);
-        this.plugin.log(`${repositoryPath} reinstalled`, true);
+        await this.plugin.log(`${repositoryPath} reinstalled`, true);
         toastMessage(
           this.plugin,
           `${repositoryPath}\nPlugin has been reinstalled and reloaded.`,
@@ -285,7 +295,7 @@ export default class BetaPlugins {
       } else {
         const versionText = specifyVersion === '' ? '' : ` (version: ${specifyVersion})`;
         const msg = `${repositoryPath}${versionText}\nThe plugin has been registered with BRAT. You may still need to enable it the Community Plugin List.`;
-        this.plugin.log(msg, true);
+        await this.plugin.log(msg, true);
         toastMessage(this.plugin, msg, noticeTimeout);
       }
     } else {
@@ -344,10 +354,10 @@ export default class BetaPlugins {
         if (seeIfUpdatedOnly) {
           // dont update, just report it
           const msg = `There is an update available for ${primaryManifest.id} from version ${localManifestJson.version} to ${primaryManifest.version}. `;
-          this.plugin.log(
+          await this.plugin.log(
             msg +
               `[Release Info](https://github.com/${repositoryPath}/releases/tag/${primaryManifest.version})`,
-            false
+            true
           );
           toastMessage(this.plugin, msg, 30, () => {
             if (primaryManifest) {
@@ -361,10 +371,10 @@ export default class BetaPlugins {
           await this.plugin.app.plugins.loadManifests();
           await this.reloadPlugin(primaryManifest.id);
           const msg = `${primaryManifest.id}\nPlugin has been updated from version ${localManifestJson.version} to ${primaryManifest.version}. `;
-          this.plugin.log(
+          await this.plugin.log(
             msg +
               `[Release Info](https://github.com/${repositoryPath}/releases/tag/${primaryManifest.version})`,
-            false
+            true
           );
           toastMessage(this.plugin, msg, 30, () => {
             if (primaryManifest) {
@@ -429,7 +439,7 @@ export default class BetaPlugins {
    * @param showInfo - should this with a started/completed message - useful when ran from CP
    *
    */
-  async checkForUpdatesAndInstallUpdates(
+  async checkForPluginUpdatesAndInstallUpdates(
     showInfo = false,
     onlyCheckDontUpdate = false
   ): Promise<void> {
@@ -439,7 +449,7 @@ export default class BetaPlugins {
     }
     let newNotice: Notice | undefined;
     const msg1 = `Checking for plugin updates STARTED`;
-    this.plugin.log(msg1, true);
+    await this.plugin.log(msg1, true);
     if (showInfo && this.plugin.settings.notificationsEnabled)
       newNotice = new Notice(`BRAT\n${msg1}`, 30000);
     const pluginSubListFrozenVersionNames = new Set(
@@ -452,7 +462,7 @@ export default class BetaPlugins {
       await this.updatePlugin(bp, onlyCheckDontUpdate);
     }
     const msg2 = `Checking for plugin updates COMPLETED`;
-    this.plugin.log(msg2, true);
+    await this.plugin.log(msg2, true);
     if (showInfo) {
       if (newNotice) {
         newNotice.hide();
@@ -469,7 +479,7 @@ export default class BetaPlugins {
    */
   deletePlugin(repositoryPath: string): void {
     const msg = `Removed ${repositoryPath} from BRAT plugin list`;
-    this.plugin.log(msg, true);
+    void this.plugin.log(msg, true);
     this.plugin.settings.pluginList = this.plugin.settings.pluginList.filter(
       (b) => b !== repositoryPath
     );

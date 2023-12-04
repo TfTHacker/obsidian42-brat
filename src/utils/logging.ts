@@ -11,11 +11,11 @@ import { getDailyNoteSettings } from 'obsidian-daily-notes-interface';
  * @param verboseLoggingOn - True if should only be logged if verbose logging is enabled
  *
  */
-export function logger(
+export async function logger(
   plugin: ThePlugin,
   textToLog: string,
   verboseLoggingOn = false
-): void {
+): Promise<void> {
   if (plugin.settings.debuggingMode) console.log('BRAT: ' + textToLog);
   if (plugin.settings.loggingEnabled) {
     if (!plugin.settings.loggingVerboseEnabled && verboseLoggingOn) {
@@ -31,14 +31,13 @@ export function logger(
       const machineName = Platform.isDesktop ? os.hostname() : 'MOBILE';
       let output =
         dateOutput + ' ' + machineName + ' ' + textToLog.replace('\n', ' ') + '\n\n';
-      (async () => {
-        if (await plugin.app.vault.adapter.exists(fileName)) {
-          const fileContents = await plugin.app.vault.adapter.read(fileName);
-          output = output + fileContents;
-          const file = plugin.app.vault.getAbstractFileByPath(fileName) as TFile;
-          void plugin.app.vault.modify(file, output);
-        } else void plugin.app.vault.create(fileName, output);
-      })();
+
+      if (await plugin.app.vault.adapter.exists(fileName)) {
+        const fileContents = await plugin.app.vault.adapter.read(fileName);
+        output = output + fileContents;
+        const file = plugin.app.vault.getAbstractFileByPath(fileName) as TFile;
+        await plugin.app.vault.modify(file, output);
+      } else await plugin.app.vault.create(fileName, output);
     }
   }
 }

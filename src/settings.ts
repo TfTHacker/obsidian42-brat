@@ -18,7 +18,6 @@ export interface Settings {
   themesList: ThemeInforamtion[];
   updateAtStartup: boolean;
   updateThemesAtStartup: boolean;
-  ribbonIconEnabled: boolean;
   loggingEnabled: boolean;
   loggingPath: string;
   loggingVerboseEnabled: boolean;
@@ -30,13 +29,12 @@ export const DEFAULT_SETTINGS: Settings = {
   pluginList: [],
   pluginSubListFrozenVersion: [],
   themesList: [],
-  updateAtStartup: false,
-  updateThemesAtStartup: false,
-  ribbonIconEnabled: true,
+  updateAtStartup: true,
+  updateThemesAtStartup: true,
   loggingEnabled: false,
   loggingPath: 'BRAT-log',
   loggingVerboseEnabled: false,
-  debuggingMode: true,
+  debuggingMode: false,
   notificationsEnabled: true,
 };
 

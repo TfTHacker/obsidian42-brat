@@ -30,7 +30,7 @@ export default class ThePlugin extends Plugin {
       // let obsidian load and calm down before checking for updates
       if (this.settings.updateAtStartup) {
         setTimeout(() => {
-          void this.betaPlugins.checkForUpdatesAndInstallUpdates(false);
+          void this.betaPlugins.checkForPluginUpdatesAndInstallUpdates(false);
         }, 60000);
       }
       if (this.settings.updateThemesAtStartup) {
@@ -49,8 +49,8 @@ export default class ThePlugin extends Plugin {
     });
   }
 
-  log(textToLog: string, verbose = false): void {
-    logger(this, textToLog, verbose);
+  async log(textToLog: string, verbose = false): Promise<void> {
+    await logger(this, textToLog, verbose);
   }
 
   onunload(): void {
