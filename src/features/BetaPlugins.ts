@@ -240,6 +240,10 @@ export default class BetaPlugins {
       }
     }
 
+    type ErrnoType = {
+      errno: number;
+    };
+
     const getRelease = async () => {
       const rFiles = await this.getAllReleaseFiles(
         repositoryPath,
@@ -295,7 +299,7 @@ export default class BetaPlugins {
           pluginTargetFolderPath + 'manifest.json'
         );
       } catch (e) {
-        if (e.errno === -4058 || e.errno === -2) {
+        if ((e as ErrnoType).errno === -4058 || (e as ErrnoType).errno === -2) {
           // file does not exist, try installing the plugin
           await this.addPlugin(
             repositoryPath,
