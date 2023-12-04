@@ -2,10 +2,10 @@
 
 ### New
 
-- In order to better conform with Obsidian's naming policies for settings screen, Obsidian42-BRAT is now just known as BRAT in the Settings Tab.
-- In settings, when a plugin or theme are listed, they are now links to their github repositories. Small addition, but very nice to quickly jump to a repo for plugins or themes being tested. Addresses FR #67
+- To better conform with Obsidian's naming policies for the settings screen, Obsidian42-BRAT is now just known as BRAT in the Settings Tab.
+- In settings, when a plugin or theme is listed, they are now linked to their GitHub repositories. It's a small addition, but it's very nice to quickly jump to a repo for plugins or themes being tested. Addresses FR #[67](https://github.com/TfTHacker/obsidian42-brat/issues/67)
 - Removed the Ribbon icon toggle from settings, as this is now controlled natively by Obsidian since v1.1.0
-- **Major** code refactoring - the goal was to make this strongly typed according to Typescript rules. Additionally applied a new protocal to the formatting of the code. The result is extensive changes in all files. While this won't mean a lot to users, it will make the code easier to maintain, as well as making the code easier to understand for others.
+- **Major** code refactoring - the goal was to make this strongly typed according to Typescript rules and additionally applied a new protocol to the formatting of the code. The result is extensive changes in all files. While this won't mean a lot to users, it will make the code easier to maintain and understand for others.
 - chore: update all dependencies.
 
 # 0.7.1
