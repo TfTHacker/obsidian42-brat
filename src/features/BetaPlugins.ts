@@ -48,24 +48,6 @@ export default class BetaPlugins {
   }
 
   /**
-   * Add a new beta plugin by opening a link "obsidian://brat?plugin=..."
-   * @param params - ObsidianProtocolData
-   */
-  async addNewPluginViaObsidianProtocol(params: ObsidianProtocolData): Promise<void> {
-    if (!params.plugin) {
-      toastMessage(
-        this.plugin,
-        `Could not locate the plugin repository from the URL.`,
-        10
-      );
-      return;
-    }
-    const modal = new AddNewPluginModal(this.plugin, this);
-    modal.address = params.plugin;
-    await modal.submitForm();
-  }
-
-  /**
    * Validates that a GitHub repository is plugin
    *
    * @param repositoryPath - GithubUser/RepositoryName (example: TfThacker/obsidian42-brat)

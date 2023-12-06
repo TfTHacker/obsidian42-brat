@@ -26,7 +26,7 @@ export default class AddNewTheme extends Modal {
     if (existBetaThemeinInList(this.plugin, scrubbedAddress)) {
       toastMessage(
         this.plugin,
-        `This plugin is already in the list for beta testing`,
+        `This theme is already in the list for beta testing`,
         10
       );
       return;

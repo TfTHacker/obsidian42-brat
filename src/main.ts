@@ -1,4 +1,4 @@
-import { Plugin } from 'obsidian';
+import { ObsidianProtocolData, Plugin } from 'obsidian';
 import { BratSettingsTab } from './ui/SettingsTab';
 import type { Settings } from './settings';
 import { DEFAULT_SETTINGS } from './settings';
@@ -8,6 +8,9 @@ import { logger } from './utils/logging';
 import PluginCommands from './ui/PluginCommands';
 import { themesCheckAndUpdates } from './features/themes';
 import BratAPI from './utils/BratAPI';
+import { toastMessage } from './utils/notifications';
+import AddNewTheme from './ui/AddNewTheme';
+import AddNewPluginModal from './ui/AddNewPluginModal';
 
 export default class ThePlugin extends Plugin {
   APP_NAME = "Obsidian42 - Beta Reviewer's Auto-update Tool (BRAT)";
@@ -25,7 +28,7 @@ export default class ThePlugin extends Plugin {
 
     addIcons();
     this.showRibbonButton();
-    this.registerObsidianProtocolHandler('brat', this.betaPlugins.addNewPluginViaObsidianProtocol.bind(this.betaPlugins));
+    this.registerObsidianProtocolHandler('brat', this.obsidianProtocolHandler);
 
     this.app.workspace.onLayoutReady(() => {
       // let obsidian load and calm down before checking for updates
@@ -65,5 +68,25 @@ export default class ThePlugin extends Plugin {
 
   async saveSettings(): Promise<void> {
     await this.saveData(this.settings);
+  }
+
+  obsidianProtocolHandler = async (params: ObsidianProtocolData) => {
+    if (!params.plugin && !params.theme) {
+      toastMessage(
+        this,
+        `Could not locate the repository from the URL.`,
+        10
+      );
+      return;
+    }
+
+    for (const which of ['plugin', 'theme']) {
+      if (params[which]) {
+        const modal = which === 'plugin' ? new AddNewPluginModal(this, this.betaPlugins) : new AddNewTheme(this);
+        modal.address = params[which];
+        await modal.submitForm();
+        return;
+      }
+    }
   }
 }
