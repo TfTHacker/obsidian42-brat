@@ -25,6 +25,7 @@ export default class ThePlugin extends Plugin {
 
     addIcons();
     this.showRibbonButton();
+    this.registerObsidianProtocolHandler('brat', this.betaPlugins.addNewPluginViaObsidianProtocol.bind(this.betaPlugins));
 
     this.app.workspace.onLayoutReady(() => {
       // let obsidian load and calm down before checking for updates
