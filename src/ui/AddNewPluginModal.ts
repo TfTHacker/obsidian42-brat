@@ -63,6 +63,7 @@ export default class AddNewPluginModal extends Modal {
         textEl.setPlaceholder(
           'Repository (example: https://github.com/GitubUserName/repository-name)'
         );
+        textEl.setValue(this.address);
         textEl.onChange((value) => {
           this.address = value.trim();
         });
