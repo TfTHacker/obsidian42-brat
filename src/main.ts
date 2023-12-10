@@ -84,7 +84,7 @@ export default class ThePlugin extends Plugin {
       if (params[which]) {
         const modal = which === 'plugin' ? new AddNewPluginModal(this, this.betaPlugins) : new AddNewTheme(this);
         modal.address = params[which];
-        await modal.submitForm();
+        modal.open();
         return;
       }
     }
