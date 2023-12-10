@@ -3,7 +3,7 @@
 ### New
 
 - Obsidian Protocol handler for making installing plugins and themes easier by using Obsidian's protocol feature. See https://tfthacker.com/brat-protocol for more information.
-  This new feature contributed by @mProjectsCode (Thank you!).
+  This new feature contributed by @RyotaUshio (Thank you!).
 - chore: updated all dependencies.
 
 ### Fix
