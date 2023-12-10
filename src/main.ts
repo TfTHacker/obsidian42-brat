@@ -1,4 +1,5 @@
-import { ObsidianProtocolData, Plugin } from 'obsidian';
+import { Plugin } from 'obsidian';
+import type { ObsidianProtocolData } from 'obsidian';
 import { BratSettingsTab } from './ui/SettingsTab';
 import type { Settings } from './settings';
 import { DEFAULT_SETTINGS } from './settings';
@@ -13,7 +14,7 @@ import AddNewTheme from './ui/AddNewTheme';
 import AddNewPluginModal from './ui/AddNewPluginModal';
 
 export default class ThePlugin extends Plugin {
-  APP_NAME = "Obsidian42 - Beta Reviewer's Auto-update Tool (BRAT)";
+  APP_NAME = 'BRAT';
   APP_ID = 'obsidian42-brat';
   settings: Settings = DEFAULT_SETTINGS;
   betaPlugins = new BetaPlugins(this);
@@ -21,7 +22,7 @@ export default class ThePlugin extends Plugin {
   bratApi: BratAPI = new BratAPI(this);
 
   async onload(): Promise<void> {
-    console.log('loading Obsidian42 - BRAT');
+    console.log('loading ' + this.APP_NAME);
 
     await this.loadSettings();
     this.addSettingTab(new BratSettingsTab(this.app, this));
@@ -70,23 +71,22 @@ export default class ThePlugin extends Plugin {
     await this.saveData(this.settings);
   }
 
-  obsidianProtocolHandler = async (params: ObsidianProtocolData) => {
+  obsidianProtocolHandler = (params: ObsidianProtocolData) => {
     if (!params.plugin && !params.theme) {
-      toastMessage(
-        this,
-        `Could not locate the repository from the URL.`,
-        10
-      );
+      toastMessage(this, `Could not locate the repository from the URL.`, 10);
       return;
     }
 
     for (const which of ['plugin', 'theme']) {
       if (params[which]) {
-        const modal = which === 'plugin' ? new AddNewPluginModal(this, this.betaPlugins) : new AddNewTheme(this);
+        const modal =
+          which === 'plugin' ?
+            new AddNewPluginModal(this, this.betaPlugins)
+          : new AddNewTheme(this);
         modal.address = params[which];
         modal.open();
         return;
       }
     }
-  }
+  };
 }

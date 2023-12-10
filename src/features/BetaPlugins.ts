@@ -199,15 +199,16 @@ export default class BetaPlugins {
     specifyVersion = '',
     forceReinstall = false
   ): Promise<boolean> {
-    console.log(
-      'BRAT: addPlugin',
-      repositoryPath,
-      updatePluginFiles,
-      seeIfUpdatedOnly,
-      reportIfNotUpdted,
-      specifyVersion,
-      forceReinstall
-    );
+    if (this.plugin.settings.debuggingMode)
+      console.log(
+        'BRAT: addPlugin',
+        repositoryPath,
+        updatePluginFiles,
+        seeIfUpdatedOnly,
+        reportIfNotUpdted,
+        specifyVersion,
+        forceReinstall
+      );
 
     const noticeTimeout = 10;
     // attempt to get manifest-beta.json
@@ -266,7 +267,10 @@ export default class BetaPlugins {
       if (usingBetaManifest || rFiles.manifest === '')
         rFiles.manifest = JSON.stringify(primaryManifest);
 
-      if (usingBetaManifest || rFiles.mainJs === null) {
+      if (this.plugin.settings.debuggingMode)
+        console.log('BRAT: rFiles.manifest', usingBetaManifest, rFiles);
+
+      if (rFiles.mainJs === null) {
         const msg = `${repositoryPath}\nThe release is not complete and cannot be download. main.js is missing from the Release`;
         await this.plugin.log(msg, true);
         toastMessage(this.plugin, `${msg}`, noticeTimeout);

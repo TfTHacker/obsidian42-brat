@@ -1,3 +1,15 @@
+# 0.8.1
+
+### New
+
+- Obsidian Protocol handler for making installing plugins and themes easier by using Obsidian's protocol feature. See https://tfthacker.com/brat-protocol for more information.
+  This new feature contributed by @mProjectsCode (Thank you!).
+- chore: updated all dependencies.
+
+### Fix
+
+- Bug introduced with 8.02 when manifest-beta.json is used that a plugin will not installed. (https://github.com/TfTHacker/obsidian42-brat/issues/71) Thank you for reporting this @mProjectsCode.
+
 # 0.8.0
 
 ### New

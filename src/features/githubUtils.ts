@@ -47,8 +47,11 @@ export const grabManifestJsonFromRepository = async (
     GITHUB_RAW_USERCONTENT_PATH +
     repositoryPath +
     (rootManifest ? '/HEAD/manifest.json' : '/HEAD/manifest-beta.json');
+  if (debugLogging)
+    console.log('grabManifestJsonFromRepository manifestJsonPath', manifestJsonPath);
   try {
     const response: string = await request({ url: manifestJsonPath });
+    if (debugLogging) console.log('grabManifestJsonFromRepository response', response);
     return response === '404: Not Found' ? null : (
         ((await JSON.parse(response)) as PluginManifest)
       );

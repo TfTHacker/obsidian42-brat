@@ -24,11 +24,7 @@ export default class AddNewTheme extends Modal {
     if (this.address === '') return;
     const scrubbedAddress = this.address.replace('https://github.com/', '');
     if (existBetaThemeinInList(this.plugin, scrubbedAddress)) {
-      toastMessage(
-        this.plugin,
-        `This theme is already in the list for beta testing`,
-        10
-      );
+      toastMessage(this.plugin, `This theme is already in the list for beta testing`, 10);
       return;
     }
 
