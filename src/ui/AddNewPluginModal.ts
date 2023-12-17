@@ -14,6 +14,7 @@ export default class AddNewPluginModal extends Modal {
   address: string;
   openSettingsTabAfterwards: boolean;
   readonly useFrozenVersion: boolean;
+  enableAfterInstall: boolean;
   version: string;
 
   constructor(
@@ -28,6 +29,7 @@ export default class AddNewPluginModal extends Modal {
     this.address = '';
     this.openSettingsTabAfterwards = openSettingsTabAfterwards;
     this.useFrozenVersion = useFrozenVersion;
+    this.enableAfterInstall = plugin.settings.enableAfterInstall;
     this.version = '';
   }
 
@@ -92,6 +94,20 @@ export default class AddNewPluginModal extends Modal {
       }
 
       formEl.createDiv('modal-button-container', (buttonContainerEl) => {
+        buttonContainerEl.createEl("label", {
+          cls: "mod-checkbox"
+        }, (labelEl) => {
+          const checkboxEl = labelEl.createEl("input", {
+            attr: { tabindex: -1 },
+            type: "checkbox"
+          });
+          checkboxEl.checked = this.enableAfterInstall;
+          checkboxEl.addEventListener("click", () => {
+            this.enableAfterInstall = checkboxEl.checked;
+          });
+          labelEl.appendText('Enable after installing the plugin');
+        });
+
         buttonContainerEl
           .createEl('button', { attr: { type: 'button' }, text: 'Never mind' })
           .addEventListener('click', () => {

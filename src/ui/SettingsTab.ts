@@ -44,6 +44,19 @@ export class BratSettingsTab extends PluginSettingTab {
       });
 
     new Setting(containerEl)
+      .setName('Auto-enable plugins after installation')
+      .setDesc(
+        'If enabled beta plugins will be automatically enabled after installtion by default. Note: you can toggle this on and off for each plugin in the "Add Plugin" form.'
+      )
+      .addToggle((cb: ToggleComponent) => {
+        cb.setValue(this.plugin.settings.enableAfterInstall);
+        cb.onChange(async (value: boolean) => {
+          this.plugin.settings.enableAfterInstall = value;
+          await this.plugin.saveSettings();
+        });
+      });
+
+    new Setting(containerEl)
       .setName('Auto-update themes at startup')
       .setDesc(
         'If enabled all beta themes will be checked for updates each time Obsidian starts.'
