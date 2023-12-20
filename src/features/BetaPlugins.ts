@@ -138,7 +138,7 @@ export default class BetaPlugins {
             'manifest.json',
             this.plugin.settings.debuggingMode
           )
-        : '',
+          : '',
       styles: await grabReleaseFileFromRepository(
         repositoryPath,
         version,
@@ -197,7 +197,8 @@ export default class BetaPlugins {
     seeIfUpdatedOnly = false,
     reportIfNotUpdted = false,
     specifyVersion = '',
-    forceReinstall = false
+    forceReinstall = false,
+    enableAfterInstall = this.plugin.settings.enableAfterInstall
   ): Promise<boolean> {
     if (this.plugin.settings.debuggingMode)
       console.log(
@@ -207,7 +208,8 @@ export default class BetaPlugins {
         seeIfUpdatedOnly,
         reportIfNotUpdted,
         specifyVersion,
-        forceReinstall
+        forceReinstall,
+        enableAfterInstall
       );
 
     const noticeTimeout = 10;
@@ -226,9 +228,8 @@ export default class BetaPlugins {
     }
 
     if (!Object.hasOwn(primaryManifest, 'version')) {
-      const msg = `${repositoryPath}\nThe manifest${
-        usingBetaManifest ? '-beta' : ''
-      }.json file in the root directory of the repository does not have a version number in the file. This plugin cannot be installed.`;
+      const msg = `${repositoryPath}\nThe manifest${usingBetaManifest ? '-beta' : ''
+        }.json file in the root directory of the repository does not have a version number in the file. This plugin cannot be installed.`;
       await this.plugin.log(msg, true);
       toastMessage(this.plugin, `${msg}`, noticeTimeout);
       return false;
@@ -239,8 +240,7 @@ export default class BetaPlugins {
       if (!requireApiVersion(primaryManifest.minAppVersion)) {
         const msg =
           `Plugin: ${repositoryPath}\n\n` +
-          `The manifest${
-            usingBetaManifest ? '-beta' : ''
+          `The manifest${usingBetaManifest ? '-beta' : ''
           }.json for this plugin indicates that the Obsidian ` +
           `version of the app needs to be ${primaryManifest.minAppVersion}, ` +
           `but this installation of Obsidian is ${apiVersion}. \n\nYou will need to update your ` +
@@ -284,8 +284,13 @@ export default class BetaPlugins {
       if (releaseFiles === null) return false;
       await this.writeReleaseFilesToPluginFolder(primaryManifest.id, releaseFiles);
       if (!forceReinstall)
-        // only add to list if not a force reinstall
         addBetaPluginToList(this.plugin, repositoryPath, specifyVersion);
+      if (enableAfterInstall) {
+        const { plugins } = this.plugin.app;
+        const pluginTargetFolderPath = normalizePath(plugins.getPluginFolder() + '/' + primaryManifest.id);
+        await plugins.loadManifest(pluginTargetFolderPath);
+        await plugins.enablePlugin(primaryManifest.id);
+      }
       await this.plugin.app.plugins.loadManifests();
       if (forceReinstall) {
         // reload if enabled
@@ -298,7 +303,10 @@ export default class BetaPlugins {
         );
       } else {
         const versionText = specifyVersion === '' ? '' : ` (version: ${specifyVersion})`;
-        const msg = `${repositoryPath}${versionText}\nThe plugin has been registered with BRAT. You may still need to enable it the Community Plugin List.`;
+        let msg = `${repositoryPath}${versionText}\nThe plugin has been registered with BRAT.`;
+        if (!enableAfterInstall) {
+          msg += " You may still need to enable it the Community Plugin List.";
+        }
         await this.plugin.log(msg, true);
         toastMessage(this.plugin, msg, noticeTimeout);
       }
@@ -360,7 +368,7 @@ export default class BetaPlugins {
           const msg = `There is an update available for ${primaryManifest.id} from version ${localManifestJson.version} to ${primaryManifest.version}. `;
           await this.plugin.log(
             msg +
-              `[Release Info](https://github.com/${repositoryPath}/releases/tag/${primaryManifest.version})`,
+            `[Release Info](https://github.com/${repositoryPath}/releases/tag/${primaryManifest.version})`,
             true
           );
           toastMessage(this.plugin, msg, 30, () => {
@@ -377,7 +385,7 @@ export default class BetaPlugins {
           const msg = `${primaryManifest.id}\nPlugin has been updated from version ${localManifestJson.version} to ${primaryManifest.version}. `;
           await this.plugin.log(
             msg +
-              `[Release Info](https://github.com/${repositoryPath}/releases/tag/${primaryManifest.version})`,
+            `[Release Info](https://github.com/${repositoryPath}/releases/tag/${primaryManifest.version})`,
             true
           );
           toastMessage(this.plugin, msg, 30, () => {
@@ -508,12 +516,12 @@ export default class BetaPlugins {
       (p) => p.manifest
     );
     return enabled ?
-        manifests.filter((manifest) =>
-          enabledPlugins.find((pluginName) => manifest.id === pluginName.id)
-        )
+      manifests.filter((manifest) =>
+        enabledPlugins.find((pluginName) => manifest.id === pluginName.id)
+      )
       : manifests.filter(
-          (manifest) =>
-            !enabledPlugins.find((pluginName) => manifest.id === pluginName.id)
-        );
+        (manifest) =>
+          !enabledPlugins.find((pluginName) => manifest.id === pluginName.id)
+      );
   }
 }
