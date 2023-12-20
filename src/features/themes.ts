@@ -92,7 +92,7 @@ export const themeSave = async (
   }
 
   void plugin.log(msg + `[Theme Info](https://github.com/${cssGithubRepository})`, false);
-  toastMessage(plugin, `${msg}`, 20, (): void => {
+  toastMessage(plugin, msg, 20, (): void => {
     window.open(`https://github.com/${cssGithubRepository}`);
   });
   return true;
@@ -159,7 +159,7 @@ export const themeDelete = (plugin: ThePlugin, cssGithubRepository: string): voi
   void plugin.saveSettings();
   const msg = `Removed ${cssGithubRepository} from BRAT themes list and will no longer be updated. However, the theme files still exist in the vault. To remove them, go into Settings > Appearance and remove the theme.`;
   void plugin.log(msg, true);
-  toastMessage(plugin, `${msg}`);
+  toastMessage(plugin, msg);
 };
 
 /**

@@ -1,3 +1,10 @@
+# 0.8.2
+
+### New
+
+- A new setting controls if a beta plugin is auto-enabled after installation. This means after it is installed, it will be enabled in settings. This reduces the additional step of manually enabling a plugin after installation. This setting is now enabled by default.
+- chore: update all dependencies.
+
 # 0.8.1
 
 ### New

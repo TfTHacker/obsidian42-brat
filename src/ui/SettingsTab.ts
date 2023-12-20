@@ -31,19 +31,6 @@ export class BratSettingsTab extends PluginSettingTab {
     containerEl.empty();
 
     new Setting(containerEl)
-      .setName('Auto-update plugins at startup')
-      .setDesc(
-        'If enabled all beta plugins will be checked for updates each time Obsidian starts. Note: this does not update frozen version plugins.'
-      )
-      .addToggle((cb: ToggleComponent) => {
-        cb.setValue(this.plugin.settings.updateAtStartup);
-        cb.onChange(async (value: boolean) => {
-          this.plugin.settings.updateAtStartup = value;
-          await this.plugin.saveSettings();
-        });
-      });
-
-    new Setting(containerEl)
       .setName('Auto-enable plugins after installation')
       .setDesc(
         'If enabled beta plugins will be automatically enabled after installtion by default. Note: you can toggle this on and off for each plugin in the "Add Plugin" form.'
@@ -52,6 +39,19 @@ export class BratSettingsTab extends PluginSettingTab {
         cb.setValue(this.plugin.settings.enableAfterInstall);
         cb.onChange(async (value: boolean) => {
           this.plugin.settings.enableAfterInstall = value;
+          await this.plugin.saveSettings();
+        });
+      });
+
+    new Setting(containerEl)
+      .setName('Auto-update plugins at startup')
+      .setDesc(
+        'If enabled all beta plugins will be checked for updates each time Obsidian starts. Note: this does not update frozen version plugins.'
+      )
+      .addToggle((cb: ToggleComponent) => {
+        cb.setValue(this.plugin.settings.updateAtStartup);
+        cb.onChange(async (value: boolean) => {
+          this.plugin.settings.updateAtStartup = value;
           await this.plugin.saveSettings();
         });
       });
