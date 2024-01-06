@@ -293,7 +293,7 @@ export default class BetaPlugins {
           plugins.getPluginFolder() + '/' + primaryManifest.id
         );
         await plugins.loadManifest(pluginTargetFolderPath);
-        await plugins.enablePlugin(primaryManifest.id);
+        await plugins.enablePluginAndSave(primaryManifest.id);
       }
       await this.plugin.app.plugins.loadManifests();
       if (forceReinstall) {

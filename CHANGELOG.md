@@ -1,3 +1,10 @@
+# 0.8.3
+
+### Fix
+
+- New auto-enable for new plugin installs not persisting the enabled state. (Issue: https://github.com/TfTHacker/obsidian42-brat/issues/74)
+- chore: update all dependencies.
+
 # 0.8.2
 
 ### New
