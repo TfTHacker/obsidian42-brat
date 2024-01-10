@@ -66,16 +66,24 @@ export default class BetaPlugins {
     const manifestJson = await grabManifestJsonFromRepository(
       repositoryPath,
       !getBetaManifest,
-      this.plugin.settings.debuggingMode
+      this.plugin.settings.debuggingMode,
+      this.plugin.settings.personalAccessToken
     );
     if (!manifestJson) {
       // this is a plugin with a manifest json, try to see if there is a beta version
-      if (reportIssues)
+      if (reportIssues) {
         toastMessage(
           this.plugin,
           `${repositoryPath}\nThis does not seem to be an obsidian plugin, as there is no manifest.json file.`,
           noticeTimeout
         );
+        console.error(
+          'BRAT: validateRepository',
+          repositoryPath,
+          getBetaManifest,
+          reportIssues
+        );
+      }
       return null;
     }
     // Test that the mainfest has some key elements, like ID and version
@@ -123,12 +131,15 @@ export default class BetaPlugins {
     // if we have version specified, we always want to get the remote manifest file.
     const reallyGetManifestOrNot = getManifest || specifyVersion !== '';
 
+    console.log({ reallyGetManifestOrNot, version });
+
     return {
       mainJs: await grabReleaseFileFromRepository(
         repositoryPath,
         version,
         'main.js',
-        this.plugin.settings.debuggingMode
+        this.plugin.settings.debuggingMode,
+        this.plugin.settings.personalAccessToken
       ),
       manifest:
         reallyGetManifestOrNot ?
@@ -136,14 +147,16 @@ export default class BetaPlugins {
             repositoryPath,
             version,
             'manifest.json',
-            this.plugin.settings.debuggingMode
+            this.plugin.settings.debuggingMode,
+            this.plugin.settings.personalAccessToken
           )
         : '',
       styles: await grabReleaseFileFromRepository(
         repositoryPath,
         version,
         'styles.css',
-        this.plugin.settings.debuggingMode
+        this.plugin.settings.debuggingMode,
+        this.plugin.settings.personalAccessToken
       ),
     };
   }
@@ -253,6 +266,8 @@ export default class BetaPlugins {
       }
     }
 
+    // now the user must be able to access the repo
+
     interface ErrnoType {
       errno: number;
     }
@@ -265,6 +280,8 @@ export default class BetaPlugins {
         usingBetaManifest,
         specifyVersion
       );
+
+      console.log('rFiles', rFiles);
       // if beta, use that manifest, or if there is no manifest in release, use the primaryManifest
       if (usingBetaManifest || rFiles.manifest === '')
         rFiles.manifest = JSON.stringify(primaryManifest);
