@@ -24,6 +24,7 @@ export interface Settings {
   loggingVerboseEnabled: boolean;
   debuggingMode: boolean;
   notificationsEnabled: boolean;
+  personalAccessToken?: string;
 }
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -38,6 +39,7 @@ export const DEFAULT_SETTINGS: Settings = {
   loggingVerboseEnabled: false,
   debuggingMode: false,
   notificationsEnabled: true,
+  personalAccessToken: '',
 };
 
 /**

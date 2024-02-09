@@ -3,6 +3,30 @@ import { request } from 'obsidian';
 
 const GITHUB_RAW_USERCONTENT_PATH = 'https://raw.githubusercontent.com/';
 
+const isPrivateRepo = async (
+  repository: string,
+  debugLogging = true,
+  personalAccessToken = ''
+): Promise<boolean> => {
+  const URL = `https://api.github.com/repos/${repository}`;
+  try {
+    const response = await request({
+      url: URL,
+      headers:
+        personalAccessToken ?
+          {
+            Authorization: `Token ${personalAccessToken}`,
+          }
+        : {},
+    });
+    const data = await JSON.parse(response);
+    return data.private;
+  } catch (e) {
+    if (debugLogging) console.log('error in isPrivateRepo', URL, e);
+    return false;
+  }
+};
+
 /**
  * pulls from github a release file by its version number
  *
@@ -16,14 +40,73 @@ export const grabReleaseFileFromRepository = async (
   repository: string,
   version: string,
   fileName: string,
-  debugLogging = true
+  debugLogging = true,
+  personalAccessToken = ''
 ): Promise<string | null> => {
-  const URL = `https://github.com/${repository}/releases/download/${version}/${fileName}`;
   try {
-    const download = await request({ url: URL });
-    return download === 'Not Found' || download === `{"error":"Not Found"}` ?
-        null
-      : download;
+    // check if the repo is a private repo
+    const isPrivate = await isPrivateRepo(repository, debugLogging, personalAccessToken);
+
+    if (isPrivate) {
+      type Release = {
+        url: string;
+        tag_name: string;
+        assets: {
+          name: string;
+          url: string;
+        }[];
+      };
+
+      // get the asset id
+      // fetch https://api.github.com/repos/{repos}/releases , parse the response
+      // this will return an array of releases, find the release with the version number by tag_name
+      // in the release object, get assets and find the correct asset by name
+      // then fetch the url
+
+      const URL = `https://api.github.com/repos/${repository}/releases`;
+      const response = await request({
+        url: URL,
+        headers: {
+          Authorization: `Token ${personalAccessToken}`,
+        },
+      });
+      const data = await JSON.parse(response);
+      const release = data.find((release: Release) => release.tag_name === version);
+      if (!release) {
+        return null;
+      }
+      const asset = release.assets.find(
+        (asset: { name: string }) => asset.name === fileName
+      );
+      if (!asset) {
+        return null;
+      }
+      const download = await request({
+        url: asset.url,
+        headers: {
+          Authorization: `Token ${personalAccessToken}`,
+          Accept: 'application/octet-stream',
+        },
+      });
+      return download === 'Not Found' || download === `{"error":"Not Found"}` ?
+          null
+        : download;
+    } else {
+      const URL = `https://github.com/${repository}/releases/download/${version}/${fileName}`;
+      const download = await request({
+        url: URL,
+        headers:
+          personalAccessToken ?
+            {
+              Authorization: `Token ${personalAccessToken}`,
+            }
+          : {},
+      });
+
+      return download === 'Not Found' || download === `{"error":"Not Found"}` ?
+          null
+        : download;
+    }
   } catch (error) {
     if (debugLogging) console.log('error in grabReleaseFileFromRepository', URL, error);
     return null;
@@ -41,7 +124,8 @@ export const grabReleaseFileFromRepository = async (
 export const grabManifestJsonFromRepository = async (
   repositoryPath: string,
   rootManifest = true,
-  debugLogging = true
+  debugLogging = true,
+  personalAccessToken = ''
 ): Promise<PluginManifest | null> => {
   const manifestJsonPath =
     GITHUB_RAW_USERCONTENT_PATH +
@@ -50,7 +134,15 @@ export const grabManifestJsonFromRepository = async (
   if (debugLogging)
     console.log('grabManifestJsonFromRepository manifestJsonPath', manifestJsonPath);
   try {
-    const response: string = await request({ url: manifestJsonPath });
+    const response: string = await request({
+      url: manifestJsonPath,
+      headers:
+        personalAccessToken ?
+          {
+            Authorization: `Token ${personalAccessToken}`,
+          }
+        : {},
+    });
     if (debugLogging) console.log('grabManifestJsonFromRepository response', response);
     return response === '404: Not Found' ? null : (
         ((await JSON.parse(response)) as PluginManifest)

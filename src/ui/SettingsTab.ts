@@ -240,5 +240,20 @@ export class BratSettingsTab extends PluginSettingTab {
           await this.plugin.saveSettings();
         });
       });
+
+    new Setting(containerEl)
+      .setName('Personal Access Token')
+      .setDesc(
+        'If you need to access private repository, enter the personal access token here.'
+      )
+      .addText((text) => {
+        text
+          .setPlaceholder('Enter your personal access token')
+          .setValue(this.plugin.settings.personalAccessToken ?? '')
+          .onChange(async (value: string) => {
+            this.plugin.settings.personalAccessToken = value;
+            await this.plugin.saveSettings();
+          });
+      });
   }
 }
