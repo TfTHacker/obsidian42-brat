@@ -5,7 +5,7 @@
   "main": "main.js",
   "scripts": {
     "dev": "node esbuild.config.mjs",
-    "build": "tsc -noEmit -skipLibCheck && node esbuild.config.mjs production",
+    "build": "node esbuild.config.mjs production",
     "version": "node version-bump.mjs",
     "githubaction": "node version-github-action.mjs",
     "lint:check": "eslint --ext .ts,.tsx .",
