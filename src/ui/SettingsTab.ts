@@ -244,7 +244,7 @@ export class BratSettingsTab extends PluginSettingTab {
     new Setting(containerEl)
       .setName('Personal Access Token')
       .setDesc(
-        'If you need to access private repository, enter the personal access token here.'
+        'If you need to access private repositories, enter the personal access token here.'
       )
       .addText((text) => {
         text
