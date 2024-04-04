@@ -1,3 +1,10 @@
+# 1.0.0
+
+### New
+
+- Private repositories are now accessible by BRAT. This will allow for private testing of plugins. You will need to setup a GitHub token in the settings to access private repositories. Check out https://tfthacker.com/brat-private-repo for more info.
+- BRAT is no longer in beta, though it will always be in beta since we add new features. So I am bumping this up to 1.0.0.
+
 # 0.8.3
 
 ### Fix
