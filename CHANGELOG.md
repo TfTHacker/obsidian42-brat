@@ -1,3 +1,10 @@
+# 1.0.2
+
+### Fix
+
+- Improved the update logic to better handle when a personal access token has failed.
+- chore: update all dependencies.
+
 # 1.0.1
 
 ### New

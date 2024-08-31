@@ -133,11 +133,38 @@ export const grabManifestJsonFromRepository = async (
     (rootManifest ? '/HEAD/manifest.json' : '/HEAD/manifest-beta.json');
   if (debugLogging)
     console.log('grabManifestJsonFromRepository manifestJsonPath', manifestJsonPath);
+
+  // Function to check if the token is valid
+  const isTokenValid = async (token: string): Promise<boolean> => {
+    try {
+      await request({
+        url: 'https://api.github.com/user',
+        method: 'GET',
+        headers: {
+          'Authorization': `token ${token}`,
+          'User-Agent': 'request',
+          'accept': 'application/vnd.github.v3+json',
+        },
+      });
+      return true;
+    } catch (error) {
+      if (debugLogging) console.log('Token validation error:', error);
+      return false;
+    }
+  };
+
+  // Check if the token is valid
+  let tokenValid = false;
+  if (personalAccessToken) {
+    tokenValid = await isTokenValid(personalAccessToken);
+    if (debugLogging) console.log('Token valid:', tokenValid);
+  }
+
   try {
     const response: string = await request({
       url: manifestJsonPath,
       headers:
-        personalAccessToken ?
+        tokenValid ?
           {
             Authorization: `Token ${personalAccessToken}`,
           }
