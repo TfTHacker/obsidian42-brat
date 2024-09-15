@@ -1,3 +1,10 @@
+# 1.0.3
+
+### fix
+
+- modified main.ts to better conform to obdisidan.dt.ts
+- chore: update all dependencies.
+
 # 1.0.2
 
 ### Fix

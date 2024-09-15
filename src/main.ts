@@ -21,33 +21,39 @@ export default class ThePlugin extends Plugin {
   commands: PluginCommands = new PluginCommands(this);
   bratApi: BratAPI = new BratAPI(this);
 
-  async onload(): Promise<void> {
+  onload() {
     console.log('loading ' + this.APP_NAME);
 
-    await this.loadSettings();
-    this.addSettingTab(new BratSettingsTab(this.app, this));
+    this.loadSettings()
+      .then(() => {
+        this.addSettingTab(new BratSettingsTab(this.app, this));
 
-    addIcons();
-    this.showRibbonButton();
-    this.registerObsidianProtocolHandler('brat', this.obsidianProtocolHandler);
+        addIcons();
+        this.showRibbonButton();
+        this.registerObsidianProtocolHandler('brat', this.obsidianProtocolHandler);
 
-    this.app.workspace.onLayoutReady(() => {
-      // let obsidian load and calm down before checking for updates
-      if (this.settings.updateAtStartup) {
-        setTimeout(() => {
-          void this.betaPlugins.checkForPluginUpdatesAndInstallUpdates(false);
-        }, 60000);
-      }
-      if (this.settings.updateThemesAtStartup) {
-        setTimeout(() => {
-          void themesCheckAndUpdates(this, false);
-        }, 120000);
-      }
-      setTimeout(() => {
-        window.bratAPI = this.bratApi;
-      }, 500);
-    });
+        this.app.workspace.onLayoutReady(() => {
+          // let obsidian load and calm down before checking for updates
+          if (this.settings.updateAtStartup) {
+            setTimeout(() => {
+              void this.betaPlugins.checkForPluginUpdatesAndInstallUpdates(false);
+            }, 60000);
+          }
+          if (this.settings.updateThemesAtStartup) {
+            setTimeout(() => {
+              void themesCheckAndUpdates(this, false);
+            }, 120000);
+          }
+          setTimeout(() => {
+            window.bratAPI = this.bratApi;
+          }, 500);
+        });
+      })
+      .catch((error: unknown) => {
+        console.error('Failed to load settings:', error);
+      });
   }
+
   showRibbonButton(): void {
     this.addRibbonIcon('BratIcon', 'BRAT', () => {
       this.commands.ribbonDisplayCommands();
