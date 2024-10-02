@@ -1,3 +1,5 @@
+![](brat.jpg)
+
 # Beta Reviewers Auto-update Tester
 
 This is a very special plugin designed to make life much easier for developers and beta-testers of plugins and themes.
