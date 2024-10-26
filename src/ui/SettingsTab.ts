@@ -73,7 +73,7 @@ export class BratSettingsTab extends PluginSettingTab {
     containerEl.createEl('hr');
     containerEl.createEl('h2', { text: 'Beta Plugin List' });
     containerEl.createEl('div', {
-      text: `The following is a list of beta plugins added via the command palette "Add a beta plugin for testing" or "Add a beta plugin with frozen version for testing". A frozen version is a specific release of a plugin based on its releease tag. `,
+      text: `The following is a list of beta plugins added via the command palette "Add a beta plugin for testing" or "Add a beta plugin with frozen version for testing". A frozen version is a specific release of a plugin based on its release tag. `,
     });
     containerEl.createEl('p');
     containerEl.createEl('div', {
