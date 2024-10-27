@@ -6,7 +6,7 @@
 	"scripts": {
 		"dev": "node --no-warnings esbuild.config.mjs",
 		"build": "node --no-warnings esbuild.config.mjs production",
-		"lint": "biome check .",
+		"lint": "biome check ./src",
 		"version": "node version-bump.mjs",
 		"githubaction": "node version-github-action.mjs"
 	},
@@ -19,10 +19,8 @@
 	"devDependencies": {
 		"@biomejs/biome": "1.9.4",
 		"@types/node": "^22.5.5",
-		"@types/obsidian-typings": "github:Fevol/obsidian-typings",
 		"builtin-modules": "4.0.0",
 		"esbuild": "0.23.1",
-		"eslint": "^8.57.0",
 		"jsdom": "^25.0.0",
 		"obsidian": "1.7.2",
 		"ts-node": "^10.9.2",

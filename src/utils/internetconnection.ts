@@ -3,10 +3,10 @@
  * @returns true if connected, false if no internet
  */
 export async function isConnectedToInternet(): Promise<boolean> {
-  try {
-    const online = await fetch(`https://obsidian.md/?${Math.random()}`);
-    return online.status >= 200 && online.status < 300;
-  } catch (err) {
-    return false;
-  }
+	try {
+		const online = await fetch(`https://obsidian.md/?${Math.random()}`);
+		return online.status >= 200 && online.status < 300;
+	} catch (err) {
+		return false;
+	}
 }

@@ -1,45 +1,45 @@
-import type ThePlugin from "./main";
 import { checksumForString } from "./features/githubUtils";
+import type BratPlugin from "./main";
 
 export interface ThemeInforamtion {
-  repo: string;
-  // checksum of theme file (either theme.css or theme-beta.css)
-  lastUpdate: string;
+	repo: string;
+	// checksum of theme file (either theme.css or theme-beta.css)
+	lastUpdate: string;
 }
 
 export interface PluginFrozenVersion {
-  repo: string;
-  version: string;
+	repo: string;
+	version: string;
 }
 
 export interface Settings {
-  pluginList: string[];
-  pluginSubListFrozenVersion: PluginFrozenVersion[];
-  themesList: ThemeInforamtion[];
-  updateAtStartup: boolean;
-  updateThemesAtStartup: boolean;
-  enableAfterInstall: boolean;
-  loggingEnabled: boolean;
-  loggingPath: string;
-  loggingVerboseEnabled: boolean;
-  debuggingMode: boolean;
-  notificationsEnabled: boolean;
-  personalAccessToken?: string;
+	pluginList: string[];
+	pluginSubListFrozenVersion: PluginFrozenVersion[];
+	themesList: ThemeInforamtion[];
+	updateAtStartup: boolean;
+	updateThemesAtStartup: boolean;
+	enableAfterInstall: boolean;
+	loggingEnabled: boolean;
+	loggingPath: string;
+	loggingVerboseEnabled: boolean;
+	debuggingMode: boolean;
+	notificationsEnabled: boolean;
+	personalAccessToken?: string;
 }
 
 export const DEFAULT_SETTINGS: Settings = {
-  pluginList: [],
-  pluginSubListFrozenVersion: [],
-  themesList: [],
-  updateAtStartup: true,
-  updateThemesAtStartup: true,
-  enableAfterInstall: true,
-  loggingEnabled: false,
-  loggingPath: "BRAT-log",
-  loggingVerboseEnabled: false,
-  debuggingMode: false,
-  notificationsEnabled: true,
-  personalAccessToken: "",
+	pluginList: [],
+	pluginSubListFrozenVersion: [],
+	themesList: [],
+	updateAtStartup: true,
+	updateThemesAtStartup: true,
+	enableAfterInstall: true,
+	loggingEnabled: false,
+	loggingPath: "BRAT-log",
+	loggingVerboseEnabled: false,
+	debuggingMode: false,
+	notificationsEnabled: true,
+	personalAccessToken: "",
 };
 
 /**
@@ -50,30 +50,30 @@ export const DEFAULT_SETTINGS: Settings = {
  * @param  specifyVersion  - if the plugin needs to stay at the frozen version, we need to also record the version
  */
 export function addBetaPluginToList(
-  plugin: ThePlugin,
-  repositoryPath: string,
-  specifyVersion = ""
+	plugin: BratPlugin,
+	repositoryPath: string,
+	specifyVersion = "",
 ): void {
-  let save = false;
-  if (!plugin.settings.pluginList.contains(repositoryPath)) {
-    plugin.settings.pluginList.unshift(repositoryPath);
-    save = true;
-  }
-  if (
-    specifyVersion !== "" &&
-    plugin.settings.pluginSubListFrozenVersion.filter(
-      (x) => x.repo === repositoryPath
-    ).length === 0
-  ) {
-    plugin.settings.pluginSubListFrozenVersion.unshift({
-      repo: repositoryPath,
-      version: specifyVersion,
-    });
-    save = true;
-  }
-  if (save) {
-    void plugin.saveSettings();
-  }
+	let save = false;
+	if (!plugin.settings.pluginList.contains(repositoryPath)) {
+		plugin.settings.pluginList.unshift(repositoryPath);
+		save = true;
+	}
+	if (
+		specifyVersion !== "" &&
+		plugin.settings.pluginSubListFrozenVersion.filter(
+			(x) => x.repo === repositoryPath,
+		).length === 0
+	) {
+		plugin.settings.pluginSubListFrozenVersion.unshift({
+			repo: repositoryPath,
+			version: specifyVersion,
+		});
+		save = true;
+	}
+	if (save) {
+		void plugin.saveSettings();
+	}
 }
 
 /**
@@ -84,10 +84,10 @@ export function addBetaPluginToList(
  *
  */
 export function existBetaPluginInList(
-  plugin: ThePlugin,
-  repositoryPath: string
+	plugin: BratPlugin,
+	repositoryPath: string,
 ): boolean {
-  return plugin.settings.pluginList.contains(repositoryPath);
+	return plugin.settings.pluginList.contains(repositoryPath);
 }
 
 /**
@@ -99,16 +99,16 @@ export function existBetaPluginInList(
  *
  */
 export function addBetaThemeToList(
-  plugin: ThePlugin,
-  repositoryPath: string,
-  themeCss: string
+	plugin: BratPlugin,
+	repositoryPath: string,
+	themeCss: string,
 ): void {
-  const newTheme: ThemeInforamtion = {
-    repo: repositoryPath,
-    lastUpdate: checksumForString(themeCss),
-  };
-  plugin.settings.themesList.unshift(newTheme);
-  void plugin.saveSettings();
+	const newTheme: ThemeInforamtion = {
+		repo: repositoryPath,
+		lastUpdate: checksumForString(themeCss),
+	};
+	plugin.settings.themesList.unshift(newTheme);
+	void plugin.saveSettings();
 }
 
 /**
@@ -119,13 +119,13 @@ export function addBetaThemeToList(
  *
  */
 export function existBetaThemeinInList(
-  plugin: ThePlugin,
-  repositoryPath: string
+	plugin: BratPlugin,
+	repositoryPath: string,
 ): boolean {
-  const testIfThemExists = plugin.settings.themesList.find(
-    (t) => t.repo === repositoryPath
-  );
-  return testIfThemExists ? true : false;
+	const testIfThemExists = plugin.settings.themesList.find(
+		(t) => t.repo === repositoryPath,
+	);
+	return !!testIfThemExists;
 }
 
 /**
@@ -137,14 +137,14 @@ export function existBetaThemeinInList(
  *
  */
 export function updateBetaThemeLastUpdateChecksum(
-  plugin: ThePlugin,
-  repositoryPath: string,
-  checksum: string
+	plugin: BratPlugin,
+	repositoryPath: string,
+	checksum: string,
 ): void {
-  plugin.settings.themesList.forEach((t) => {
-    if (t.repo === repositoryPath) {
-      t.lastUpdate = checksum;
-      void plugin.saveSettings();
-    }
-  });
+	for (const t of plugin.settings.themesList) {
+		if (t.repo === repositoryPath) {
+			t.lastUpdate = checksum;
+			void plugin.saveSettings();
+		}
+	}
 }
