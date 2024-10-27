@@ -175,11 +175,7 @@ export default class BetaPlugins {
 			`${this.plugin.app.vault.configDir}/plugins/${betaPluginId}`,
 		)}/`;
 		const { adapter } = this.plugin.app.vault;
-		if (
-			!(await adapter.exists(pluginTargetFolderPath)) ||
-			!(await adapter.exists(`${pluginTargetFolderPath}manifest.json`))
-		) {
-			// if plugin folder doesnt exist or manifest.json doesn't exist, create it and save the plugin files
+		if (!(await adapter.exists(pluginTargetFolderPath))) {
 			await adapter.mkdir(pluginTargetFolderPath);
 		}
 		await adapter.write(

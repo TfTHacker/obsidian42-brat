@@ -24,13 +24,13 @@ export async function logger(
 		const dateOutput = `[[${moment().format(getDailyNoteSettings().format).toString()}]] ${moment().format("HH:mm")}`;
 		const os = window.require("os") as { hostname: () => string };
 		const machineName = Platform.isDesktop ? os.hostname() : "MOBILE";
-		let output = `${dateOutput} ${machineName} ${textToLog.replace("\n", " ")}\n\n`;
+		const output = `${dateOutput} ${machineName} ${textToLog.replace("\n", " ")}\n`;
 
-		if (await plugin.app.vault.adapter.exists(fileName)) {
-			const fileContents = await plugin.app.vault.adapter.read(fileName);
-			output = output + fileContents;
-			const file = plugin.app.vault.getAbstractFileByPath(fileName) as TFile;
-			await plugin.app.vault.modify(file, output);
-		} else await plugin.app.vault.create(fileName, output);
+		let file = plugin.app.vault.getAbstractFileByPath(fileName) as TFile;
+		if (!file) {
+			file = await plugin.app.vault.create(fileName, output);
+		} else {
+			await plugin.app.vault.append(file, output);
+		}
 	}
 }

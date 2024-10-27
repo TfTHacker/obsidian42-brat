@@ -6,7 +6,7 @@
 ### Updates
 - Transition to Biome from EsLint and Prettier.
 - Updating plugint to newest Obsidian recommendations https://docs.obsidian.md/oo24/plugin
-
+- The output log file format for when debugging is enabled in BRAT has changed. It now appends to the log file, not prepends.
 
 # 1.0.3
 
