@@ -1,7 +1,7 @@
-import type ThePlugin from '../main';
-import type { TFile } from 'obsidian';
-import { moment, Platform } from 'obsidian';
-import { getDailyNoteSettings } from 'obsidian-daily-notes-interface';
+import type ThePlugin from "../main";
+import type { TFile } from "obsidian";
+import { moment, Platform } from "obsidian";
+import { getDailyNoteSettings } from "obsidian-daily-notes-interface";
 
 /**
  * Logs events to a log file
@@ -16,21 +16,26 @@ export async function logger(
   textToLog: string,
   verboseLoggingOn = false
 ): Promise<void> {
-  if (plugin.settings.debuggingMode) console.log('BRAT: ' + textToLog);
+  if (plugin.settings.debuggingMode) console.log(`BRAT: ${textToLog}`);
   if (plugin.settings.loggingEnabled) {
     if (!plugin.settings.loggingVerboseEnabled && verboseLoggingOn) {
       return;
     } else {
-      const fileName = plugin.settings.loggingPath + '.md';
+      const fileName = plugin.settings.loggingPath + ".md";
       const dateOutput =
-        '[[' +
+        "[[" +
         moment().format(getDailyNoteSettings().format).toString() +
-        ']] ' +
-        moment().format('HH:mm');
-      const os = window.require('os') as { hostname: () => string };
-      const machineName = Platform.isDesktop ? os.hostname() : 'MOBILE';
+        "]] " +
+        moment().format("HH:mm");
+      const os = window.require("os") as { hostname: () => string };
+      const machineName = Platform.isDesktop ? os.hostname() : "MOBILE";
       let output =
-        dateOutput + ' ' + machineName + ' ' + textToLog.replace('\n', ' ') + '\n\n';
+        dateOutput +
+        " " +
+        machineName +
+        " " +
+        textToLog.replace("\n", " ") +
+        "\n\n";
 
       if (await plugin.app.vault.adapter.exists(fileName)) {
         const fileContents = await plugin.app.vault.adapter.read(fileName);

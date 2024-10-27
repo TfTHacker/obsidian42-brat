@@ -1,9 +1,9 @@
-import type ThePlugin from '../main';
-import { Modal, Setting } from 'obsidian';
-import type BetaPlugins from '../features/BetaPlugins';
-import { toastMessage } from '../utils/notifications';
-import { promotionalLinks } from './Promotional';
-import { existBetaPluginInList } from '../settings';
+import type ThePlugin from "../main";
+import { Modal, Setting } from "obsidian";
+import type BetaPlugins from "../features/BetaPlugins";
+import { toastMessage } from "../utils/notifications";
+import { promotionalLinks } from "./Promotional";
+import { existBetaPluginInList } from "../settings";
 
 /**
  * Add a beta plugin to the list of plugins being tracked and updated
@@ -26,21 +26,22 @@ export default class AddNewPluginModal extends Modal {
     super(plugin.app);
     this.plugin = plugin;
     this.betaPlugins = betaPlugins;
-    this.address = '';
+    this.address = "";
     this.openSettingsTabAfterwards = openSettingsTabAfterwards;
     this.useFrozenVersion = useFrozenVersion;
     this.enableAfterInstall = plugin.settings.enableAfterInstall;
-    this.version = '';
+    this.version = "";
   }
 
   async submitForm(): Promise<void> {
-    if (this.address === '') return;
-    let scrubbedAddress = this.address.replace('https://github.com/', '');
-    if (scrubbedAddress.endsWith('.git')) scrubbedAddress = scrubbedAddress.slice(0, -4);
+    if (this.address === "") return;
+    let scrubbedAddress = this.address.replace("https://github.com/", "");
+    if (scrubbedAddress.endsWith(".git"))
+      scrubbedAddress = scrubbedAddress.slice(0, -4);
     if (existBetaPluginInList(this.plugin, scrubbedAddress)) {
       toastMessage(
         this.plugin,
-        `This plugin is already in the list for beta testing`,
+        "This plugin is already in the list for beta testing",
         10
       );
       return;
@@ -60,21 +61,23 @@ export default class AddNewPluginModal extends Modal {
   }
 
   onOpen(): void {
-    this.contentEl.createEl('h4', { text: 'Github repository for beta plugin:' });
-    this.contentEl.createEl('form', {}, (formEl) => {
-      formEl.addClass('brat-modal');
+    this.contentEl.createEl("h4", {
+      text: "Github repository for beta plugin:",
+    });
+    this.contentEl.createEl("form", {}, (formEl) => {
+      formEl.addClass("brat-modal");
       new Setting(formEl).addText((textEl) => {
         textEl.setPlaceholder(
-          'Repository (example: https://github.com/GitubUserName/repository-name)'
+          "Repository (example: https://github.com/GitubUserName/repository-name)"
         );
         textEl.setValue(this.address);
         textEl.onChange((value) => {
           this.address = value.trim();
         });
-        textEl.inputEl.addEventListener('keydown', (e: KeyboardEvent) => {
-          if (e.key === 'Enter' && this.address !== ' ') {
+        textEl.inputEl.addEventListener("keydown", (e: KeyboardEvent) => {
+          if (e.key === "Enter" && this.address !== " ") {
             if (
-              (this.useFrozenVersion && this.version !== '') ||
+              (this.useFrozenVersion && this.version !== "") ||
               !this.useFrozenVersion
             ) {
               e.preventDefault();
@@ -82,72 +85,77 @@ export default class AddNewPluginModal extends Modal {
             }
           }
         });
-        textEl.inputEl.style.width = '100%';
+        textEl.inputEl.style.width = "100%";
       });
 
       if (this.useFrozenVersion) {
         new Setting(formEl).addText((textEl) => {
-          textEl.setPlaceholder('Specify the release version tag (example: 1.0.0)');
+          textEl.setPlaceholder(
+            "Specify the release version tag (example: 1.0.0)"
+          );
           textEl.onChange((value) => {
             this.version = value.trim();
           });
-          textEl.inputEl.style.width = '100%';
+          textEl.inputEl.style.width = "100%";
         });
       }
 
-      formEl.createDiv('modal-button-container', (buttonContainerEl) => {
+      formEl.createDiv("modal-button-container", (buttonContainerEl) => {
         buttonContainerEl.createEl(
-          'label',
+          "label",
           {
-            cls: 'mod-checkbox',
+            cls: "mod-checkbox",
           },
           (labelEl) => {
-            const checkboxEl = labelEl.createEl('input', {
+            const checkboxEl = labelEl.createEl("input", {
               attr: { tabindex: -1 },
-              type: 'checkbox',
+              type: "checkbox",
             });
             checkboxEl.checked = this.enableAfterInstall;
-            checkboxEl.addEventListener('click', () => {
+            checkboxEl.addEventListener("click", () => {
               this.enableAfterInstall = checkboxEl.checked;
             });
-            labelEl.appendText('Enable after installing the plugin');
+            labelEl.appendText("Enable after installing the plugin");
           }
         );
 
         buttonContainerEl
-          .createEl('button', { attr: { type: 'button' }, text: 'Never mind' })
-          .addEventListener('click', () => {
+          .createEl("button", { attr: { type: "button" }, text: "Never mind" })
+          .addEventListener("click", () => {
             this.close();
           });
-        buttonContainerEl.createEl('button', {
-          attr: { type: 'submit' },
-          cls: 'mod-cta',
-          text: 'Add Plugin',
+        buttonContainerEl.createEl("button", {
+          attr: { type: "submit" },
+          cls: "mod-cta",
+          text: "Add Plugin",
         });
       });
 
       const newDiv = formEl.createDiv();
-      newDiv.style.borderTop = '1px solid #ccc';
-      newDiv.style.marginTop = '30px';
+      newDiv.style.borderTop = "1px solid #ccc";
+      newDiv.style.marginTop = "30px";
       const byTfThacker = newDiv.createSpan();
       byTfThacker.innerHTML =
         "BRAT by <a href='https://bit.ly/o42-twitter'>TFTHacker</a>";
-      byTfThacker.style.fontStyle = 'italic';
+      byTfThacker.style.fontStyle = "italic";
       newDiv.appendChild(byTfThacker);
       promotionalLinks(newDiv, false);
 
       window.setTimeout(() => {
-        const title = formEl.querySelectorAll('.brat-modal .setting-item-info');
+        const title = formEl.querySelectorAll(".brat-modal .setting-item-info");
         title.forEach((titleEl) => {
           titleEl.remove();
         });
       }, 50);
 
       // invoked when button is clicked.
-      formEl.addEventListener('submit', (e: Event) => {
+      formEl.addEventListener("submit", (e: Event) => {
         e.preventDefault();
-        if (this.address !== '') {
-          if ((this.useFrozenVersion && this.version !== '') || !this.useFrozenVersion) {
+        if (this.address !== "") {
+          if (
+            (this.useFrozenVersion && this.version !== "") ||
+            !this.useFrozenVersion
+          ) {
             void this.submitForm();
           }
         }

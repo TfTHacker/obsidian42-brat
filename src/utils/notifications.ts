@@ -1,5 +1,5 @@
-import type ThePlugin from '../main';
-import { Notice, Platform } from 'obsidian';
+import type ThePlugin from "../main";
+import { Notice, Platform } from "obsidian";
 
 /**
  * Displays a notice to the user
@@ -16,12 +16,11 @@ export function toastMessage(
   contextMenuCallback?: () => void
 ): void {
   if (!plugin.settings.notificationsEnabled) return;
-  const additionalInfo =
-    contextMenuCallback ?
-      Platform.isDesktop ?
-        '(click=dismiss, right-click=Info)'
-      : '(click=dismiss)'
-    : '';
+  const additionalInfo = contextMenuCallback
+    ? Platform.isDesktop
+      ? "(click=dismiss, right-click=Info)"
+      : "(click=dismiss)"
+    : "";
   const newNotice: Notice = new Notice(
     `BRAT\n${msg}\n${additionalInfo}`,
     timeoutInSeconds * 1000

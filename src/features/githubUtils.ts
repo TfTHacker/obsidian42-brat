@@ -1,20 +1,19 @@
-import type { PluginManifest } from 'obsidian';
-import { request } from 'obsidian';
+import type { PluginManifest } from "obsidian";
+import { request } from "obsidian";
 
-const GITHUB_RAW_USERCONTENT_PATH = 'https://raw.githubusercontent.com/';
+const GITHUB_RAW_USERCONTENT_PATH = "https://raw.githubusercontent.com/";
 
 const isPrivateRepo = async (
   repository: string,
   debugLogging = true,
-  personalAccessToken = ''
+  personalAccessToken = ""
 ): Promise<boolean> => {
   const URL = `https://api.github.com/repos/${repository}`;
   try {
     const response = await request({
       url: URL,
-      headers:
-        personalAccessToken ?
-          {
+      headers: personalAccessToken
+        ? {
             Authorization: `Token ${personalAccessToken}`,
           }
         : {},
@@ -22,7 +21,7 @@ const isPrivateRepo = async (
     const data = await JSON.parse(response);
     return data.private;
   } catch (e) {
-    if (debugLogging) console.log('error in isPrivateRepo', URL, e);
+    if (debugLogging) console.log("error in isPrivateRepo", URL, e);
     return false;
   }
 };
@@ -41,11 +40,15 @@ export const grabReleaseFileFromRepository = async (
   version: string,
   fileName: string,
   debugLogging = true,
-  personalAccessToken = ''
+  personalAccessToken = ""
 ): Promise<string | null> => {
   try {
     // check if the repo is a private repo
-    const isPrivate = await isPrivateRepo(repository, debugLogging, personalAccessToken);
+    const isPrivate = await isPrivateRepo(
+      repository,
+      debugLogging,
+      personalAccessToken
+    );
 
     if (isPrivate) {
       type Release = {
@@ -71,7 +74,9 @@ export const grabReleaseFileFromRepository = async (
         },
       });
       const data = await JSON.parse(response);
-      const release = data.find((release: Release) => release.tag_name === version);
+      const release = data.find(
+        (release: Release) => release.tag_name === version
+      );
       if (!release) {
         return null;
       }
@@ -85,30 +90,30 @@ export const grabReleaseFileFromRepository = async (
         url: asset.url,
         headers: {
           Authorization: `Token ${personalAccessToken}`,
-          Accept: 'application/octet-stream',
+          Accept: "application/octet-stream",
         },
       });
-      return download === 'Not Found' || download === `{"error":"Not Found"}` ?
-          null
+      return download === "Not Found" || download === `{"error":"Not Found"}`
+        ? null
         : download;
     } else {
       const URL = `https://github.com/${repository}/releases/download/${version}/${fileName}`;
       const download = await request({
         url: URL,
-        headers:
-          personalAccessToken ?
-            {
+        headers: personalAccessToken
+          ? {
               Authorization: `Token ${personalAccessToken}`,
             }
           : {},
       });
 
-      return download === 'Not Found' || download === `{"error":"Not Found"}` ?
-          null
+      return download === "Not Found" || download === `{"error":"Not Found"}`
+        ? null
         : download;
     }
   } catch (error) {
-    if (debugLogging) console.log('error in grabReleaseFileFromRepository', URL, error);
+    if (debugLogging)
+      console.log("error in grabReleaseFileFromRepository", URL, error);
     return null;
   }
 };
@@ -125,30 +130,33 @@ export const grabManifestJsonFromRepository = async (
   repositoryPath: string,
   rootManifest = true,
   debugLogging = true,
-  personalAccessToken = ''
+  personalAccessToken = ""
 ): Promise<PluginManifest | null> => {
   const manifestJsonPath =
     GITHUB_RAW_USERCONTENT_PATH +
     repositoryPath +
-    (rootManifest ? '/HEAD/manifest.json' : '/HEAD/manifest-beta.json');
+    (rootManifest ? "/HEAD/manifest.json" : "/HEAD/manifest-beta.json");
   if (debugLogging)
-    console.log('grabManifestJsonFromRepository manifestJsonPath', manifestJsonPath);
+    console.log(
+      "grabManifestJsonFromRepository manifestJsonPath",
+      manifestJsonPath
+    );
 
   // Function to check if the token is valid
   const isTokenValid = async (token: string): Promise<boolean> => {
     try {
       await request({
-        url: 'https://api.github.com/user',
-        method: 'GET',
+        url: "https://api.github.com/user",
+        method: "GET",
         headers: {
-          'Authorization': `token ${token}`,
-          'User-Agent': 'request',
-          'accept': 'application/vnd.github.v3+json',
+          Authorization: `token ${token}`,
+          "User-Agent": "request",
+          accept: "application/vnd.github.v3+json",
         },
       });
       return true;
     } catch (error) {
-      if (debugLogging) console.log('Token validation error:', error);
+      if (debugLogging) console.log("Token validation error:", error);
       return false;
     }
   };
@@ -157,25 +165,25 @@ export const grabManifestJsonFromRepository = async (
   let tokenValid = false;
   if (personalAccessToken) {
     tokenValid = await isTokenValid(personalAccessToken);
-    if (debugLogging) console.log('Token valid:', tokenValid);
+    if (debugLogging) console.log("Token valid:", tokenValid);
   }
 
   try {
     const response: string = await request({
       url: manifestJsonPath,
-      headers:
-        tokenValid ?
-          {
+      headers: tokenValid
+        ? {
             Authorization: `Token ${personalAccessToken}`,
           }
         : {},
     });
-    if (debugLogging) console.log('grabManifestJsonFromRepository response', response);
-    return response === '404: Not Found' ? null : (
-        ((await JSON.parse(response)) as PluginManifest)
-      );
+    if (debugLogging)
+      console.log("grabManifestJsonFromRepository response", response);
+    return response === "404: Not Found"
+      ? null
+      : ((await JSON.parse(response)) as PluginManifest);
   } catch (error) {
-    if (error !== 'Error: Request failed, status 404' && debugLogging) {
+    if (error !== "Error: Request failed, status 404" && debugLogging) {
       // normal error, ignore
       console.log(
         `error in grabManifestJsonFromRepository for ${manifestJsonPath}`,
@@ -197,14 +205,15 @@ export interface CommunityPlugin {
 export const grabCommmunityPluginList = async (
   debugLogging = true
 ): Promise<CommunityPlugin[] | null> => {
-  const pluginListUrl = `https://raw.githubusercontent.com/obsidianmd/obsidian-releases/HEAD/community-plugins.json`;
+  const pluginListUrl =
+    "https://raw.githubusercontent.com/obsidianmd/obsidian-releases/HEAD/community-plugins.json";
   try {
     const response = await request({ url: pluginListUrl });
-    return response === '404: Not Found' ? null : (
-        ((await JSON.parse(response)) as CommunityPlugin[])
-      );
+    return response === "404: Not Found"
+      ? null
+      : ((await JSON.parse(response)) as CommunityPlugin[]);
   } catch (error) {
-    if (debugLogging) console.log('error in grabCommmunityPluginList', error);
+    if (debugLogging) console.log("error in grabCommmunityPluginList", error);
     return null;
   }
 };
@@ -218,14 +227,15 @@ export interface CommunityTheme {
 export const grabCommmunityThemesList = async (
   debugLogging = true
 ): Promise<CommunityTheme[] | null> => {
-  const themesUrl = `https://raw.githubusercontent.com/obsidianmd/obsidian-releases/HEAD/community-css-themes.json`;
+  const themesUrl =
+    "https://raw.githubusercontent.com/obsidianmd/obsidian-releases/HEAD/community-css-themes.json";
   try {
     const response = await request({ url: themesUrl });
-    return response === '404: Not Found' ? null : (
-        ((await JSON.parse(response)) as CommunityTheme[])
-      );
+    return response === "404: Not Found"
+      ? null
+      : ((await JSON.parse(response)) as CommunityTheme[]);
   } catch (error) {
-    if (debugLogging) console.log('error in grabCommmunityThemesList', error);
+    if (debugLogging) console.log("error in grabCommmunityThemesList", error);
     return null;
   }
 };
@@ -236,13 +246,13 @@ export const grabCommmunityThemeCssFile = async (
   debugLogging: boolean
 ): Promise<string | null> => {
   const themesUrl = `https://raw.githubusercontent.com/${repositoryPath}/HEAD/theme${
-    betaVersion ? '-beta' : ''
+    betaVersion ? "-beta" : ""
   }.css`;
   try {
     const response = await request({ url: themesUrl });
-    return response === '404: Not Found' ? null : response;
+    return response === "404: Not Found" ? null : response;
   } catch (error) {
-    if (debugLogging) console.log('error in grabCommmunityThemeCssFile', error);
+    if (debugLogging) console.log("error in grabCommmunityThemeCssFile", error);
     return null;
   }
 };
@@ -254,9 +264,10 @@ export const grabCommmunityThemeManifestFile = async (
   const themesUrl = `https://raw.githubusercontent.com/${repositoryPath}/HEAD/manifest.json`;
   try {
     const response = await request({ url: themesUrl });
-    return response === '404: Not Found' ? null : response;
+    return response === "404: Not Found" ? null : response;
   } catch (error) {
-    if (debugLogging) console.log('error in grabCommmunityThemeManifestFile', error);
+    if (debugLogging)
+      console.log("error in grabCommmunityThemeManifestFile", error);
     return null;
   }
 };
@@ -283,7 +294,7 @@ export const grabChecksumOfThemeCssFile = async (
     betaVersion,
     debugLogging
   );
-  return themeCss ? checksumForString(themeCss) : '0';
+  return themeCss ? checksumForString(themeCss) : "0";
 };
 
 interface CommitInfo {
@@ -302,9 +313,11 @@ export const grabLastCommitInfoForFile = async (
   const url = `https://api.github.com/repos/${repositoryPath}/commits?path=${path}&page=1&per_page=1`;
   try {
     const response = await request({ url: url });
-    return response === '404: Not Found' ? null : (JSON.parse(response) as CommitInfo[]);
+    return response === "404: Not Found"
+      ? null
+      : (JSON.parse(response) as CommitInfo[]);
   } catch (error) {
-    if (debugLogging) console.log('error in grabLastCommitInfoForAFile', error);
+    if (debugLogging) console.log("error in grabLastCommitInfoForAFile", error);
     return null;
   }
 };
@@ -313,10 +326,13 @@ export const grabLastCommitDateForFile = async (
   repositoryPath: string,
   path: string
 ): Promise<string> => {
-  const test: CommitInfo[] | null = await grabLastCommitInfoForFile(repositoryPath, path);
+  const test: CommitInfo[] | null = await grabLastCommitInfoForFile(
+    repositoryPath,
+    path
+  );
   if (test && test.length > 0 && test[0].commit.committer?.date) {
     return test[0].commit.committer.date;
   } else {
-    return '';
+    return "";
   }
 };

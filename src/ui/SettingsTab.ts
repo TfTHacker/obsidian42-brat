@@ -1,13 +1,16 @@
-import type ThePlugin from '../main';
-import type { App, ToggleComponent, ButtonComponent } from 'obsidian';
-import { PluginSettingTab, Setting } from 'obsidian';
-import { themeDelete } from '../features/themes';
-import AddNewTheme from './AddNewTheme';
-import { promotionalLinks } from './Promotional';
+import type ThePlugin from "../main";
+import type { App, ToggleComponent, ButtonComponent } from "obsidian";
+import { PluginSettingTab, Setting } from "obsidian";
+import { themeDelete } from "../features/themes";
+import AddNewTheme from "./AddNewTheme";
+import { promotionalLinks } from "./Promotional";
 
-const createLink = (githubResource: string, optionalText?: string): DocumentFragment => {
+const createLink = (
+  githubResource: string,
+  optionalText?: string
+): DocumentFragment => {
   const newLink = new DocumentFragment();
-  const linkElement = document.createElement('a');
+  const linkElement = document.createElement("a");
   linkElement.textContent = githubResource;
   linkElement.href = `https://github.com/${githubResource}`;
   newLink.appendChild(linkElement);
@@ -31,7 +34,7 @@ export class BratSettingsTab extends PluginSettingTab {
     containerEl.empty();
 
     new Setting(containerEl)
-      .setName('Auto-enable plugins after installation')
+      .setName("Auto-enable plugins after installation")
       .setDesc(
         'If enabled beta plugins will be automatically enabled after installtion by default. Note: you can toggle this on and off for each plugin in the "Add Plugin" form.'
       )
@@ -44,9 +47,9 @@ export class BratSettingsTab extends PluginSettingTab {
       });
 
     new Setting(containerEl)
-      .setName('Auto-update plugins at startup')
+      .setName("Auto-update plugins at startup")
       .setDesc(
-        'If enabled all beta plugins will be checked for updates each time Obsidian starts. Note: this does not update frozen version plugins.'
+        "If enabled all beta plugins will be checked for updates each time Obsidian starts. Note: this does not update frozen version plugins."
       )
       .addToggle((cb: ToggleComponent) => {
         cb.setValue(this.plugin.settings.updateAtStartup);
@@ -57,9 +60,9 @@ export class BratSettingsTab extends PluginSettingTab {
       });
 
     new Setting(containerEl)
-      .setName('Auto-update themes at startup')
+      .setName("Auto-update themes at startup")
       .setDesc(
-        'If enabled all beta themes will be checked for updates each time Obsidian starts.'
+        "If enabled all beta themes will be checked for updates each time Obsidian starts."
       )
       .addToggle((cb: ToggleComponent) => {
         cb.setValue(this.plugin.settings.updateThemesAtStartup);
@@ -70,23 +73,23 @@ export class BratSettingsTab extends PluginSettingTab {
       });
 
     promotionalLinks(containerEl, true);
-    containerEl.createEl('hr');
-    containerEl.createEl('h2', { text: 'Beta Plugin List' });
-    containerEl.createEl('div', {
+    containerEl.createEl("hr");
+    containerEl.createEl("h2", { text: "Beta Plugin List" });
+    containerEl.createEl("div", {
       text: `The following is a list of beta plugins added via the command palette "Add a beta plugin for testing" or "Add a beta plugin with frozen version for testing". A frozen version is a specific release of a plugin based on its release tag. `,
     });
-    containerEl.createEl('p');
-    containerEl.createEl('div', {
-      text: `Click the x button next to a plugin to remove it from the list.`,
+    containerEl.createEl("p");
+    containerEl.createEl("div", {
+      text: "Click the x button next to a plugin to remove it from the list.",
     });
-    containerEl.createEl('p');
-    containerEl.createEl('span').createEl('b', { text: 'Note: ' });
+    containerEl.createEl("p");
+    containerEl.createEl("span").createEl("b", { text: "Note: " });
     containerEl.createSpan({
-      text: 'This does not delete the plugin, this should be done from the  Community Plugins tab in Settings.',
+      text: "This does not delete the plugin, this should be done from the  Community Plugins tab in Settings.",
     });
 
     new Setting(containerEl).addButton((cb: ButtonComponent) => {
-      cb.setButtonText('Add Beta plugin');
+      cb.setButtonText("Add Beta plugin");
       cb.onClick(() => {
         this.plugin.app.setting.close();
         this.plugin.betaPlugins.displayAddNewPluginModal(true, false);
@@ -103,11 +106,11 @@ export class BratSettingsTab extends PluginSettingTab {
       new Setting(containerEl)
         .setName(createLink(bp))
         .addButton((btn: ButtonComponent) => {
-          btn.setIcon('cross');
-          btn.setTooltip('Delete this beta plugin');
+          btn.setIcon("cross");
+          btn.setTooltip("Delete this beta plugin");
           btn.onClick(() => {
-            if (btn.buttonEl.textContent === '')
-              btn.setButtonText('Click once more to confirm removal');
+            if (btn.buttonEl.textContent === "")
+              btn.setButtonText("Click once more to confirm removal");
             else {
               const { buttonEl } = btn;
               const { parentElement } = buttonEl;
@@ -121,7 +124,7 @@ export class BratSettingsTab extends PluginSettingTab {
     }
 
     new Setting(containerEl).addButton((cb: ButtonComponent) => {
-      cb.setButtonText('Add Beta plugin with frozen version');
+      cb.setButtonText("Add Beta plugin with frozen version");
       cb.onClick(() => {
         this.plugin.app.setting.close();
         this.plugin.betaPlugins.displayAddNewPluginModal(true, true);
@@ -131,11 +134,11 @@ export class BratSettingsTab extends PluginSettingTab {
       new Setting(containerEl)
         .setName(createLink(bp.repo, ` (version ${bp.version})`))
         .addButton((btn: ButtonComponent) => {
-          btn.setIcon('cross');
-          btn.setTooltip('Delete this beta plugin');
+          btn.setIcon("cross");
+          btn.setTooltip("Delete this beta plugin");
           btn.onClick(() => {
-            if (btn.buttonEl.textContent === '')
-              btn.setButtonText('Click once more to confirm removal');
+            if (btn.buttonEl.textContent === "")
+              btn.setButtonText("Click once more to confirm removal");
             else {
               const { buttonEl } = btn;
               const { parentElement } = buttonEl;
@@ -148,10 +151,10 @@ export class BratSettingsTab extends PluginSettingTab {
         });
     }
 
-    containerEl.createEl('h2', { text: 'Beta Themes List' });
+    containerEl.createEl("h2", { text: "Beta Themes List" });
 
     new Setting(containerEl).addButton((cb: ButtonComponent) => {
-      cb.setButtonText('Add Beta Theme');
+      cb.setButtonText("Add Beta Theme");
       cb.onClick(() => {
         this.plugin.app.setting.close();
         new AddNewTheme(this.plugin).open();
@@ -162,11 +165,11 @@ export class BratSettingsTab extends PluginSettingTab {
       new Setting(containerEl)
         .setName(createLink(bp.repo))
         .addButton((btn: ButtonComponent) => {
-          btn.setIcon('cross');
-          btn.setTooltip('Delete this beta theme');
+          btn.setIcon("cross");
+          btn.setTooltip("Delete this beta theme");
           btn.onClick(() => {
-            if (btn.buttonEl.textContent === '')
-              btn.setButtonText('Click once more to confirm removal');
+            if (btn.buttonEl.textContent === "")
+              btn.setButtonText("Click once more to confirm removal");
             else {
               const { buttonEl } = btn;
               const { parentElement } = buttonEl;
@@ -179,12 +182,12 @@ export class BratSettingsTab extends PluginSettingTab {
         });
     }
 
-    containerEl.createEl('h2', { text: 'Monitoring' });
+    containerEl.createEl("h2", { text: "Monitoring" });
 
     new Setting(containerEl)
-      .setName('Enable Notifications')
+      .setName("Enable Notifications")
       .setDesc(
-        'BRAT will provide popup notifications for its various activities. Turn this off means  no notifications from BRAT.'
+        "BRAT will provide popup notifications for its various activities. Turn this off means  no notifications from BRAT."
       )
       .addToggle((cb: ToggleComponent) => {
         cb.setValue(this.plugin.settings.notificationsEnabled);
@@ -195,8 +198,8 @@ export class BratSettingsTab extends PluginSettingTab {
       });
 
     new Setting(containerEl)
-      .setName('Enable Logging')
-      .setDesc('Plugin updates will be logged to a file in the log file.')
+      .setName("Enable Logging")
+      .setDesc("Plugin updates will be logged to a file in the log file.")
       .addToggle((cb: ToggleComponent) => {
         cb.setValue(this.plugin.settings.loggingEnabled);
         cb.onChange(async (value: boolean) => {
@@ -206,10 +209,12 @@ export class BratSettingsTab extends PluginSettingTab {
       });
 
     new Setting(this.containerEl)
-      .setName('BRAT Log File Location')
-      .setDesc("Logs will be saved to this file. Don't add .md to the file name.")
+      .setName("BRAT Log File Location")
+      .setDesc(
+        "Logs will be saved to this file. Don't add .md to the file name."
+      )
       .addSearch((cb) => {
-        cb.setPlaceholder('Example: BRAT-log')
+        cb.setPlaceholder("Example: BRAT-log")
           .setValue(this.plugin.settings.loggingPath)
           .onChange(async (newFolder) => {
             this.plugin.settings.loggingPath = newFolder;
@@ -218,8 +223,8 @@ export class BratSettingsTab extends PluginSettingTab {
       });
 
     new Setting(containerEl)
-      .setName('Enable Verbose Logging')
-      .setDesc('Get a lot  more information in  the log.')
+      .setName("Enable Verbose Logging")
+      .setDesc("Get a lot  more information in  the log.")
       .addToggle((cb: ToggleComponent) => {
         cb.setValue(this.plugin.settings.loggingVerboseEnabled);
         cb.onChange(async (value: boolean) => {
@@ -229,9 +234,9 @@ export class BratSettingsTab extends PluginSettingTab {
       });
 
     new Setting(containerEl)
-      .setName('Debugging Mode')
+      .setName("Debugging Mode")
       .setDesc(
-        'Atomic Bomb level console logging. Can be used for troubleshoting and development.'
+        "Atomic Bomb level console logging. Can be used for troubleshoting and development."
       )
       .addToggle((cb: ToggleComponent) => {
         cb.setValue(this.plugin.settings.debuggingMode);
@@ -242,14 +247,14 @@ export class BratSettingsTab extends PluginSettingTab {
       });
 
     new Setting(containerEl)
-      .setName('Personal Access Token')
+      .setName("Personal Access Token")
       .setDesc(
-        'If you need to access private repositories, enter the personal access token here.'
+        "If you need to access private repositories, enter the personal access token here."
       )
       .addText((text) => {
         text
-          .setPlaceholder('Enter your personal access token')
-          .setValue(this.plugin.settings.personalAccessToken ?? '')
+          .setPlaceholder("Enter your personal access token")
+          .setValue(this.plugin.settings.personalAccessToken ?? "")
           .onChange(async (value: string) => {
             this.plugin.settings.personalAccessToken = value;
             await this.plugin.saveSettings();

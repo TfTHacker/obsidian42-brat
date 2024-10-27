@@ -1,10 +1,14 @@
-import type ThePlugin from '../main';
+import type ThePlugin from "../main";
 import {
   grabChecksumOfThemeCssFile,
   grabCommmunityThemeCssFile,
   grabLastCommitDateForFile,
-} from '../features/githubUtils';
-import { themeSave, themeDelete, themesCheckAndUpdates } from '../features/themes';
+} from "../features/githubUtils";
+import {
+  themeSave,
+  themeDelete,
+  themesCheckAndUpdates,
+} from "../features/themes";
 
 // This module is for API access for use in debuging console
 
@@ -15,8 +19,11 @@ export default class BratAPI {
     this.plugin = plugin;
   }
 
-  console = (logDescription: string, ...outputs: (string | number | boolean)[]): void => {
-    console.log('BRAT: ' + logDescription, ...outputs);
+  console = (
+    logDescription: string,
+    ...outputs: (string | number | boolean)[]
+  ): void => {
+    console.log(`BRAT: ${logDescription}`, ...outputs);
   };
 
   themes = {
@@ -25,12 +32,18 @@ export default class BratAPI {
     },
 
     themeInstallTheme: async (cssGithubRepository: string): Promise<void> => {
-      const scrubbedAddress = cssGithubRepository.replace('https://github.com/', '');
+      const scrubbedAddress = cssGithubRepository.replace(
+        "https://github.com/",
+        ""
+      );
       await themeSave(this.plugin, scrubbedAddress, true);
     },
 
     themesDelete: (cssGithubRepository: string): void => {
-      const scrubbedAddress = cssGithubRepository.replace('https://github.com/', '');
+      const scrubbedAddress = cssGithubRepository.replace(
+        "https://github.com/",
+        ""
+      );
       themeDelete(this.plugin, scrubbedAddress);
     },
 

@@ -1,5 +1,5 @@
-import type ThePlugin from './main';
-import { checksumForString } from './features/githubUtils';
+import type ThePlugin from "./main";
+import { checksumForString } from "./features/githubUtils";
 
 export interface ThemeInforamtion {
   repo: string;
@@ -35,11 +35,11 @@ export const DEFAULT_SETTINGS: Settings = {
   updateThemesAtStartup: true,
   enableAfterInstall: true,
   loggingEnabled: false,
-  loggingPath: 'BRAT-log',
+  loggingPath: "BRAT-log",
   loggingVerboseEnabled: false,
   debuggingMode: false,
   notificationsEnabled: true,
-  personalAccessToken: '',
+  personalAccessToken: "",
 };
 
 /**
@@ -52,7 +52,7 @@ export const DEFAULT_SETTINGS: Settings = {
 export function addBetaPluginToList(
   plugin: ThePlugin,
   repositoryPath: string,
-  specifyVersion = ''
+  specifyVersion = ""
 ): void {
   let save = false;
   if (!plugin.settings.pluginList.contains(repositoryPath)) {
@@ -60,9 +60,10 @@ export function addBetaPluginToList(
     save = true;
   }
   if (
-    specifyVersion !== '' &&
-    plugin.settings.pluginSubListFrozenVersion.filter((x) => x.repo === repositoryPath)
-      .length === 0
+    specifyVersion !== "" &&
+    plugin.settings.pluginSubListFrozenVersion.filter(
+      (x) => x.repo === repositoryPath
+    ).length === 0
   ) {
     plugin.settings.pluginSubListFrozenVersion.unshift({
       repo: repositoryPath,

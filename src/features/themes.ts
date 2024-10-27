@@ -1,15 +1,18 @@
-import type ThePlugin from '../main';
-import { normalizePath, Notice } from 'obsidian';
-import { addBetaThemeToList, updateBetaThemeLastUpdateChecksum } from '../settings';
+import type ThePlugin from "../main";
+import { normalizePath, Notice } from "obsidian";
+import {
+  addBetaThemeToList,
+  updateBetaThemeLastUpdateChecksum,
+} from "../settings";
 import {
   checksumForString,
   grabChecksumOfThemeCssFile,
   grabCommmunityThemeCssFile,
   grabCommmunityThemeManifestFile,
-} from './githubUtils';
-import { toastMessage } from '../utils/notifications';
-import { isConnectedToInternet } from '../utils/internetconnection';
-import type { ThemeManifest } from 'obsidian-typings';
+} from "./githubUtils";
+import { toastMessage } from "../utils/notifications";
+import { isConnectedToInternet } from "../utils/internetconnection";
+import type { ThemeManifest } from "obsidian-typings";
 
 /**
  * Installs or updates a theme
@@ -42,7 +45,7 @@ export const themeSave = async (
   if (!themeCss) {
     toastMessage(
       plugin,
-      'There is no theme.css or theme-beta.css file in the root path of this repository, so there is no theme to install.'
+      "There is no theme.css or theme-beta.css file in the root path of this repository, so there is no theme to install."
     );
     return false;
   }
@@ -54,22 +57,27 @@ export const themeSave = async (
   if (!themeManifest) {
     toastMessage(
       plugin,
-      'There is no manifest.json file in the root path of this repository, so theme cannot be installed.'
+      "There is no manifest.json file in the root path of this repository, so theme cannot be installed."
     );
     return false;
   }
 
   const manifestInfo = (await JSON.parse(themeManifest)) as ThemeManifest;
 
-  const themeTargetFolderPath = normalizePath(themesRootPath(plugin) + manifestInfo.name);
+  const themeTargetFolderPath = normalizePath(
+    themesRootPath(plugin) + manifestInfo.name
+  );
 
   const { adapter } = plugin.app.vault;
   if (!(await adapter.exists(themeTargetFolderPath)))
     await adapter.mkdir(themeTargetFolderPath);
 
-  await adapter.write(normalizePath(themeTargetFolderPath + '/theme.css'), themeCss);
   await adapter.write(
-    normalizePath(themeTargetFolderPath + '/manifest.json'),
+    normalizePath(`${themeTargetFolderPath}/theme.css`),
+    themeCss
+  );
+  await adapter.write(
+    normalizePath(`${themeTargetFolderPath}/manifest.json`),
     themeManifest
   );
 
@@ -79,7 +87,7 @@ export const themeSave = async (
     checksumForString(themeCss)
   );
 
-  let msg = ``;
+  let msg = "";
 
   if (newInstall) {
     addBetaThemeToList(plugin, cssGithubRepository, themeCss);
@@ -91,7 +99,10 @@ export const themeSave = async (
     msg = `${manifestInfo.name} theme updated from ${cssGithubRepository}.`;
   }
 
-  void plugin.log(msg + `[Theme Info](https://github.com/${cssGithubRepository})`, false);
+  void plugin.log(
+    `${msg}[Theme Info](https://github.com/${cssGithubRepository})`,
+    false
+  );
   toastMessage(plugin, msg, 20, (): void => {
     window.open(`https://github.com/${cssGithubRepository}`);
   });
@@ -110,11 +121,11 @@ export const themesCheckAndUpdates = async (
   showInfo: boolean
 ): Promise<void> => {
   if (!(await isConnectedToInternet())) {
-    console.log('BRAT: No internet detected.');
+    console.log("BRAT: No internet detected.");
     return;
   }
   let newNotice: Notice | undefined;
-  const msg1 = `Checking for beta theme updates STARTED`;
+  const msg1 = "Checking for beta theme updates STARTED";
   await plugin.log(msg1, true);
   if (showInfo && plugin.settings.notificationsEnabled)
     newNotice = new Notice(`BRAT\n${msg1}`, 30000);
@@ -126,16 +137,17 @@ export const themesCheckAndUpdates = async (
       plugin.settings.debuggingMode
     );
     // if theme-beta.css does NOT exist, try to get theme.css
-    if (lastUpdateOnline === '0')
+    if (lastUpdateOnline === "0")
       lastUpdateOnline = await grabChecksumOfThemeCssFile(
         t.repo,
         false,
         plugin.settings.debuggingMode
       );
-    console.log('BRAT: lastUpdateOnline', lastUpdateOnline);
-    if (lastUpdateOnline !== t.lastUpdate) await themeSave(plugin, t.repo, false);
+    console.log("BRAT: lastUpdateOnline", lastUpdateOnline);
+    if (lastUpdateOnline !== t.lastUpdate)
+      await themeSave(plugin, t.repo, false);
   }
-  const msg2 = `Checking for beta theme updates COMPLETED`;
+  const msg2 = "Checking for beta theme updates COMPLETED";
   (async (): Promise<void> => {
     await plugin.log(msg2, true);
   })();
@@ -152,7 +164,10 @@ export const themesCheckAndUpdates = async (
  * @param cssGithubRepository - Repository path
  *
  */
-export const themeDelete = (plugin: ThePlugin, cssGithubRepository: string): void => {
+export const themeDelete = (
+  plugin: ThePlugin,
+  cssGithubRepository: string
+): void => {
   plugin.settings.themesList = plugin.settings.themesList.filter(
     (t) => t.repo !== cssGithubRepository
   );
@@ -170,5 +185,5 @@ export const themeDelete = (plugin: ThePlugin, cssGithubRepository: string): voi
  * @returns path to themes folder
  */
 export const themesRootPath = (plugin: ThePlugin): string => {
-  return normalizePath(plugin.app.vault.configDir + '/themes') + '/';
+  return normalizePath(plugin.app.vault.configDir + "/themes") + "/";
 };

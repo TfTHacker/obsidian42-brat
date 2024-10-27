@@ -1,65 +1,73 @@
-import type ThePlugin from '../main';
-import type { SuggesterItem } from './GenericFuzzySuggester';
-import { GenericFuzzySuggester } from './GenericFuzzySuggester';
-import type { CommunityPlugin, CommunityTheme } from '../features/githubUtils';
+import type ThePlugin from "../main";
+import type { SuggesterItem } from "./GenericFuzzySuggester";
+import { GenericFuzzySuggester } from "./GenericFuzzySuggester";
+import type { CommunityPlugin, CommunityTheme } from "../features/githubUtils";
 import {
   grabCommmunityPluginList,
   grabCommmunityThemesList,
-} from '../features/githubUtils';
-import { themesCheckAndUpdates } from '../features/themes';
-import AddNewTheme from './AddNewTheme';
-import { toastMessage } from '../utils/notifications';
-import type { SettingTab } from 'obsidian';
+} from "../features/githubUtils";
+import { themesCheckAndUpdates } from "../features/themes";
+import AddNewTheme from "./AddNewTheme";
+import { toastMessage } from "../utils/notifications";
+import type { SettingTab } from "obsidian";
 
 export default class PluginCommands {
   plugin: ThePlugin;
   bratCommands = [
     {
-      id: 'BRAT-AddBetaPlugin',
-      icon: 'BratIcon',
-      name: 'Plugins: Add a beta plugin for testing',
+      id: "BRAT-AddBetaPlugin",
+      icon: "BratIcon",
+      name: "Plugins: Add a beta plugin for testing",
       showInRibbon: true,
       callback: () => {
         this.plugin.betaPlugins.displayAddNewPluginModal(false, false);
       },
     },
     {
-      id: 'BRAT-AddBetaPluginWithFrozenVersion',
-      icon: 'BratIcon',
-      name: 'Plugins: Add a beta plugin with frozen version based on a release tag',
+      id: "BRAT-AddBetaPluginWithFrozenVersion",
+      icon: "BratIcon",
+      name: "Plugins: Add a beta plugin with frozen version based on a release tag",
       showInRibbon: true,
       callback: () => {
         this.plugin.betaPlugins.displayAddNewPluginModal(false, true);
       },
     },
     {
-      id: 'BRAT-checkForUpdatesAndUpdate',
-      icon: 'BratIcon',
-      name: 'Plugins: Check for updates to all beta plugins and UPDATE',
+      id: "BRAT-checkForUpdatesAndUpdate",
+      icon: "BratIcon",
+      name: "Plugins: Check for updates to all beta plugins and UPDATE",
       showInRibbon: true,
       callback: async () => {
-        await this.plugin.betaPlugins.checkForPluginUpdatesAndInstallUpdates(true, false);
+        await this.plugin.betaPlugins.checkForPluginUpdatesAndInstallUpdates(
+          true,
+          false
+        );
       },
     },
     {
-      id: 'BRAT-checkForUpdatesAndDontUpdate',
-      icon: 'BratIcon',
+      id: "BRAT-checkForUpdatesAndDontUpdate",
+      icon: "BratIcon",
       name: "Plugins: Only check for updates to beta plugins, but don't Update",
       showInRibbon: true,
       callback: async () => {
-        await this.plugin.betaPlugins.checkForPluginUpdatesAndInstallUpdates(true, true);
+        await this.plugin.betaPlugins.checkForPluginUpdatesAndInstallUpdates(
+          true,
+          true
+        );
       },
     },
     {
-      id: 'BRAT-updateOnePlugin',
-      icon: 'BratIcon',
-      name: 'Plugins: Choose a single plugin version to update',
+      id: "BRAT-updateOnePlugin",
+      icon: "BratIcon",
+      name: "Plugins: Choose a single plugin version to update",
       showInRibbon: true,
       callback: () => {
         const pluginSubListFrozenVersionNames = new Set(
           this.plugin.settings.pluginSubListFrozenVersion.map((f) => f.repo)
         );
-        const pluginList: SuggesterItem[] = Object.values(this.plugin.settings.pluginList)
+        const pluginList: SuggesterItem[] = Object.values(
+          this.plugin.settings.pluginList
+        )
           .filter((f) => !pluginSubListFrozenVersionNames.has(f))
           .map((m) => {
             return { display: m, info: m };
@@ -70,20 +78,26 @@ export default class PluginCommands {
           const msg = `Checking for updates for ${results.info as string}`;
           void this.plugin.log(msg, true);
           toastMessage(this.plugin, `\n${msg}`, 3);
-          void this.plugin.betaPlugins.updatePlugin(results.info as string, false, true);
+          void this.plugin.betaPlugins.updatePlugin(
+            results.info as string,
+            false,
+            true
+          );
         });
       },
     },
     {
-      id: 'BRAT-reinstallOnePlugin',
-      icon: 'BratIcon',
-      name: 'Plugins: Choose a single plugin to reinstall',
+      id: "BRAT-reinstallOnePlugin",
+      icon: "BratIcon",
+      name: "Plugins: Choose a single plugin to reinstall",
       showInRibbon: true,
       callback: () => {
         const pluginSubListFrozenVersionNames = new Set(
           this.plugin.settings.pluginSubListFrozenVersion.map((f) => f.repo)
         );
-        const pluginList: SuggesterItem[] = Object.values(this.plugin.settings.pluginList)
+        const pluginList: SuggesterItem[] = Object.values(
+          this.plugin.settings.pluginList
+        )
           .filter((f) => !pluginSubListFrozenVersionNames.has(f))
           .map((m) => {
             return { display: m, info: m };
@@ -104,9 +118,9 @@ export default class PluginCommands {
       },
     },
     {
-      id: 'BRAT-restartPlugin',
-      icon: 'BratIcon',
-      name: 'Plugins: Restart a plugin that is already installed',
+      id: "BRAT-restartPlugin",
+      icon: "BratIcon",
+      name: "Plugins: Restart a plugin that is already installed",
       showInRibbon: true,
       callback: () => {
         const pluginList: SuggesterItem[] = Object.values(
@@ -127,48 +141,58 @@ export default class PluginCommands {
       },
     },
     {
-      id: 'BRAT-disablePlugin',
-      icon: 'BratIcon',
-      name: 'Plugins: Disable a plugin - toggle it off',
+      id: "BRAT-disablePlugin",
+      icon: "BratIcon",
+      name: "Plugins: Disable a plugin - toggle it off",
       showInRibbon: true,
       callback: () => {
         const pluginList = this.plugin.betaPlugins
           .getEnabledDisabledPlugins(true)
           .map((manifest) => {
-            return { display: `${manifest.name} (${manifest.id})`, info: manifest.id };
+            return {
+              display: `${manifest.name} (${manifest.id})`,
+              info: manifest.id,
+            };
           });
         const gfs = new GenericFuzzySuggester(this.plugin);
         gfs.setSuggesterData(pluginList);
         gfs.display((results) => {
           void this.plugin.log(`${results.display} plugin disabled`, false);
           if (this.plugin.settings.debuggingMode) console.log(results.info);
-          void this.plugin.app.plugins.disablePluginAndSave(results.info as string);
+          void this.plugin.app.plugins.disablePluginAndSave(
+            results.info as string
+          );
         });
       },
     },
     {
-      id: 'BRAT-enablePlugin',
-      icon: 'BratIcon',
-      name: 'Plugins: Enable a plugin - toggle it on',
+      id: "BRAT-enablePlugin",
+      icon: "BratIcon",
+      name: "Plugins: Enable a plugin - toggle it on",
       showInRibbon: true,
       callback: () => {
         const pluginList = this.plugin.betaPlugins
           .getEnabledDisabledPlugins(false)
           .map((manifest) => {
-            return { display: `${manifest.name} (${manifest.id})`, info: manifest.id };
+            return {
+              display: `${manifest.name} (${manifest.id})`,
+              info: manifest.id,
+            };
           });
         const gfs = new GenericFuzzySuggester(this.plugin);
         gfs.setSuggesterData(pluginList);
         gfs.display((results) => {
           void this.plugin.log(`${results.display} plugin enabled`, false);
-          void this.plugin.app.plugins.enablePluginAndSave(results.info as string);
+          void this.plugin.app.plugins.enablePluginAndSave(
+            results.info as string
+          );
         });
       },
     },
     {
-      id: 'BRAT-openGitHubZRepository',
-      icon: 'BratIcon',
-      name: 'Plugins: Open the GitHub repository for a plugin',
+      id: "BRAT-openGitHubZRepository",
+      icon: "BratIcon",
+      name: "Plugins: Open the GitHub repository for a plugin",
       showInRibbon: true,
       callback: async () => {
         const communityPlugins = await grabCommmunityPluginList(
@@ -183,59 +207,63 @@ export default class PluginCommands {
           const bratList: SuggesterItem[] = Object.values(
             this.plugin.settings.pluginList
           ).map((p) => {
-            return { display: 'BRAT: ' + p, info: p };
+            return { display: `BRAT: ${p}`, info: p };
           });
           communityPluginList.forEach((si) => bratList.push(si));
           const gfs = new GenericFuzzySuggester(this.plugin);
           gfs.setSuggesterData(bratList);
           gfs.display((results) => {
-            if (results.info) window.open(`https://github.com/${results.info as string}`);
+            if (results.info)
+              window.open(`https://github.com/${results.info as string}`);
           });
         }
       },
     },
     {
-      id: 'BRAT-openGitHubRepoTheme',
-      icon: 'BratIcon',
-      name: 'Themes: Open the GitHub repository for a theme (appearance)',
+      id: "BRAT-openGitHubRepoTheme",
+      icon: "BratIcon",
+      name: "Themes: Open the GitHub repository for a theme (appearance)",
       showInRibbon: true,
       callback: async () => {
         const communityTheme = await grabCommmunityThemesList(
           this.plugin.settings.debuggingMode
         );
         if (communityTheme) {
-          const communityThemeList: SuggesterItem[] = Object.values(communityTheme).map(
-            (p: CommunityTheme) => {
-              return { display: `Theme: ${p.name}  (${p.repo})`, info: p.repo };
-            }
-          );
+          const communityThemeList: SuggesterItem[] = Object.values(
+            communityTheme
+          ).map((p: CommunityTheme) => {
+            return { display: `Theme: ${p.name}  (${p.repo})`, info: p.repo };
+          });
           const gfs = new GenericFuzzySuggester(this.plugin);
           gfs.setSuggesterData(communityThemeList);
           gfs.display((results) => {
-            if (results.info) window.open(`https://github.com/${results.info as string}`);
+            if (results.info)
+              window.open(`https://github.com/${results.info as string}`);
           });
         }
       },
     },
     {
-      id: 'BRAT-opentPluginSettings',
-      icon: 'BratIcon',
-      name: 'Plugins: Open Plugin Settings Tab',
+      id: "BRAT-opentPluginSettings",
+      icon: "BratIcon",
+      name: "Plugins: Open Plugin Settings Tab",
       showInRibbon: true,
       callback: () => {
         const settings = this.plugin.app.setting;
         const listOfPluginSettingsTabs: SuggesterItem[] = Object.values(
           settings.pluginTabs
         ).map((t) => {
-          return { display: 'Plugin: ' + t.name, info: t.id };
+          return { display: `Plugin: ${t.name}`, info: t.id };
         });
         const gfs = new GenericFuzzySuggester(this.plugin);
         const listOfCoreSettingsTabs: SuggesterItem[] = Object.values(
           settings.settingTabs
         ).map((t) => {
-          return { display: 'Core: ' + t.name, info: t.id };
+          return { display: `Core: ${t.name}`, info: t.id };
         });
-        listOfPluginSettingsTabs.forEach((si) => listOfCoreSettingsTabs.push(si));
+        listOfPluginSettingsTabs.forEach((si) =>
+          listOfCoreSettingsTabs.push(si)
+        );
         gfs.setSuggesterData(listOfCoreSettingsTabs);
         gfs.display((results) => {
           settings.open();
@@ -244,27 +272,27 @@ export default class PluginCommands {
       },
     },
     {
-      id: 'BRAT-GrabBetaTheme',
-      icon: 'BratIcon',
-      name: 'Themes: Grab a beta theme for testing from a Github repository',
+      id: "BRAT-GrabBetaTheme",
+      icon: "BratIcon",
+      name: "Themes: Grab a beta theme for testing from a Github repository",
       showInRibbon: true,
       callback: () => {
         new AddNewTheme(this.plugin).open();
       },
     },
     {
-      id: 'BRAT-updateBetaThemes',
-      icon: 'BratIcon',
-      name: 'Themes: Update beta themes',
+      id: "BRAT-updateBetaThemes",
+      icon: "BratIcon",
+      name: "Themes: Update beta themes",
       showInRibbon: true,
       callback: async () => {
         await themesCheckAndUpdates(this.plugin, true);
       },
     },
     {
-      id: 'BRAT-allCommands',
-      icon: 'BratIcon',
-      name: 'All Commands list',
+      id: "BRAT-allCommands",
+      icon: "BratIcon",
+      name: "All Commands list",
       showInRibbon: false,
       callback: () => {
         this.ribbonDisplayCommands();
@@ -284,7 +312,7 @@ export default class PluginCommands {
       settings.settingTabs
     ).map((t: SettingTab) => {
       return {
-        display: 'Core: ' + t.name,
+        display: `Core: ${t.name}`,
         info: () => {
           settings.open();
           settings.openTabById(t.id);
@@ -295,7 +323,7 @@ export default class PluginCommands {
       settings.pluginTabs
     ).map((t: SettingTab) => {
       return {
-        display: 'Plugin: ' + t.name,
+        display: "Plugin: " + t.name,
         info: () => {
           settings.open();
           settings.openTabById(t.id);
@@ -304,14 +332,14 @@ export default class PluginCommands {
     });
 
     bratCommandList.push({
-      display: '---- Core Plugin Settings ----',
+      display: "---- Core Plugin Settings ----",
       info: () => {
         this.ribbonDisplayCommands();
       },
     });
     listOfCoreSettingsTabs.forEach((si) => bratCommandList.push(si));
     bratCommandList.push({
-      display: '---- Plugin Settings ----',
+      display: "---- Plugin Settings ----",
       info: () => {
         this.ribbonDisplayCommands();
       },
@@ -320,7 +348,7 @@ export default class PluginCommands {
 
     gfs.setSuggesterData(bratCommandList);
     gfs.display((results) => {
-      if (typeof results.info === 'function') {
+      if (typeof results.info === "function") {
         results.info();
       }
     });

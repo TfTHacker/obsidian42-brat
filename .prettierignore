@@ -1,7 +1,0 @@
-pnpm-lock.yaml
-package-lock.json
-dist/
-.vite/
-.vscode/
-out/
-.tmp/

@@ -1,61 +1,36 @@
 {
-  "name": "obsidian42-brat",
-  "version": "1.0.3",
-  "description": "Obsidian42 - Beta Reviewer's Autoupdate Tool.",
-  "main": "main.js",
-  "scripts": {
-    "dev": "node --no-warnings esbuild.config.mjs",
-    "build": "node esbuild.config.mjs production",
-    "version": "node version-bump.mjs",
-    "githubaction": "node version-github-action.mjs",
-    "lint:check": "eslint --ext .ts,.tsx .",
-    "lint:fix": "eslint --fix --ext .ts,.tsx .",
-    "format:check": "prettier --check .",
-    "format:fix": "prettier --write ."
-  },
-  "author": "TfT Hacker",
-  "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "git://github.com/TfTHacker/obsidian42-brat.git"
-  },
-  "devDependencies": {
-    "typescript": "5.6.2",
-    "tslib": "^2.7.0",
-    "@types/node": "^22.5.5",
-    "@typescript-eslint/eslint-plugin": "^8.5.0",
-    "@typescript-eslint/parser": "^8.5.0",
-    "@typescript-eslint/utils": "^8.5.0",
-    "builtin-modules": "4.0.0",
-    "esbuild": "0.23.1",
-    "eslint": "^8.57.0",
-    "eslint-config-prettier": "^9.1.0",
-    "eslint-import-resolver-typescript": "^3.6.3",
-    "eslint-plugin-css": "^0.11.0",
-    "eslint-plugin-eslint-comments": "^3.2.0",
-    "eslint-plugin-import": "^2.30.0",
-    "eslint-plugin-jsonc": "^2.16.0",
-    "eslint-plugin-mdx": "^3.1.5",
-    "eslint-plugin-only-warn": "^1.1.0",
-    "eslint-plugin-prettier": "^5.2.1",
-    "eslint-plugin-tsdoc": "^0.3.0",
-    "eslint-plugin-yml": "^1.14.0",
-    "@html-eslint/eslint-plugin": "^0.26.0",
-    "@html-eslint/parser": "^0.26.0",
-    "husky": "^9.1.6",
-    "jsdom": "^25.0.0",
-    "lint-staged": "^15.2.10",
-    "prettier": "^3.3.3",
-    "remark-preset-lint-consistent": "^6.0.0",
-    "remark-preset-lint-markdown-style-guide": "^6.0.0",
-    "remark-preset-lint-recommended": "^7.0.0",
-    "remark-preset-prettier": "^2.0.1",
-    "ts-node": "^10.9.2",
-    "typedoc": "^0.26.7",
-    "@types/obsidian-typings": "github:Fevol/obsidian-typings",
-    "obsidian": "1.6.6"
-  },
-  "dependencies": {
-    "obsidian-daily-notes-interface": "^0.9.4"
-  }
+	"name": "obsidian42-brat",
+	"version": "1.0.3",
+	"description": "Obsidian42 - Beta Reviewer's Autoupdate Tool.",
+	"main": "main.js",
+	"scripts": {
+		"dev": "node --no-warnings esbuild.config.mjs",
+		"build": "node --no-warnings esbuild.config.mjs production",
+		"lint": "biome check .",
+		"version": "node version-bump.mjs",
+		"githubaction": "node version-github-action.mjs"
+	},
+	"author": "TfT Hacker",
+	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "git://github.com/TfTHacker/obsidian42-brat.git"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "1.9.4",
+		"@types/node": "^22.5.5",
+		"@types/obsidian-typings": "github:Fevol/obsidian-typings",
+		"builtin-modules": "4.0.0",
+		"esbuild": "0.23.1",
+		"eslint": "^8.57.0",
+		"jsdom": "^25.0.0",
+		"obsidian": "1.7.2",
+		"ts-node": "^10.9.2",
+		"tslib": "^2.7.0",
+		"typedoc": "^0.26.7",
+		"typescript": "5.6.2"
+	},
+	"dependencies": {
+		"obsidian-daily-notes-interface": "^0.9.4"
+	}
 }
