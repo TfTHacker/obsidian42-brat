@@ -1,6 +1,6 @@
 {
 	"name": "obsidian42-brat",
-	"version": "1.0.5",
+	"version": "1.0.6",
 	"description": "Obsidian42 - Beta Reviewer's Autoupdate Tool.",
 	"main": "main.js",
 	"scripts": {
@@ -18,15 +18,15 @@
 	},
 	"devDependencies": {
 		"@biomejs/biome": "1.9.4",
-		"@types/node": "^22.5.5",
+		"@types/node": "^22.10.1",
 		"builtin-modules": "4.0.0",
-		"esbuild": "0.23.1",
-		"jsdom": "^25.0.0",
+		"esbuild": "0.24.0",
+		"jsdom": "^25.0.1",
 		"obsidian": "1.7.2",
 		"ts-node": "^10.9.2",
-		"tslib": "^2.7.0",
-		"typedoc": "^0.26.7",
-		"typescript": "5.6.2"
+		"tslib": "^2.8.1",
+		"typedoc": "^0.27.1",
+		"typescript": "5.7.2"
 	},
 	"dependencies": {
 		"obsidian-daily-notes-interface": "^0.9.4"

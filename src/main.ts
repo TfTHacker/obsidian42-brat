@@ -24,23 +24,21 @@ export default class BratPlugin extends Plugin {
 	onload() {
 		console.log(`loading ${this.APP_NAME}`);
 
+		addIcons();
+		this.addRibbonIcon("BratIcon", "BRAT", () => {
+			this.commands.ribbonDisplayCommands();
+		});
+
 		this.loadSettings()
 			.then(() => {
 				this.app.workspace.onLayoutReady(() => {
 					this.addSettingTab(new BratSettingsTab(this.app, this));
 
-					addIcons();
-					this.showRibbonButton();
-					this.registerObsidianProtocolHandler(
-						"brat",
-						this.obsidianProtocolHandler,
-					);
+					this.registerObsidianProtocolHandler("brat", this.obsidianProtocolHandler);
 
 					if (this.settings.updateAtStartup) {
 						setTimeout(() => {
-							void this.betaPlugins.checkForPluginUpdatesAndInstallUpdates(
-								false,
-							);
+							void this.betaPlugins.checkForPluginUpdatesAndInstallUpdates(false);
 						}, 60000);
 					}
 					if (this.settings.updateThemesAtStartup) {
@@ -56,12 +54,6 @@ export default class BratPlugin extends Plugin {
 			.catch((error: unknown) => {
 				console.error("Failed to load settings:", error);
 			});
-	}
-
-	showRibbonButton(): void {
-		this.addRibbonIcon("BratIcon", "BRAT", () => {
-			this.commands.ribbonDisplayCommands();
-		});
 	}
 
 	async log(textToLog: string, verbose = false): Promise<void> {
@@ -88,10 +80,7 @@ export default class BratPlugin extends Plugin {
 
 		for (const which of ["plugin", "theme"]) {
 			if (params[which]) {
-				const modal =
-					which === "plugin"
-						? new AddNewPluginModal(this, this.betaPlugins)
-						: new AddNewTheme(this);
+				const modal = which === "plugin" ? new AddNewPluginModal(this, this.betaPlugins) : new AddNewTheme(this);
 				modal.address = params[which];
 				modal.open();
 				return;

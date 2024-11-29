@@ -1,3 +1,7 @@
+# 1.0.6
+
+- Fix: [#92](https://github.com/TfTHacker/obsidian42-brat/issues/92) - BRAT icon could not be disabled.
+
 # 1.0.5
 
 ### Updates
