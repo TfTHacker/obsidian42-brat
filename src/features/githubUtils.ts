@@ -57,7 +57,8 @@ export const grabReleaseFileFromRepository = async (
 			Accept: "application/octet-stream"
 		};
 
-		if (isPrivate && personalAccessToken) {
+		// Authenticated requests get a higher rate limit
+		if (isPrivate && personalAccessToken || personalAccessToken) {
 			headers.Authorization = `Token ${personalAccessToken}`;
 		}
 
@@ -271,7 +272,8 @@ export const grabReleaseFromRepository = async (
             'Accept': 'application/vnd.github.v3+json'
         };
 
-        if (isPrivate && personalAccessToken) {
+		// Authenticated requests get a higher rate limit
+        if (isPrivate && personalAccessToken || personalAccessToken) {
             headers.Authorization = `Token ${personalAccessToken}`;
         }
 
