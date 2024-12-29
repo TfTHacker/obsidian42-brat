@@ -63,6 +63,7 @@ export default class BetaPlugins {
 		repositoryPath: string,
 		getBetaManifest = false,
 		reportIssues = false,
+		specifyVersion = "",
 	): Promise<PluginManifest | null> {
 		const noticeTimeout = 15;
 
@@ -74,9 +75,9 @@ export default class BetaPlugins {
 		);
 		
 		// Grab the manifest.json for the latest release from the repository
-		const release = await grabReleaseFromRepository(
+		const release : Release | null = await grabReleaseFromRepository(
 			repositoryPath,
-			"",
+			specifyVersion,
 			getBetaManifest,
 			this.plugin.settings.debuggingMode,
 			isPrivate,
@@ -295,14 +296,16 @@ export default class BetaPlugins {
 			repositoryPath,
 			true,
 			false,
+			specifyVersion,
 		);
 		const usingBetaManifest: boolean = !!primaryManifest;
-		// attempt to get manifest.json
+		// attempt to get manifest.json 
 		if (!usingBetaManifest)
 			primaryManifest = await this.validateRepository(
 				repositoryPath,
 				false,
 				true,
+				specifyVersion,
 			);
 
 		if (primaryManifest === null) {
