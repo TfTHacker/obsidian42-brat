@@ -1,35 +1,31 @@
 {
-	"name": "obsidian42-brat",
-	"version": "1.0.6",
-	"description": "Obsidian42 - Beta Reviewer's Autoupdate Tool.",
-	"main": "main.js",
-	"scripts": {
-		"dev": "node --no-warnings esbuild.config.mjs",
-		"build": "node --no-warnings esbuild.config.mjs production",
-		"lint": "biome check ./src",
-		"version": "node version-bump.mjs",
-		"githubaction": "node version-github-action.mjs"
-	},
-	"author": "TfT Hacker",
-	"license": "MIT",
-	"repository": {
-		"type": "git",
-		"url": "git://github.com/TfTHacker/obsidian42-brat.git"
-	},
-	"devDependencies": {
-		"@biomejs/biome": "1.9.4",
-		"@types/node": "^22.10.1",
-		"builtin-modules": "4.0.0",
-		"esbuild": "0.24.0",
-		"jsdom": "^25.0.1",
-		"obsidian": "1.7.2",
-		"ts-node": "^10.9.2",
-		"tslib": "^2.8.1",
-		"typedoc": "^0.27.1",
-		"typescript": "5.7.2"
-	},
-	"dependencies": {
-		"compare-versions": "^6.1.1",
-		"obsidian-daily-notes-interface": "^0.9.4"
-	}
+    "name": "obsidian42-brat",
+    "version": "1.0.0-use-github-releases.1",
+    "description": "Obsidian42 - Beta Reviewer's Autoupdate Tool.",
+    "main": "main.js",
+    "scripts": {
+        "dev": "node --no-warnings esbuild.config.mjs",
+        "build": "node --no-warnings esbuild.config.mjs production",
+        "lint": "biome check ./src",
+        "version": "node version-bump.mjs",
+        "githubaction": "node version-github-action.mjs"
+    },
+    "author": "TfT Hacker",
+    "license": "MIT",
+    "devDependencies": {
+        "@biomejs/biome": "1.9.4",
+        "@types/node": "^22.10.1",
+        "builtin-modules": "4.0.0",
+        "esbuild": "0.24.0",
+        "jsdom": "^25.0.1",
+        "obsidian": "1.7.2",
+        "ts-node": "^10.9.2",
+        "tslib": "^2.8.1",
+        "typedoc": "^0.27.1",
+        "typescript": "5.7.2"
+    },
+    "dependencies": {
+        "compare-versions": "^6.1.1",
+        "obsidian-daily-notes-interface": "^0.9.4"
+    }
 }
