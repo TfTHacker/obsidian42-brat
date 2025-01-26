@@ -20,6 +20,7 @@ export default class AddNewPluginModal extends Modal {
 	constructor(
 		plugin: BratPlugin,
 		betaPlugins: BetaPlugins,
+		version = "",
 		openSettingsTabAfterwards = false,
 		useFrozenVersion = false,
 	) {
@@ -30,7 +31,7 @@ export default class AddNewPluginModal extends Modal {
 		this.openSettingsTabAfterwards = openSettingsTabAfterwards;
 		this.useFrozenVersion = useFrozenVersion;
 		this.enableAfterInstall = plugin.settings.enableAfterInstall;
-		this.version = "";
+		this.version = version;
 	}
 
 	async submitForm(): Promise<void> {
@@ -93,6 +94,7 @@ export default class AddNewPluginModal extends Modal {
 					textEl.setPlaceholder(
 						"Specify the release version tag (example: 1.0.0)",
 					);
+					textEl.setValue(this.version);
 					textEl.onChange((value) => {
 						this.version = value.trim();
 					});

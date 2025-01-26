@@ -41,6 +41,7 @@ export default class BetaPlugins {
 		const newPlugin = new AddNewPluginModal(
 			this.plugin,
 			this,
+			"",
 			openSettingsTabAfterwards,
 			useFrozenVersion,
 		);

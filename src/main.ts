@@ -80,9 +80,19 @@ export default class BratPlugin extends Plugin {
 
 		for (const which of ["plugin", "theme"]) {
 			if (params[which]) {
-				const modal = which === "plugin" ? new AddNewPluginModal(this, this.betaPlugins) : new AddNewTheme(this);
-				modal.address = params[which];
-				modal.open();
+				let modal;
+				switch (which) {
+					case "plugin":
+						modal = new AddNewPluginModal(this, this.betaPlugins, params['version'] ?? "", true, params['version'] ? true : false);
+						modal.address = params[which];
+						modal.open();						break;
+					case "theme":
+						modal = new AddNewTheme(this);
+						modal.address = params[which];
+						modal.open();
+						break;
+				}
+
 				return;
 			}
 		}
