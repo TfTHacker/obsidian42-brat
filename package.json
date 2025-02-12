@@ -20,7 +20,7 @@
 		"@biomejs/biome": "1.9.4",
 		"@types/node": "^22.10.1",
 		"builtin-modules": "4.0.0",
-		"esbuild": "0.24.0",
+		"esbuild": "0.25.0",
 		"jsdom": "^25.0.1",
 		"obsidian": "1.7.2",
 		"ts-node": "^10.9.2",
