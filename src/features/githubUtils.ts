@@ -1,6 +1,11 @@
 import type { PluginManifest } from "obsidian";
 import { request } from "obsidian";
 
+export interface ReleaseVersion {
+    version: string;   // The tag name of the release
+    prerelease: boolean; // Indicates if the release is a pre-release
+}
+
 const GITHUB_RAW_USERCONTENT_PATH = "https://raw.githubusercontent.com/";
 
 const isPrivateRepo = async (
@@ -36,7 +41,7 @@ export const fetchReleaseVersions = async (
 	repository: string,
 	debugLogging = true,
 	personalAccessToken = "",
-): Promise<string[] | null> => {
+): Promise<ReleaseVersion[] | null> => {
 	const URL = `https://api.github.com/repos/${repository}/releases`;
 	try {
 		const response = await request({
@@ -46,7 +51,10 @@ export const fetchReleaseVersions = async (
 			},
 		});
 		const data = await JSON.parse(response);
-		return data.map((release: { tag_name: string }) => release.tag_name);
+		return data.map((release: { tag_name: string, prerelease: boolean }) => ({
+			version: release.tag_name,
+			prerelease: release.prerelease
+		}));
 	} catch (e) {
 		if (debugLogging) console.log("error in fetchReleaseVersions", URL, e);
 		return null;

@@ -1,5 +1,5 @@
 import { Modal, Setting, type TextComponent } from "obsidian";
-import { fetchReleaseVersions } from "src/features/githubUtils";
+import { type ReleaseVersion, fetchReleaseVersions } from "src/features/githubUtils";
 import type BetaPlugins from "../features/BetaPlugins";
 import type BratPlugin from "../main";
 import { existBetaPluginInList } from "../settings";
@@ -65,12 +65,12 @@ export default class AddNewPluginModal extends Modal {
 		}
 	}
 
-    private updateVersionDropdown(settingEl: Setting, versions: string[]): void {
+    private updateVersionDropdown(settingEl: Setting, versions: ReleaseVersion[]): void {
 		settingEl.clear();
 		settingEl.addDropdown((dropdown) => {
                 dropdown.addOption("", "Select a version");
                 for (const version of versions) {
-                    dropdown.addOption(version, version);
+                    dropdown.addOption(version.version, `${version.version} ${version.prerelease ? "(Prerelease)" : ""}`);
                 }
                 dropdown.onChange((value) => {
                     this.version = value;
