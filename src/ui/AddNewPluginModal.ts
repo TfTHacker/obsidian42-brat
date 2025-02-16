@@ -1,4 +1,5 @@
-import { Modal, Setting } from "obsidian";
+import { Modal, Setting, type TextComponent } from "obsidian";
+import { fetchReleaseVersions } from "src/features/githubUtils";
 import type BetaPlugins from "../features/BetaPlugins";
 import type BratPlugin from "../main";
 import { existBetaPluginInList } from "../settings";
@@ -16,6 +17,8 @@ export default class AddNewPluginModal extends Modal {
 	readonly useFrozenVersion: boolean;
 	enableAfterInstall: boolean;
 	version: string;
+	versionSetting: Setting | null;
+	addPluginButton: HTMLButtonElement | null;
 
 	constructor(
 		plugin: BratPlugin,
@@ -31,6 +34,8 @@ export default class AddNewPluginModal extends Modal {
 		this.useFrozenVersion = useFrozenVersion;
 		this.enableAfterInstall = plugin.settings.enableAfterInstall;
 		this.version = "";
+		this.versionSetting = null;
+		this.addPluginButton = null;
 	}
 
 	async submitForm(): Promise<void> {
@@ -60,6 +65,28 @@ export default class AddNewPluginModal extends Modal {
 		}
 	}
 
+    private updateVersionDropdown(settingEl: Setting, versions: string[]): void {
+		settingEl.clear();
+		settingEl.addDropdown((dropdown) => {
+                dropdown.addOption("", "Select a version");
+                for (const version of versions) {
+                    dropdown.addOption(version, version);
+                }
+                dropdown.onChange((value) => {
+                    this.version = value;
+					// Enable add plugin button if version is selected
+					if(this.addPluginButton) {
+						if(this.version !== "") {
+							this.addPluginButton.disabled = false;
+						} else {
+							this.addPluginButton.disabled = true;
+						}
+					}
+                });
+                dropdown.selectEl.style.width = "100%";
+            });
+    }
+
 	onOpen(): void {
 		this.contentEl.createEl("h4", {
 			text: "Github repository for beta plugin:",
@@ -73,31 +100,46 @@ export default class AddNewPluginModal extends Modal {
 				textEl.setValue(this.address);
 				textEl.onChange((value) => {
 					this.address = value.trim();
+
+					// Disable version dropdown if useFrozenVersion is true and address is empty
+					if(this.useFrozenVersion && this.address === "") {
+						if (this.versionSetting) {
+							this.updateVersionDropdown(this.versionSetting, []);
+							this.versionSetting.settingEl.classList.add("disabled-setting");
+							this.versionSetting.setDisabled(true);
+							textEl.inputEl.classList.remove("valid-repository");
+							textEl.inputEl.classList.remove("invalid-repository");
+					}
+					}
 				});
-				textEl.inputEl.addEventListener("keydown", (e: KeyboardEvent) => {
-					if (e.key === "Enter" && this.address !== " ") {
-						if (
-							(this.useFrozenVersion && this.version !== "") ||
-							!this.useFrozenVersion
+				textEl.inputEl.addEventListener("keydown", async (e: KeyboardEvent) => {
+					if (e.key === "Enter") {
+						if ( this.address !== " " && 
+							((this.useFrozenVersion && this.version !== "" ) ||
+							!this.useFrozenVersion)
 						) {
 							e.preventDefault();
 							void this.submitForm();
 						}
-					}
+
+						// Populate version dropdown
+						await this.updateVersionDropwdown(textEl);
+					} 
+				});
+
+				// Update version dropdown when input loses focus
+				textEl.inputEl.addEventListener("blur", async () => {
+					await this.updateVersionDropwdown(textEl);
 				});
 				textEl.inputEl.style.width = "100%";
 			});
 
 			if (this.useFrozenVersion) {
-				new Setting(formEl).addText((textEl) => {
-					textEl.setPlaceholder(
-						"Specify the release version tag (example: 1.0.0)",
-					);
-					textEl.onChange((value) => {
-						this.version = value.trim();
-					});
-					textEl.inputEl.style.width = "100%";
-				});
+				this.versionSetting = new Setting(formEl)
+					.setClass('version-setting')
+					.setClass('disabled-setting')
+				this.updateVersionDropdown(this.versionSetting, []);
+				this.versionSetting.setDisabled(true);
 			}
 
 			formEl.createDiv("modal-button-container", (buttonContainerEl) => {
@@ -124,11 +166,12 @@ export default class AddNewPluginModal extends Modal {
 					.addEventListener("click", () => {
 						this.close();
 					});
-				buttonContainerEl.createEl("button", {
+				this.addPluginButton = buttonContainerEl.createEl("button", {
 					attr: { type: "submit" },
 					cls: "mod-cta",
 					text: "Add Plugin",
 				});
+				this.addPluginButton.disabled = true;
 			});
 
 			const newDiv = formEl.createDiv();
@@ -161,6 +204,53 @@ export default class AddNewPluginModal extends Modal {
 				}
 			});
 		});
+	}
+
+	/**
+	 * Update the version dropdown 
+	 * @param addressInputEl - The address input element (Only needed if we keep the color-coding of the address input)
+	 */
+	private async updateVersionDropwdown(addressInputEl: TextComponent) {
+		if (this.useFrozenVersion && this.address) {
+			// Clear the version dropdown
+			if (this.versionSetting) {
+				this.updateVersionDropdown(this.versionSetting, []);
+			}
+			let scrubbedAddress = this.address.replace("https://github.com/", "");
+			if (scrubbedAddress.endsWith(".git")) {
+				scrubbedAddress = scrubbedAddress.slice(0, -4);
+			}
+			const versions = await fetchReleaseVersions(
+				scrubbedAddress,
+				this.plugin.settings.debuggingMode,
+				this.plugin.settings.personalAccessToken
+			);
+
+			if (versions && versions.length > 0) {
+				// Add valid-repository class
+				addressInputEl.inputEl.classList.remove("invalid-repository");
+				addressInputEl.inputEl.classList.add("valid-repository");
+
+				if (this.versionSetting) {
+					this.versionSetting.settingEl.classList.remove("disabled-setting");
+					this.versionSetting.setDisabled(false);
+					// Add new dropdown to existing version setting
+					this.updateVersionDropdown(this.versionSetting, versions);
+				}
+			} else {
+				// Add invalid-repository class
+				addressInputEl.inputEl.classList.remove("valid-repository");
+				addressInputEl.inputEl.classList.add("invalid-repository");
+
+				if (this.versionSetting) {
+					this.versionSetting.settingEl.classList.add("disabled-setting");
+					this.versionSetting.setDisabled(true);
+					if(this.addPluginButton) {
+						this.addPluginButton.disabled = true;
+					}
+				}
+			}
+		}
 	}
 
 	onClose(): void {

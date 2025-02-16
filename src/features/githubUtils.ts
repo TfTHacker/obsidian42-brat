@@ -27,6 +27,34 @@ const isPrivateRepo = async (
 };
 
 /**
+ * Fetches available release versions from a GitHub repository
+ * 
+ * @param repository - path to GitHub repository in format USERNAME/repository
+ * @returns array of version strings, or null if error
+ */
+export const fetchReleaseVersions = async (
+	repository: string,
+	debugLogging = true,
+	personalAccessToken = "",
+): Promise<string[] | null> => {
+	const URL = `https://api.github.com/repos/${repository}/releases`;
+	try {
+		const response = await request({
+			url: URL,
+			headers: {
+				Authorization: `Token ${personalAccessToken}`,
+			},
+		});
+		const data = await JSON.parse(response);
+		return data.map((release: { tag_name: string }) => release.tag_name);
+	} catch (e) {
+		if (debugLogging) console.log("error in fetchReleaseVersions", URL, e);
+		return null;
+	}
+};
+
+
+/**
  * pulls from github a release file by its version number
  *
  * @param repository - path to GitHub repository in format USERNAME/repository

@@ -1,3 +1,13 @@
 .brat-modal .modal-button-container {
 	margin-top: 5px !important;
 }
+
+.brat-modal .valid-repository {
+	border-color: var(--color-green) !important;
+}
+.brat-modal .invalid-repository {
+	border-color: var(--color-red) !important;
+}
+.brat-modal .disabled-setting {
+	opacity: 0.5;
+}
