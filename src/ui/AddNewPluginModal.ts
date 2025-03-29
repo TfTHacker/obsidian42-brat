@@ -171,7 +171,8 @@ export default class AddNewPluginModal extends Modal {
 					cls: "mod-cta",
 					text: "Add Plugin",
 				});
-				this.addPluginButton.disabled = true;
+				// Disable "Add Plugin" if adding a frozen version only
+				if (this.useFrozenVersion) this.addPluginButton.disabled = true;
 			});
 
 			const newDiv = formEl.createDiv();
