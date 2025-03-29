@@ -1,9 +1,10 @@
 import type { PluginManifest } from "obsidian";
 import { request } from "obsidian";
+import { compareVersions } from 'compare-versions';
 
 const GITHUB_RAW_USERCONTENT_PATH = "https://raw.githubusercontent.com/";
 
-const isPrivateRepo = async (
+export const isPrivateRepo = async (
 	repository: string,
 	debugLogging = true,
 	personalAccessToken = "",
@@ -36,80 +37,39 @@ const isPrivateRepo = async (
  * @returns contents of file as string from the repository's release
  */
 export const grabReleaseFileFromRepository = async (
-	repository: string,
-	version: string,
+	release: Release,
 	fileName: string,
 	debugLogging = true,
+	isPrivate = false,
 	personalAccessToken = "",
 ): Promise<string | null> => {
 	try {
-		// check if the repo is a private repo
-		const isPrivate = await isPrivateRepo(
-			repository,
-			debugLogging,
-			personalAccessToken,
+		// get the asset based on the asset url in the release
+		// We can use this both for private and public repos
+		const asset = release.assets.find(
+			(asset: { name: string }) => asset.name === fileName,
 		);
-
-		if (isPrivate) {
-			type Release = {
-				url: string;
-				tag_name: string;
-				assets: {
-					name: string;
-					url: string;
-				}[];
-			};
-
-			// get the asset id
-			// fetch https://api.github.com/repos/{repos}/releases , parse the response
-			// this will return an array of releases, find the release with the version number by tag_name
-			// in the release object, get assets and find the correct asset by name
-			// then fetch the url
-
-			const URL = `https://api.github.com/repos/${repository}/releases`;
-			const response = await request({
-				url: URL,
-				headers: {
-					Authorization: `Token ${personalAccessToken}`,
-				},
-			});
-			const data = await JSON.parse(response);
-			const release = data.find(
-				(release: Release) => release.tag_name === version,
-			);
-			if (!release) {
-				return null;
-			}
-			const asset = release.assets.find(
-				(asset: { name: string }) => asset.name === fileName,
-			);
-			if (!asset) {
-				return null;
-			}
-			const download = await request({
-				url: asset.url,
-				headers: {
-					Authorization: `Token ${personalAccessToken}`,
-					Accept: "application/octet-stream",
-				},
-			});
-			return download === "Not Found" || download === `{"error":"Not Found"}`
-				? null
-				: download;
+		if (!asset) {
+			return null;
 		}
-		const URL = `https://github.com/${repository}/releases/download/${version}/${fileName}`;
-		const download = await request({
-			url: URL,
-			headers: personalAccessToken
-				? {
-						Authorization: `Token ${personalAccessToken}`,
-					}
-				: {},
-		});
+		
+		const headers: Record<string, string> = {
+			Accept: "application/octet-stream"
+		};
 
+		// Authenticated requests get a higher rate limit
+		if (isPrivate && personalAccessToken || personalAccessToken) {
+			headers.Authorization = `Token ${personalAccessToken}`;
+		}
+
+		const download = await request({
+			url: asset.url,
+			headers
+		});
 		return download === "Not Found" || download === `{"error":"Not Found"}`
 			? null
 			: download;
+
 	} catch (error) {
 		if (debugLogging)
 			console.log("error in grabReleaseFileFromRepository", URL, error);
@@ -117,81 +77,6 @@ export const grabReleaseFileFromRepository = async (
 	}
 };
 
-/**
- * grabs the manifest.json from the repository. rootManifest - if true grabs manifest.json if false grabs manifest-beta.json
- *
- * @param repositoryPath - path to GitHub repository in format USERNAME/repository
- * @param rootManifest   - if true grabs manifest.json if false grabs manifest-beta.json
- *
- * @returns returns manifest file for  a plugin
- */
-export const grabManifestJsonFromRepository = async (
-	repositoryPath: string,
-	rootManifest = true,
-	debugLogging = true,
-	personalAccessToken = "",
-): Promise<PluginManifest | null> => {
-	const manifestJsonPath =
-		GITHUB_RAW_USERCONTENT_PATH +
-		repositoryPath +
-		(rootManifest ? "/HEAD/manifest.json" : "/HEAD/manifest-beta.json");
-	if (debugLogging)
-		console.log(
-			"grabManifestJsonFromRepository manifestJsonPath",
-			manifestJsonPath,
-		);
-
-	// Function to check if the token is valid
-	const isTokenValid = async (token: string): Promise<boolean> => {
-		try {
-			await request({
-				url: "https://api.github.com/user",
-				method: "GET",
-				headers: {
-					Authorization: `token ${token}`,
-					"User-Agent": "request",
-					accept: "application/vnd.github.v3+json",
-				},
-			});
-			return true;
-		} catch (error) {
-			if (debugLogging) console.log("Token validation error:", error);
-			return false;
-		}
-	};
-
-	// Check if the token is valid
-	let tokenValid = false;
-	if (personalAccessToken) {
-		tokenValid = await isTokenValid(personalAccessToken);
-		if (debugLogging) console.log("Token valid:", tokenValid);
-	}
-
-	try {
-		const response: string = await request({
-			url: manifestJsonPath,
-			headers: tokenValid
-				? {
-						Authorization: `Token ${personalAccessToken}`,
-					}
-				: {},
-		});
-		if (debugLogging)
-			console.log("grabManifestJsonFromRepository response", response);
-		return response === "404: Not Found"
-			? null
-			: ((await JSON.parse(response)) as PluginManifest);
-	} catch (error) {
-		if (error !== "Error: Request failed, status 404" && debugLogging) {
-			// normal error, ignore
-			console.log(
-				`error in grabManifestJsonFromRepository for ${manifestJsonPath}`,
-				error,
-			);
-		}
-		return null;
-	}
-};
 
 export interface CommunityPlugin {
 	id: string;
@@ -333,4 +218,86 @@ export const grabLastCommitDateForFile = async (
 		return test[0].commit.committer.date;
 	}
 	return "";
+};
+
+export type Release = {
+    url: string;
+    tag_name: string;
+    prerelease: boolean;
+    assets: {
+        name: string;
+        url: string;
+        browser_download_url: string;
+    }[];
+};
+
+/**
+ * Gets either a specific release or the latest release from a GitHub repository
+ * 
+ * @param repositoryPath - Repository path in format username/repository
+ * @param version - Optional version/tag to fetch. If not provided, fetches latest release
+ * @param includePrereleases - Whether to include pre-releases in the results (default: false)
+ * @param debugLogging - Enable debug logging (default: false)
+ * @param isPrivate - Whether the repository is private (default: false)
+ * @param personalAccessToken - GitHub personal access token for private repos
+ * @returns Promise<Release | null> Release information or null if not found/error
+ * 
+ * @example
+ * // Get latest release
+ * const release = await grabReleaseFromRepository('username/repo');
+ * 
+ * // Get specific version
+ * const release = await grabReleaseFromRepository('username/repo', '1.0.0');
+ * 
+ * // Include pre-releases
+ * const beta = await grabReleaseFromRepository('username/repo', undefined, true);
+ * 
+ * // Access private repository
+ * const private = await grabReleaseFromRepository('username/repo', undefined, false, false, true, 'token');
+ */
+export const grabReleaseFromRepository = async (
+    repositoryPath: string,
+    version?: string,
+    includePrereleases = false,
+    debugLogging = false,
+	isPrivate = false,
+    personalAccessToken?: string
+): Promise<Release | null> => {
+    try {
+        const apiUrl = version
+            ? `https://api.github.com/repos/${repositoryPath}/releases/tags/${version}`
+            : `https://api.github.com/repos/${repositoryPath}/releases`;
+
+        const headers: Record<string, string> = {
+            'Accept': 'application/vnd.github.v3+json'
+        };
+
+		// Authenticated requests get a higher rate limit
+        if (isPrivate && personalAccessToken || personalAccessToken) {
+            headers.Authorization = `Token ${personalAccessToken}`;
+        }
+
+        const response = await request({ url: apiUrl, headers });
+
+        if (response === "404: Not Found") return null;
+
+        const releases: Release[] = version 
+            ? [JSON.parse(response)]
+            : JSON.parse(response);
+
+        if (debugLogging) {
+            console.log(`grabReleaseFromRepository for ${repositoryPath}:`, releases);
+        }
+
+		
+        return releases
+            .sort((a, b) => compareVersions(b.tag_name, a.tag_name))
+            .filter(release => includePrereleases || !release.prerelease)[0] ?? null;
+
+    } catch (error) {
+        if (debugLogging) {
+            console.log(`Error in grabReleaseFromRepository for ${repositoryPath}:`, error);
+        }
+        return null;
+    }
 };

@@ -6,8 +6,10 @@ import AddNewPluginModal from "../ui/AddNewPluginModal";
 import { isConnectedToInternet } from "../utils/internetconnection";
 import { toastMessage } from "../utils/notifications";
 import {
-	grabManifestJsonFromRepository,
 	grabReleaseFileFromRepository,
+	grabReleaseFromRepository,
+	isPrivateRepo,
+	Release
 } from "./githubUtils";
 
 /**
@@ -61,15 +63,53 @@ export default class BetaPlugins {
 		repositoryPath: string,
 		getBetaManifest = false,
 		reportIssues = false,
+		specifyVersion = "",
 	): Promise<PluginManifest | null> {
 		const noticeTimeout = 15;
-		const manifestJson = await grabManifestJsonFromRepository(
+
+		// check if the repository is private
+		const isPrivate = await isPrivateRepo(
 			repositoryPath,
-			!getBetaManifest,
 			this.plugin.settings.debuggingMode,
 			this.plugin.settings.personalAccessToken,
 		);
-		if (!manifestJson) {
+		
+		// Grab the manifest.json for the latest release from the repository
+		const release : Release | null = await grabReleaseFromRepository(
+			repositoryPath,
+			specifyVersion,
+			getBetaManifest,
+			this.plugin.settings.debuggingMode,
+			isPrivate,
+			this.plugin.settings.personalAccessToken,
+		);
+
+		if(!release) {
+			if (reportIssues) {
+				toastMessage(
+					this.plugin,
+					`${repositoryPath}\nThis does not seem to be an obsidian plugin with valid releases, as there are no releases available.`,
+					noticeTimeout,
+				);
+				console.error(
+					"BRAT: validateRepository",
+					repositoryPath,
+					getBetaManifest,
+					reportIssues,
+				);
+			}
+			return null;			
+		}
+
+		const rawManifest = await grabReleaseFileFromRepository(
+			release,
+			"manifest.json",
+			this.plugin.settings.debuggingMode,
+			isPrivate,
+			this.plugin.settings.personalAccessToken,
+		);
+
+		if (!rawManifest) {
 			// this is a plugin with a manifest json, try to see if there is a beta version
 			if (reportIssues) {
 				toastMessage(
@@ -86,7 +126,9 @@ export default class BetaPlugins {
 			}
 			return null;
 		}
-		// Test that the mainfest has some key elements, like ID and version
+
+		// Parse the returned file and verify that the mainfest has some key elements, like ID and version
+		const manifestJson = JSON.parse(rawManifest) as PluginManifest;
 		if (!("id" in manifestJson)) {
 			// this is a plugin with a manifest json, try to see if there is a beta version
 			if (reportIssues)
@@ -107,6 +149,7 @@ export default class BetaPlugins {
 				);
 			return null;
 		}
+
 		return manifestJson;
 	}
 
@@ -126,35 +169,55 @@ export default class BetaPlugins {
 		getManifest: boolean,
 		specifyVersion = "",
 	): Promise<ReleaseFiles> {
-		const version = specifyVersion === "" ? manifest.version : specifyVersion;
 
+		// check if the repository is private
+		const isPrivate = await isPrivateRepo(
+			repositoryPath,
+			this.plugin.settings.debuggingMode,
+			this.plugin.settings.personalAccessToken,
+		);
+
+		// Get the latest release from the repository
+		const release : Release | null = await grabReleaseFromRepository(
+			repositoryPath, 
+			specifyVersion, 
+			getManifest, 
+			this.plugin.settings.debuggingMode, 
+			isPrivate,
+			this.plugin.settings.personalAccessToken,
+		);
+
+		if(!release) {
+			return Promise.reject("No release found");
+		}
+		
 		// if we have version specified, we always want to get the remote manifest file.
 		const reallyGetManifestOrNot = getManifest || specifyVersion !== "";
 
-		console.log({ reallyGetManifestOrNot, version });
+		console.log({ reallyGetManifestOrNot, version: release.tag_name });
 
 		return {
 			mainJs: await grabReleaseFileFromRepository(
-				repositoryPath,
-				version,
+				release,
 				"main.js",
 				this.plugin.settings.debuggingMode,
+				isPrivate,
 				this.plugin.settings.personalAccessToken,
 			),
 			manifest: reallyGetManifestOrNot
 				? await grabReleaseFileFromRepository(
-						repositoryPath,
-						version,
-						"manifest.json",
-						this.plugin.settings.debuggingMode,
-						this.plugin.settings.personalAccessToken,
+					release,
+					"manifest.json",
+					this.plugin.settings.debuggingMode,
+					isPrivate,
+					this.plugin.settings.personalAccessToken,
 					)
 				: "",
 			styles: await grabReleaseFileFromRepository(
-				repositoryPath,
-				version,
+				release,
 				"styles.css",
 				this.plugin.settings.debuggingMode,
+				isPrivate,
 				this.plugin.settings.personalAccessToken,
 			),
 		};
@@ -233,27 +296,27 @@ export default class BetaPlugins {
 			repositoryPath,
 			true,
 			false,
+			specifyVersion,
 		);
 		const usingBetaManifest: boolean = !!primaryManifest;
-		// attempt to get manifest.json
+		// attempt to get manifest.json 
 		if (!usingBetaManifest)
 			primaryManifest = await this.validateRepository(
 				repositoryPath,
 				false,
 				true,
+				specifyVersion,
 			);
 
 		if (primaryManifest === null) {
-			const msg = `${repositoryPath}\nA manifest.json or manifest-beta.json file does not exist in the root directory of the repository. This plugin cannot be installed.`;
+			const msg = `${repositoryPath}\nA manifest.json file does not exist in the latest release of the repository. This plugin cannot be installed.`;
 			await this.plugin.log(msg, true);
 			toastMessage(this.plugin, msg, noticeTimeout);
 			return false;
 		}
 
 		if (!Object.hasOwn(primaryManifest, "version")) {
-			const msg = `${repositoryPath}\nThe manifest${
-				usingBetaManifest ? "-beta" : ""
-			}.json file in the root directory of the repository does not have a version number in the file. This plugin cannot be installed.`;
+			const msg = `${repositoryPath}\nThe manifest.json file in the latest release or pre-release of the repository does not have a version number in the file. This plugin cannot be installed.`;
 			await this.plugin.log(msg, true);
 			toastMessage(this.plugin, msg, noticeTimeout);
 			return false;
@@ -262,9 +325,7 @@ export default class BetaPlugins {
 		// Check manifest minAppVersion and current version of Obisidan, don't load plugin if not compatible
 		if (!Object.hasOwn(primaryManifest, "minAppVersion")) {
 			if (!requireApiVersion(primaryManifest.minAppVersion)) {
-				const msg = `Plugin: ${repositoryPath}\n\nThe manifest${
-					usingBetaManifest ? "-beta" : ""
-				}.json for this plugin indicates that the Obsidian version of the app needs to be ${primaryManifest.minAppVersion}, but this installation of Obsidian is ${apiVersion}. \n\nYou will need to update your Obsidian to use this plugin or contact the plugin developer for more information.`;
+				const msg = `Plugin: ${repositoryPath}\n\nThe manifest.json for this plugin indicates that the Obsidian version of the app needs to be ${primaryManifest.minAppVersion}, but this installation of Obsidian is ${apiVersion}. \n\nYou will need to update your Obsidian to use this plugin or contact the plugin developer for more information.`;
 				await this.plugin.log(msg, true);
 				toastMessage(this.plugin, msg, 30);
 				return false;
