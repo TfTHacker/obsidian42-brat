@@ -93,7 +93,11 @@ export default class AddNewPluginModal extends Modal {
 
 	onOpen(): void {
 		this.contentEl.createEl("h4", {
-			text: "Github repository for beta plugin:",
+			text: this.useFrozenVersion
+				? this.address
+					? "Update frozen version of plugin:"
+					: "Github repository for frozen beta plugin:"
+				: "Github repository for beta plugin:",
 		});
 		this.contentEl.createEl("form", {}, (formEl) => {
 			formEl.addClass("brat-modal");
@@ -103,8 +107,9 @@ export default class AddNewPluginModal extends Modal {
 
 				// If we have a prefilled repo, trigger the version dropdown update
 				if (this.address) {
-					window.setTimeout(() => {
-						void this.updateVersionDropwdown(textEl);
+					textEl.setDisabled(true); // Disable the input field
+					window.setTimeout(async () => {
+						await this.updateVersionDropwdown(textEl);
 					}, 100);
 				}
 
@@ -172,8 +177,9 @@ export default class AddNewPluginModal extends Modal {
 				this.addPluginButton = buttonContainerEl.createEl("button", {
 					attr: { type: "submit" },
 					cls: "mod-cta",
-					text: "Add Plugin",
+					text: this.useFrozenVersion ? (this.address ? "Change Version" : "Add Plugin") : "Add Plugin",
 				});
+
 				// Disable "Add Plugin" if adding a frozen version only
 				if (this.useFrozenVersion) this.addPluginButton.disabled = true;
 			});
