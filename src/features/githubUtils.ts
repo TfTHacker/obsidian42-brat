@@ -1,19 +1,15 @@
+import { compareVersions } from "compare-versions";
 import type { PluginManifest } from "obsidian";
 import { request } from "obsidian";
-import { compareVersions } from 'compare-versions';
 
 export interface ReleaseVersion {
-    version: string;   // The tag name of the release
-    prerelease: boolean; // Indicates if the release is a pre-release
+	version: string; // The tag name of the release
+	prerelease: boolean; // Indicates if the release is a pre-release
 }
 
 const GITHUB_RAW_USERCONTENT_PATH = "https://raw.githubusercontent.com/";
 
-export const isPrivateRepo = async (
-	repository: string,
-	debugLogging = true,
-	personalAccessToken = "",
-): Promise<boolean> => {
+export const isPrivateRepo = async (repository: string, debugLogging = true, personalAccessToken = ""): Promise<boolean> => {
 	const URL = `https://api.github.com/repos/${repository}`;
 	try {
 		const response = await request({
@@ -34,7 +30,7 @@ export const isPrivateRepo = async (
 
 /**
  * Fetches available release versions from a GitHub repository
- * 
+ *
  * @param repository - path to GitHub repository in format USERNAME/repository
  * @returns array of version strings, or null if error
  */
@@ -52,16 +48,15 @@ export const fetchReleaseVersions = async (
 			},
 		});
 		const data = await JSON.parse(response);
-		return data.map((release: { tag_name: string, prerelease: boolean }) => ({
+		return data.map((release: { tag_name: string; prerelease: boolean }) => ({
 			version: release.tag_name,
-			prerelease: release.prerelease
+			prerelease: release.prerelease,
 		}));
 	} catch (e) {
 		if (debugLogging) console.log("error in fetchReleaseVersions", URL, e);
 		return null;
 	}
 };
-
 
 /**
  * pulls from github a release file by its version number
@@ -82,37 +77,30 @@ export const grabReleaseFileFromRepository = async (
 	try {
 		// get the asset based on the asset url in the release
 		// We can use this both for private and public repos
-		const asset = release.assets.find(
-			(asset: { name: string }) => asset.name === fileName,
-		);
+		const asset = release.assets.find((asset: { name: string }) => asset.name === fileName);
 		if (!asset) {
 			return null;
 		}
-		
+
 		const headers: Record<string, string> = {
-			Accept: "application/octet-stream"
+			Accept: "application/octet-stream",
 		};
 
 		// Authenticated requests get a higher rate limit
-		if (isPrivate && personalAccessToken || personalAccessToken) {
+		if ((isPrivate && personalAccessToken) || personalAccessToken) {
 			headers.Authorization = `Token ${personalAccessToken}`;
 		}
 
 		const download = await request({
 			url: asset.url,
-			headers
+			headers,
 		});
-		return download === "Not Found" || download === `{"error":"Not Found"}`
-			? null
-			: download;
-
+		return download === "Not Found" || download === `{"error":"Not Found"}` ? null : download;
 	} catch (error) {
-		if (debugLogging)
-			console.log("error in grabReleaseFileFromRepository", URL, error);
+		if (debugLogging) console.log("error in grabReleaseFileFromRepository", URL, error);
 		return null;
 	}
 };
-
 
 export interface CommunityPlugin {
 	id: string;
@@ -122,16 +110,11 @@ export interface CommunityPlugin {
 	repo: string;
 }
 
-export const grabCommmunityPluginList = async (
-	debugLogging = true,
-): Promise<CommunityPlugin[] | null> => {
-	const pluginListUrl =
-		"https://raw.githubusercontent.com/obsidianmd/obsidian-releases/HEAD/community-plugins.json";
+export const grabCommmunityPluginList = async (debugLogging = true): Promise<CommunityPlugin[] | null> => {
+	const pluginListUrl = "https://raw.githubusercontent.com/obsidianmd/obsidian-releases/HEAD/community-plugins.json";
 	try {
 		const response = await request({ url: pluginListUrl });
-		return response === "404: Not Found"
-			? null
-			: ((await JSON.parse(response)) as CommunityPlugin[]);
+		return response === "404: Not Found" ? null : ((await JSON.parse(response)) as CommunityPlugin[]);
 	} catch (error) {
 		if (debugLogging) console.log("error in grabCommmunityPluginList", error);
 		return null;
@@ -144,16 +127,11 @@ export interface CommunityTheme {
 	repo: string;
 }
 
-export const grabCommmunityThemesList = async (
-	debugLogging = true,
-): Promise<CommunityTheme[] | null> => {
-	const themesUrl =
-		"https://raw.githubusercontent.com/obsidianmd/obsidian-releases/HEAD/community-css-themes.json";
+export const grabCommmunityThemesList = async (debugLogging = true): Promise<CommunityTheme[] | null> => {
+	const themesUrl = "https://raw.githubusercontent.com/obsidianmd/obsidian-releases/HEAD/community-css-themes.json";
 	try {
 		const response = await request({ url: themesUrl });
-		return response === "404: Not Found"
-			? null
-			: ((await JSON.parse(response)) as CommunityTheme[]);
+		return response === "404: Not Found" ? null : ((await JSON.parse(response)) as CommunityTheme[]);
 	} catch (error) {
 		if (debugLogging) console.log("error in grabCommmunityThemesList", error);
 		return null;
@@ -165,9 +143,7 @@ export const grabCommmunityThemeCssFile = async (
 	betaVersion = false,
 	debugLogging = false,
 ): Promise<string | null> => {
-	const themesUrl = `https://raw.githubusercontent.com/${repositoryPath}/HEAD/theme${
-		betaVersion ? "-beta" : ""
-	}.css`;
+	const themesUrl = `https://raw.githubusercontent.com/${repositoryPath}/HEAD/theme${betaVersion ? "-beta" : ""}.css`;
 	try {
 		const response = await request({ url: themesUrl });
 		return response === "404: Not Found" ? null : response;
@@ -177,17 +153,13 @@ export const grabCommmunityThemeCssFile = async (
 	}
 };
 
-export const grabCommmunityThemeManifestFile = async (
-	repositoryPath: string,
-	debugLogging = true,
-): Promise<string | null> => {
+export const grabCommmunityThemeManifestFile = async (repositoryPath: string, debugLogging = true): Promise<string | null> => {
 	const themesUrl = `https://raw.githubusercontent.com/${repositoryPath}/HEAD/manifest.json`;
 	try {
 		const response = await request({ url: themesUrl });
 		return response === "404: Not Found" ? null : response;
 	} catch (error) {
-		if (debugLogging)
-			console.log("error in grabCommmunityThemeManifestFile", error);
+		if (debugLogging) console.log("error in grabCommmunityThemeManifestFile", error);
 		return null;
 	}
 };
@@ -204,16 +176,8 @@ export const checksumForString = (str: string): string => {
 	return checksum(str).toString();
 };
 
-export const grabChecksumOfThemeCssFile = async (
-	repositoryPath: string,
-	betaVersion: boolean,
-	debugLogging: boolean,
-): Promise<string> => {
-	const themeCss = await grabCommmunityThemeCssFile(
-		repositoryPath,
-		betaVersion,
-		debugLogging,
-	);
+export const grabChecksumOfThemeCssFile = async (repositoryPath: string, betaVersion: boolean, debugLogging: boolean): Promise<string> => {
+	const themeCss = await grabCommmunityThemeCssFile(repositoryPath, betaVersion, debugLogging);
 	return themeCss ? checksumForString(themeCss) : "0";
 };
 
@@ -233,23 +197,15 @@ export const grabLastCommitInfoForFile = async (
 	const url = `https://api.github.com/repos/${repositoryPath}/commits?path=${path}&page=1&per_page=1`;
 	try {
 		const response = await request({ url: url });
-		return response === "404: Not Found"
-			? null
-			: (JSON.parse(response) as CommitInfo[]);
+		return response === "404: Not Found" ? null : (JSON.parse(response) as CommitInfo[]);
 	} catch (error) {
 		if (debugLogging) console.log("error in grabLastCommitInfoForAFile", error);
 		return null;
 	}
 };
 
-export const grabLastCommitDateForFile = async (
-	repositoryPath: string,
-	path: string,
-): Promise<string> => {
-	const test: CommitInfo[] | null = await grabLastCommitInfoForFile(
-		repositoryPath,
-		path,
-	);
+export const grabLastCommitDateForFile = async (repositoryPath: string, path: string): Promise<string> => {
+	const test: CommitInfo[] | null = await grabLastCommitInfoForFile(repositoryPath, path);
 	if (test && test.length > 0 && test[0].commit.committer?.date) {
 		return test[0].commit.committer.date;
 	}
@@ -257,19 +213,19 @@ export const grabLastCommitDateForFile = async (
 };
 
 export type Release = {
-    url: string;
-    tag_name: string;
-    prerelease: boolean;
-    assets: {
-        name: string;
-        url: string;
-        browser_download_url: string;
-    }[];
+	url: string;
+	tag_name: string;
+	prerelease: boolean;
+	assets: {
+		name: string;
+		url: string;
+		browser_download_url: string;
+	}[];
 };
 
 /**
  * Gets either a specific release or the latest release from a GitHub repository
- * 
+ *
  * @param repositoryPath - Repository path in format username/repository
  * @param version - Optional version/tag to fetch. If not provided, fetches latest release
  * @param includePrereleases - Whether to include pre-releases in the results (default: false)
@@ -277,63 +233,60 @@ export type Release = {
  * @param isPrivate - Whether the repository is private (default: false)
  * @param personalAccessToken - GitHub personal access token for private repos
  * @returns Promise<Release | null> Release information or null if not found/error
- * 
+ *
  * @example
  * // Get latest release
  * const release = await grabReleaseFromRepository('username/repo');
- * 
+ *
  * // Get specific version
  * const release = await grabReleaseFromRepository('username/repo', '1.0.0');
- * 
+ *
  * // Include pre-releases
  * const beta = await grabReleaseFromRepository('username/repo', undefined, true);
- * 
+ *
  * // Access private repository
  * const private = await grabReleaseFromRepository('username/repo', undefined, false, false, true, 'token');
  */
 export const grabReleaseFromRepository = async (
-    repositoryPath: string,
-    version?: string,
-    includePrereleases = false,
-    debugLogging = false,
+	repositoryPath: string,
+	version?: string,
+	includePrereleases = false,
+	debugLogging = false,
 	isPrivate = false,
-    personalAccessToken?: string
+	personalAccessToken?: string,
 ): Promise<Release | null> => {
-    try {
-        const apiUrl = version
-            ? `https://api.github.com/repos/${repositoryPath}/releases/tags/${version}`
-            : `https://api.github.com/repos/${repositoryPath}/releases`;
+	try {
+		const apiUrl = version
+			? `https://api.github.com/repos/${repositoryPath}/releases/tags/${version}`
+			: `https://api.github.com/repos/${repositoryPath}/releases`;
 
-        const headers: Record<string, string> = {
-            'Accept': 'application/vnd.github.v3+json'
-        };
+		const headers: Record<string, string> = {
+			Accept: "application/vnd.github.v3+json",
+		};
 
 		// Authenticated requests get a higher rate limit
-        if (isPrivate && personalAccessToken || personalAccessToken) {
-            headers.Authorization = `Token ${personalAccessToken}`;
-        }
+		if ((isPrivate && personalAccessToken) || personalAccessToken) {
+			headers.Authorization = `Token ${personalAccessToken}`;
+		}
 
-        const response = await request({ url: apiUrl, headers });
+		const response = await request({ url: apiUrl, headers });
 
-        if (response === "404: Not Found") return null;
+		if (response === "404: Not Found") return null;
 
-        const releases: Release[] = version 
-            ? [JSON.parse(response)]
-            : JSON.parse(response);
+		const releases: Release[] = version ? [JSON.parse(response)] : JSON.parse(response);
 
-        if (debugLogging) {
-            console.log(`grabReleaseFromRepository for ${repositoryPath}:`, releases);
-        }
+		if (debugLogging) {
+			console.log(`grabReleaseFromRepository for ${repositoryPath}:`, releases);
+		}
 
-		
-        return releases
-            .sort((a, b) => compareVersions(b.tag_name, a.tag_name))
-            .filter(release => includePrereleases || !release.prerelease)[0] ?? null;
-
-    } catch (error) {
-        if (debugLogging) {
-            console.log(`Error in grabReleaseFromRepository for ${repositoryPath}:`, error);
-        }
-        return null;
-    }
+		return (
+			releases.sort((a, b) => compareVersions(b.tag_name, a.tag_name)).filter((release) => includePrereleases || !release.prerelease)[0] ??
+			null
+		);
+	} catch (error) {
+		if (debugLogging) {
+			console.log(`Error in grabReleaseFromRepository for ${repositoryPath}:`, error);
+		}
+		return null;
+	}
 };

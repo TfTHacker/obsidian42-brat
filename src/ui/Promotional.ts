@@ -1,7 +1,4 @@
-export const promotionalLinks = (
-	containerEl: HTMLElement,
-	settingsTab = true,
-): HTMLElement => {
+export const promotionalLinks = (containerEl: HTMLElement, settingsTab = true): HTMLElement => {
 	const linksDiv = containerEl.createEl("div");
 	linksDiv.style.float = "right";
 

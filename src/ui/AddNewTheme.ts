@@ -24,11 +24,7 @@ export default class AddNewTheme extends Modal {
 		if (this.address === "") return;
 		const scrubbedAddress = this.address.replace("https://github.com/", "");
 		if (existBetaThemeinInList(this.plugin, scrubbedAddress)) {
-			toastMessage(
-				this.plugin,
-				"This theme is already in the list for beta testing",
-				10,
-			);
+			toastMessage(this.plugin, "This theme is already in the list for beta testing", 10);
 			return;
 		}
 
@@ -44,9 +40,7 @@ export default class AddNewTheme extends Modal {
 		this.contentEl.createEl("form", {}, (formEl) => {
 			formEl.addClass("brat-modal");
 			new Setting(formEl).addText((textEl) => {
-				textEl.setPlaceholder(
-					"Repository (example: https://github.com/GitubUserName/repository-name",
-				);
+				textEl.setPlaceholder("Repository (example: https://github.com/GitubUserName/repository-name");
 				textEl.setValue(this.address);
 				textEl.onChange((value) => {
 					this.address = value.trim();
@@ -66,11 +60,9 @@ export default class AddNewTheme extends Modal {
 			});
 
 			formEl.createDiv("modal-button-container", (buttonContainerEl) => {
-				buttonContainerEl
-					.createEl("button", { attr: { type: "button" }, text: "Never mind" })
-					.addEventListener("click", () => {
-						this.close();
-					});
+				buttonContainerEl.createEl("button", { attr: { type: "button" }, text: "Never mind" }).addEventListener("click", () => {
+					this.close();
+				});
 				buttonContainerEl.createEl("button", {
 					attr: { type: "submit" },
 					cls: "mod-cta",
@@ -82,8 +74,7 @@ export default class AddNewTheme extends Modal {
 			newDiv.style.borderTop = "1px solid #ccc";
 			newDiv.style.marginTop = "30px";
 			const byTfThacker = newDiv.createSpan();
-			byTfThacker.innerHTML =
-				"BRAT by <a href='https://bit.ly/o42-twitter'>TFTHacker</a>";
+			byTfThacker.innerHTML = "BRAT by <a href='https://bit.ly/o42-twitter'>TFTHacker</a>";
 			byTfThacker.style.fontStyle = "italic";
 			newDiv.appendChild(byTfThacker);
 			promotionalLinks(newDiv, false);
