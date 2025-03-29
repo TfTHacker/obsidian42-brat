@@ -30,9 +30,10 @@ export default class BetaPlugins {
 	 * opens the AddNewPluginModal to get info for  a new beta plugin
 	 * @param openSettingsTabAfterwards - will open settings screen afterwards. Used when this command is called from settings tab
 	 * @param useFrozenVersion - install the plugin using frozen version.
+	 * @param prefillRepo - prefill the repository field in the modal.
 	 */
-	displayAddNewPluginModal(openSettingsTabAfterwards = false, useFrozenVersion = false): void {
-		const newPlugin = new AddNewPluginModal(this.plugin, this, openSettingsTabAfterwards, useFrozenVersion);
+	displayAddNewPluginModal(openSettingsTabAfterwards = false, useFrozenVersion = false, prefillRepo = ""): void {
+		const newPlugin = new AddNewPluginModal(this.plugin, this, openSettingsTabAfterwards, useFrozenVersion, prefillRepo);
 		newPlugin.open();
 	}
 

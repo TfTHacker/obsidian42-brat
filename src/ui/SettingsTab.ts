@@ -5,10 +5,7 @@ import type BratPlugin from "../main";
 import AddNewTheme from "./AddNewTheme";
 import { promotionalLinks } from "./Promotional";
 
-const createLink = (
-	githubResource: string,
-	optionalText?: string,
-): DocumentFragment => {
+const createLink = (githubResource: string, optionalText?: string): DocumentFragment => {
 	const newLink = new DocumentFragment();
 	const linkElement = document.createElement("a");
 	linkElement.textContent = githubResource;
@@ -61,9 +58,7 @@ export class BratSettingsTab extends PluginSettingTab {
 
 		new Setting(containerEl)
 			.setName("Auto-update themes at startup")
-			.setDesc(
-				"If enabled all beta themes will be checked for updates each time Obsidian starts.",
-			)
+			.setDesc("If enabled all beta themes will be checked for updates each time Obsidian starts.")
 			.addToggle((cb: ToggleComponent) => {
 				cb.setValue(this.plugin.settings.updateThemesAtStartup);
 				cb.onChange(async (value: boolean) => {
@@ -96,31 +91,26 @@ export class BratSettingsTab extends PluginSettingTab {
 			});
 		});
 
-		const pluginSubListFrozenVersionNames = new Set(
-			this.plugin.settings.pluginSubListFrozenVersion.map((x) => x.repo),
-		);
+		const pluginSubListFrozenVersionNames = new Set(this.plugin.settings.pluginSubListFrozenVersion.map((x) => x.repo));
 		for (const bp of this.plugin.settings.pluginList) {
 			if (pluginSubListFrozenVersionNames.has(bp)) {
 				continue;
 			}
-			new Setting(containerEl)
-				.setName(createLink(bp))
-				.addButton((btn: ButtonComponent) => {
-					btn.setIcon("cross");
-					btn.setTooltip("Delete this beta plugin");
-					btn.onClick(() => {
-						if (btn.buttonEl.textContent === "")
-							btn.setButtonText("Click once more to confirm removal");
-						else {
-							const { buttonEl } = btn;
-							const { parentElement } = buttonEl;
-							if (parentElement?.parentElement) {
-								parentElement.parentElement.remove();
-								this.plugin.betaPlugins.deletePlugin(bp);
-							}
+			new Setting(containerEl).setName(createLink(bp)).addButton((btn: ButtonComponent) => {
+				btn.setIcon("cross");
+				btn.setTooltip("Delete this beta plugin");
+				btn.onClick(() => {
+					if (btn.buttonEl.textContent === "") btn.setButtonText("Click once more to confirm removal");
+					else {
+						const { buttonEl } = btn;
+						const { parentElement } = buttonEl;
+						if (parentElement?.parentElement) {
+							parentElement.parentElement.remove();
+							this.plugin.betaPlugins.deletePlugin(bp);
 						}
-					});
+					}
 				});
+			});
 		}
 
 		new Setting(containerEl).addButton((cb: ButtonComponent) => {
@@ -134,11 +124,18 @@ export class BratSettingsTab extends PluginSettingTab {
 			new Setting(containerEl)
 				.setName(createLink(bp.repo, ` (version ${bp.version})`))
 				.addButton((btn: ButtonComponent) => {
+					btn.setIcon("edit");
+					btn.setTooltip("Change version");
+					btn.onClick(() => {
+						this.plugin.app.setting.close();
+						this.plugin.betaPlugins.displayAddNewPluginModal(true, true, bp.repo);
+					});
+				})
+				.addButton((btn: ButtonComponent) => {
 					btn.setIcon("cross");
 					btn.setTooltip("Delete this beta plugin");
 					btn.onClick(() => {
-						if (btn.buttonEl.textContent === "")
-							btn.setButtonText("Click once more to confirm removal");
+						if (btn.buttonEl.textContent === "") btn.setButtonText("Click once more to confirm removal");
 						else {
 							const { buttonEl } = btn;
 							const { parentElement } = buttonEl;
@@ -162,33 +159,28 @@ export class BratSettingsTab extends PluginSettingTab {
 		});
 
 		for (const bp of this.plugin.settings.themesList) {
-			new Setting(containerEl)
-				.setName(createLink(bp.repo))
-				.addButton((btn: ButtonComponent) => {
-					btn.setIcon("cross");
-					btn.setTooltip("Delete this beta theme");
-					btn.onClick(() => {
-						if (btn.buttonEl.textContent === "")
-							btn.setButtonText("Click once more to confirm removal");
-						else {
-							const { buttonEl } = btn;
-							const { parentElement } = buttonEl;
-							if (parentElement?.parentElement) {
-								parentElement.parentElement.remove();
-								themeDelete(this.plugin, bp.repo);
-							}
+			new Setting(containerEl).setName(createLink(bp.repo)).addButton((btn: ButtonComponent) => {
+				btn.setIcon("cross");
+				btn.setTooltip("Delete this beta theme");
+				btn.onClick(() => {
+					if (btn.buttonEl.textContent === "") btn.setButtonText("Click once more to confirm removal");
+					else {
+						const { buttonEl } = btn;
+						const { parentElement } = buttonEl;
+						if (parentElement?.parentElement) {
+							parentElement.parentElement.remove();
+							themeDelete(this.plugin, bp.repo);
 						}
-					});
+					}
 				});
+			});
 		}
 
 		new Setting(containerEl).setName("Monitoring").setHeading();
 
 		new Setting(containerEl)
 			.setName("Enable Notifications")
-			.setDesc(
-				"BRAT will provide popup notifications for its various activities. Turn this off means  no notifications from BRAT.",
-			)
+			.setDesc("BRAT will provide popup notifications for its various activities. Turn this off means  no notifications from BRAT.")
 			.addToggle((cb: ToggleComponent) => {
 				cb.setValue(this.plugin.settings.notificationsEnabled);
 				cb.onChange(async (value: boolean) => {
@@ -210,9 +202,7 @@ export class BratSettingsTab extends PluginSettingTab {
 
 		new Setting(this.containerEl)
 			.setName("BRAT Log File Location")
-			.setDesc(
-				"Logs will be saved to this file. Don't add .md to the file name.",
-			)
+			.setDesc("Logs will be saved to this file. Don't add .md to the file name.")
 			.addSearch((cb) => {
 				cb.setPlaceholder("Example: BRAT-log")
 					.setValue(this.plugin.settings.loggingPath)
@@ -235,9 +225,7 @@ export class BratSettingsTab extends PluginSettingTab {
 
 		new Setting(containerEl)
 			.setName("Debugging Mode")
-			.setDesc(
-				"Atomic Bomb level console logging. Can be used for troubleshoting and development.",
-			)
+			.setDesc("Atomic Bomb level console logging. Can be used for troubleshoting and development.")
 			.addToggle((cb: ToggleComponent) => {
 				cb.setValue(this.plugin.settings.debuggingMode);
 				cb.onChange(async (value: boolean) => {
@@ -248,9 +236,7 @@ export class BratSettingsTab extends PluginSettingTab {
 
 		new Setting(containerEl)
 			.setName("Personal Access Token")
-			.setDesc(
-				"If you need to access private repositories, enter the personal access token here.",
-			)
+			.setDesc("If you need to access private repositories, enter the personal access token here.")
 			.addText((text) => {
 				text
 					.setPlaceholder("Enter your personal access token")
