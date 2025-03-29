@@ -2,6 +2,11 @@ import type { PluginManifest } from "obsidian";
 import { request } from "obsidian";
 import { compareVersions } from 'compare-versions';
 
+export interface ReleaseVersion {
+    version: string;   // The tag name of the release
+    prerelease: boolean; // Indicates if the release is a pre-release
+}
+
 const GITHUB_RAW_USERCONTENT_PATH = "https://raw.githubusercontent.com/";
 
 export const isPrivateRepo = async (
@@ -26,6 +31,37 @@ export const isPrivateRepo = async (
 		return false;
 	}
 };
+
+/**
+ * Fetches available release versions from a GitHub repository
+ * 
+ * @param repository - path to GitHub repository in format USERNAME/repository
+ * @returns array of version strings, or null if error
+ */
+export const fetchReleaseVersions = async (
+	repository: string,
+	debugLogging = true,
+	personalAccessToken = "",
+): Promise<ReleaseVersion[] | null> => {
+	const URL = `https://api.github.com/repos/${repository}/releases`;
+	try {
+		const response = await request({
+			url: URL,
+			headers: {
+				Authorization: `Token ${personalAccessToken}`,
+			},
+		});
+		const data = await JSON.parse(response);
+		return data.map((release: { tag_name: string, prerelease: boolean }) => ({
+			version: release.tag_name,
+			prerelease: release.prerelease
+		}));
+	} catch (e) {
+		if (debugLogging) console.log("error in fetchReleaseVersions", URL, e);
+		return null;
+	}
+};
+
 
 /**
  * pulls from github a release file by its version number
