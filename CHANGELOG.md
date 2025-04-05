@@ -1,3 +1,28 @@
+# 1.1.0
+
+- feat: ✨ use manifest from latest valid github release for BRAT in <https://github.com/TfTHacker/obsidian42-brat/pull/93>
+- feat: ✨ fetch available versions into dropdown when adding frozen version in <https://github.com/TfTHacker/obsidian42-brat/pull/96>
+- feat: ✨ allow user to update frozen version
+
+## For developers: changes with respect to using `manifest-beta.json`
+
+By using the github releases instead of `manifest-beta.json` the plugin will:
+
+- download a specific frozen version if specified (independently of whether it is defined as “pre-release” or not), or
+- download the latest version available as a release *or* pre-releasae, giving priority to the highest version number according to the semantic version rules (see below)
+
+Specifically, it will fetch the `manifest.json` from the **latest (or specified) (pre-)release** package in the repository to install and update a plugin.
+
+This makes BRAT independent of the version numbering in the repository root, and also allows developers to use `semantic-release` and `beta` branches to develop pre-releases that all work with BRAT.
+
+For plugin devs, this means that `manifest-beta.json` is not strictly necessary anymore, although having it in a repository doesn't hurt at all and will keep your beta version backwards compatible with older BRAT versions.
+
+As far as I understand, Obsidian and plugins like the Obsidian plugin tracker currently look at the master `manifest.json` in the default branch of a plugin repository when updating plugins, which is also compatible with this change. If a developer releases a “beta” version as an independent, but “full” release in his repository (e.g. without updating the `manifest.json` in the repository), BRAT will also pick it up independently of the version number in the master `mainfest.json` of the repository.
+
+It will also make BRAT more robust, as it will always use the true release list as its source of truth.
+
+**Full Changelog**: <https://github.com/TfTHacker/obsidian42-brat/compare/1.0.6...1.1.0>
+
 # 1.0.6
 
 - Fix: [#92](https://github.com/TfTHacker/obsidian42-brat/issues/92) - BRAT icon could not be disabled.
@@ -5,7 +30,8 @@
 # 1.0.5
 
 ### Updates
-- Updating plugin to newest Obsidian recommendations https://docs.obsidian.md/oo24/plugin.
+
+- Updating plugin to newest Obsidian recommendations <https://docs.obsidian.md/oo24/plugin>.
 - The internal command names have been renamed. Any plugins using these internal command names will need to be updated.
 - Transition to Biome from EsLint and Prettier.
 - The output log file format for when debugging is enabled in BRAT has changed. It now appends to the log file, not prepends.
@@ -28,7 +54,7 @@
 
 ### New
 
-- Private repositories are now accessible by BRAT. This will allow for private testing of plugins. You will need to setup a GitHub token in the settings to access private repositories. Check out https://tfthacker.com/brat-private-repo for more info.
+- Private repositories are now accessible by BRAT. This will allow for private testing of plugins. You will need to setup a GitHub token in the settings to access private repositories. Check out <https://tfthacker.com/brat-private-repo> for more info.
 - BRAT is no longer in beta, though it will always be in beta since we add new features. So I am bumping this up to 1.0.0.
 - Moved the build process to use GitHub Actions. This will allow for more automation in the future.
 
@@ -36,7 +62,7 @@
 
 ### Fix
 
-- New auto-enable for new plugin installs not persisting the enabled state. (Issue: https://github.com/TfTHacker/obsidian42-brat/issues/74)
+- New auto-enable for new plugin installs not persisting the enabled state. (Issue: <https://github.com/TfTHacker/obsidian42-brat/issues/74>)
 - chore: update all dependencies.
 
 # 0.8.2
@@ -50,13 +76,13 @@
 
 ### New
 
-- Obsidian Protocol handler for making installing plugins and themes easier by using Obsidian's protocol feature. See https://tfthacker.com/brat-protocol for more information.
+- Obsidian Protocol handler for making installing plugins and themes easier by using Obsidian's protocol feature. See <https://tfthacker.com/brat-protocol> for more information.
   This new feature contributed by [RyotaUshio](https://github.com/RyotaUshio) (Thank you!).
 - chore: updated all dependencies.
 
 ### Fix
 
-- Bug introduced with 8.02 when manifest-beta.json is used that a plugin will not installed. (https://github.com/TfTHacker/obsidian42-brat/issues/71) Thank you for reporting this [mProjectsCode](https://github.com/mProjectsCode).
+- Bug introduced with 8.02 when manifest-beta.json is used that a plugin will not installed. (<https://github.com/TfTHacker/obsidian42-brat/issues/71>) Thank you for reporting this [mProjectsCode](https://github.com/mProjectsCode).
 
 # 0.8.0
 
@@ -72,11 +98,11 @@
 
 ### New
 
-- Can now force a reinstall of a beta plugin. This might be useful when a local file gets corrupted, and you want to replace it with the current file in the release. (Addresses FR https://github.com/TfTHacker/obsidian42-brat/issues/62)
+- Can now force a reinstall of a beta plugin. This might be useful when a local file gets corrupted, and you want to replace it with the current file in the release. (Addresses FR <https://github.com/TfTHacker/obsidian42-brat/issues/62>)
 
 #### Fixes
 
-- If the URL ends with .git, the Add New Plugin form will strip the .git extension. This makes it easier to use the GitHub copy code button URL with BRAT (fix for https://github.com/TfTHacker/obsidian42-brat/issues/55)
+- If the URL ends with .git, the Add New Plugin form will strip the .git extension. This makes it easier to use the GitHub copy code button URL with BRAT (fix for <https://github.com/TfTHacker/obsidian42-brat/issues/55>)
 
 #### Updates
 
