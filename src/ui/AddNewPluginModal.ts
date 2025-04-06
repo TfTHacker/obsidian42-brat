@@ -73,7 +73,7 @@ export default class AddNewPluginModal extends Modal {
 			return;
 		}
 
-		if (existBetaPluginInList(this.plugin, scrubbedAddress)) {
+		if (!this.version && existBetaPluginInList(this.plugin, scrubbedAddress)) {
 			toastMessage(this.plugin, "This plugin is already in the list for beta testing", 10);
 			return;
 		}
@@ -97,6 +97,7 @@ export default class AddNewPluginModal extends Modal {
 		settingEl.clear();
 		settingEl.addDropdown((dropdown) => {
 			dropdown.addOption("", "Select a version");
+			dropdown.addOption("latest", "Latest Version");
 			for (const version of versions) {
 				dropdown.addOption(version.version, `${version.version} ${version.prerelease ? "(Prerelease)" : ""}`);
 			}
@@ -117,25 +118,17 @@ export default class AddNewPluginModal extends Modal {
 	}
 
 	onOpen(): void {
-		this.contentEl.createEl("h4", {
-			text: this.useFrozenVersion
-				? this.address
-					? "Update frozen version of plugin:"
-					: "Github repository for frozen beta plugin:"
-				: "Github repository for beta plugin:",
-		});
+		const heading = this.contentEl.createEl("h4");
+		if (this.address) {
+			heading.appendText("Change plugin version: ");
+			heading.appendChild(createLink(this.address));
+		} else {
+			heading.setText("Github repository for beta plugin:");
+		}
 
 		this.contentEl.createEl("form", {}, (formEl) => {
 			formEl.addClass("brat-modal");
 
-			if (this.address && this.useFrozenVersion) {
-				// Show as text for prefilled frozen version
-				this.contentEl.createDiv("repository-setting", (repoEl) => {
-					repoEl.addClass("brat-modal");
-					repoEl.createSpan({ text: createLink(this.address) });
-				});
-				this.contentEl.createEl("hr", { cls: "divider" });
-			}
 			if (!this.address || !this.useFrozenVersion) {
 				new Setting(formEl).setClass("repository-setting").then((setting) => {
 					// Show as input field for new plugins
@@ -185,8 +178,7 @@ export default class AddNewPluginModal extends Modal {
 				});
 			}
 			if (this.useFrozenVersion) {
-				// First add API key input for private repositories
-				new Setting(formEl).setClass("apikey-setting").addText((textEl) => {
+				new Setting(formEl).setClass("api-setting").addText((textEl) => {
 					textEl
 						.setPlaceholder("GitHub API key for private repository (optional)")
 						.setValue(this.privateApiKey)

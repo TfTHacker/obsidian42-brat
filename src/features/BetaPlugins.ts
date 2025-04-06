@@ -1,3 +1,4 @@
+import { compareVersions } from "compare-versions";
 import type { PluginManifest } from "obsidian";
 import { Notice, apiVersion, normalizePath, requireApiVersion } from "obsidian";
 import type BratPlugin from "../main";
@@ -242,6 +243,8 @@ export default class BetaPlugins {
 	 * @param reportIfNotUpdted - if true, report if an update has not succed
 	 * @param specifyVersion    - if not empty, need to install a specified version instead of the value in manifest-beta.json
 	 * @param forceReinstall    - if true, will force a reinstall of the plugin, even if it is already installed
+	 * @param enableAfterInstall - if true, will enable the plugin after install
+	 * @param privateApiKey     - if not empty, will use the private API key to access the repository
 	 *
 	 * @returns true if succeeds
 	 */
@@ -339,7 +342,11 @@ export default class BetaPlugins {
 				// reload if enabled
 				await this.reloadPlugin(primaryManifest.id);
 				await this.plugin.log(`${repositoryPath} reinstalled`, true);
-				toastMessage(this.plugin, `${repositoryPath}\nPlugin has been reinstalled and reloaded.`, noticeTimeout);
+				toastMessage(
+					this.plugin,
+					`${repositoryPath}\nPlugin has been reinstalled and reloaded with version ${primaryManifest.version}`,
+					noticeTimeout,
+				);
 			} else {
 				const versionText = specifyVersion === "" ? "" : ` (version: ${specifyVersion})`;
 				let msg = `${repositoryPath}${versionText}\nThe plugin has been registered with BRAT.`;
@@ -366,15 +373,15 @@ export default class BetaPlugins {
 				console.log("BRAT - Local Manifest Load", primaryManifest.id, JSON.stringify(e, null, 2));
 			}
 
-			if (specifyVersion !== "" || this.plugin.settings.pluginSubListFrozenVersion.map((x) => x.repo).includes(repositoryPath)) {
+			if (specifyVersion !== "" && specifyVersion !== "latest") {
 				// skip the frozen version plugin
 				toastMessage(this.plugin, `The version of ${repositoryPath} is frozen, not updating.`, 3);
 				return false;
 			}
 
 			const localManifestJson = (await JSON.parse(localManifestContents)) as PluginManifest;
-			if (localManifestJson.version !== primaryManifest.version) {
-				// manifest files are not the same, do an update
+			if (compareVersions(localManifestJson.version, primaryManifest.version) === -1) {
+				// Remote version is higher, update
 				const releaseFiles = await getRelease();
 				if (releaseFiles === null) return false;
 
@@ -387,20 +394,26 @@ export default class BetaPlugins {
 							window.open(`https://github.com/${repositoryPath}/releases/tag/${primaryManifest.version}`);
 						}
 					});
-				} else {
-					await this.writeReleaseFilesToPluginFolder(primaryManifest.id, releaseFiles);
-					// @ts-ignore
-					await this.plugin.app.plugins.loadManifests();
-					await this.reloadPlugin(primaryManifest.id);
-					const msg = `${primaryManifest.id}\nPlugin has been updated from version ${localManifestJson.version} to ${primaryManifest.version}. `;
-					await this.plugin.log(`${msg}[Release Info](https://github.com/${repositoryPath}/releases/tag/${primaryManifest.version})`, true);
-					toastMessage(this.plugin, msg, 30, () => {
-						if (primaryManifest) {
-							window.open(`https://github.com/${repositoryPath}/releases/tag/${primaryManifest.version}`);
-						}
-					});
+					return false;
 				}
-			} else if (reportIfNotUpdted) toastMessage(this.plugin, `No update available for ${repositoryPath}`, 3);
+				await this.writeReleaseFilesToPluginFolder(primaryManifest.id, releaseFiles);
+				// @ts-ignore
+				await this.plugin.app.plugins.loadManifests();
+				await this.reloadPlugin(primaryManifest.id);
+				const msg = `${primaryManifest.id}\nPlugin has been updated from version ${localManifestJson.version} to ${primaryManifest.version}. `;
+				await this.plugin.log(`${msg}[Release Info](https://github.com/${repositoryPath}/releases/tag/${primaryManifest.version})`, true);
+				toastMessage(this.plugin, msg, 30, () => {
+					if (primaryManifest) {
+						window.open(`https://github.com/${repositoryPath}/releases/tag/${primaryManifest.version}`);
+					}
+				});
+				return true;
+			}
+
+			if (reportIfNotUpdted) {
+				toastMessage(this.plugin, `No update available for ${repositoryPath}`, 3);
+			}
+			return true;
 		}
 		return true;
 	}
@@ -435,8 +448,18 @@ export default class BetaPlugins {
 		onlyCheckDontUpdate = false,
 		reportIfNotUpdted = false,
 		forceReinstall = false,
+		privateApiKey = "",
 	): Promise<boolean> {
-		const result = await this.addPlugin(repositoryPath, true, onlyCheckDontUpdate, reportIfNotUpdted, "", forceReinstall);
+		const result = await this.addPlugin(
+			repositoryPath,
+			true,
+			onlyCheckDontUpdate,
+			reportIfNotUpdted,
+			"",
+			forceReinstall,
+			false,
+			privateApiKey,
+		);
 		if (!result && !onlyCheckDontUpdate) toastMessage(this.plugin, `${repositoryPath}\nUpdate of plugin failed.`);
 		return result;
 	}
@@ -456,12 +479,16 @@ export default class BetaPlugins {
 		const msg1 = "Checking for plugin updates STARTED";
 		await this.plugin.log(msg1, true);
 		if (showInfo && this.plugin.settings.notificationsEnabled) newNotice = new Notice(`BRAT\n${msg1}`, 30000);
-		const pluginSubListFrozenVersionNames = new Set(this.plugin.settings.pluginSubListFrozenVersion.map((f) => f.repo));
+		// Create a map of repo to version for frozen plugins
+		const frozenVersions = new Map(
+			this.plugin.settings.pluginSubListFrozenVersion.map((f) => [f.repo, { version: f.version, token: f.token }]),
+		);
 		for (const bp of this.plugin.settings.pluginList) {
-			if (pluginSubListFrozenVersionNames.has(bp)) {
+			// Skip if repo is frozen and not set to "latest"
+			if (frozenVersions.has(bp) && frozenVersions.get(bp)?.version !== "latest") {
 				continue;
 			}
-			await this.updatePlugin(bp, onlyCheckDontUpdate);
+			await this.updatePlugin(bp, onlyCheckDontUpdate, false, false, frozenVersions.get(bp)?.token);
 		}
 		const msg2 = "Checking for plugin updates COMPLETED";
 		await this.plugin.log(msg2, true);

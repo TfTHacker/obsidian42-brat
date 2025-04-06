@@ -7,15 +7,15 @@ export interface ThemeInforamtion {
 	lastUpdate: string;
 }
 
-export interface PluginFrozenVersion {
+export interface PluginVersion {
 	repo: string; // path to the GitHub repository
-	version: string; // version of the plugin
+	version: "latest" | string; // version of the plugin (semver or latest)
 	token?: string; // optional private API key
 }
 
 export interface Settings {
 	pluginList: string[];
-	pluginSubListFrozenVersion: PluginFrozenVersion[];
+	pluginSubListFrozenVersion: PluginVersion[];
 	themesList: ThemeInforamtion[];
 	updateAtStartup: boolean;
 	updateThemesAtStartup: boolean;
@@ -50,13 +50,13 @@ export const DEFAULT_SETTINGS: Settings = {
  * @param  repositoryPath - path to the GitHub repository
  * @param  specifyVersion  - if the plugin needs to stay at the frozen version, we need to also record the version
  */
-export function addBetaPluginToList(plugin: BratPlugin, repositoryPath: string, specifyVersion = "", privateApiKey = ""): void {
+export function addBetaPluginToList(plugin: BratPlugin, repositoryPath: string, specifyVersion = "latest", privateApiKey = ""): void {
 	let save = false;
 	if (!plugin.settings.pluginList.contains(repositoryPath)) {
 		plugin.settings.pluginList.unshift(repositoryPath);
 		save = true;
 	}
-	if (specifyVersion !== "" && plugin.settings.pluginSubListFrozenVersion.filter((x) => x.repo === repositoryPath).length === 0) {
+	if (plugin.settings.pluginSubListFrozenVersion.filter((x) => x.repo === repositoryPath).length === 0) {
 		plugin.settings.pluginSubListFrozenVersion.unshift({
 			repo: repositoryPath,
 			version: specifyVersion,

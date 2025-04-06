@@ -59,64 +59,54 @@ export class BratSettingsTab extends PluginSettingTab {
 		containerEl.createEl("hr");
 		new Setting(containerEl).setName("Beta plugin list").setHeading();
 		containerEl.createEl("div", {
-			text: `The following is a list of beta plugins added via the command palette "Add a beta plugin for testing" or "Add a beta plugin with frozen version for testing". A frozen version is a specific release of a plugin based on its release tag. `,
+			text: `The following is a list of beta plugins added via the command "Add a beta plugin for testing". You can chose to add the latest version or a frozen version. A frozen version is a specific release of a plugin based on its release tag.`,
 		});
 		containerEl.createEl("p");
 		containerEl.createEl("div", {
-			text: "Click the x button next to a plugin to remove it from the list.",
+			text: "Click the 'Edit' button next to a plugin to change the installed version and the x button next to a plugin to remove it from the list.",
 		});
 		containerEl.createEl("p");
 		containerEl.createEl("span").createEl("b", { text: "Note: " });
 		containerEl.createSpan({
-			text: "This does not delete the plugin, this should be done from the  Community Plugins tab in Settings.",
+			text: "Removing from the list does not delete the plugin, this should be done from the Community Plugins tab in Settings.",
 		});
 
 		new Setting(containerEl).addButton((cb: ButtonComponent) => {
 			cb.setButtonText("Add Beta plugin");
 			cb.onClick(() => {
-				this.plugin.app.setting.close();
-				this.plugin.betaPlugins.displayAddNewPluginModal(true, false);
-			});
-		});
-
-		const pluginSubListFrozenVersionNames = new Set(this.plugin.settings.pluginSubListFrozenVersion.map((x) => x.repo));
-		for (const bp of this.plugin.settings.pluginList) {
-			if (pluginSubListFrozenVersionNames.has(bp)) {
-				continue;
-			}
-			new Setting(containerEl).setName(createLink(bp)).addButton((btn: ButtonComponent) => {
-				btn.setIcon("cross");
-				btn.setTooltip("Delete this beta plugin");
-				btn.onClick(() => {
-					if (btn.buttonEl.textContent === "") btn.setButtonText("Click once more to confirm removal");
-					else {
-						const { buttonEl } = btn;
-						const { parentElement } = buttonEl;
-						if (parentElement?.parentElement) {
-							parentElement.parentElement.remove();
-							this.plugin.betaPlugins.deletePlugin(bp);
-						}
-					}
-				});
-			});
-		}
-
-		new Setting(containerEl).addButton((cb: ButtonComponent) => {
-			cb.setButtonText("Add Beta plugin with frozen version");
-			cb.onClick(() => {
-				this.plugin.app.setting.close();
 				this.plugin.betaPlugins.displayAddNewPluginModal(true, true);
 			});
 		});
-		for (const bp of this.plugin.settings.pluginSubListFrozenVersion) {
-			new Setting(containerEl)
-				.setName(createLink(bp.repo, ` (version ${bp.version})`))
+
+		const frozenVersions = new Map(
+			this.plugin.settings.pluginSubListFrozenVersion.map((f) => [f.repo, { version: f.version, token: f.token }]),
+		);
+		for (const p of this.plugin.settings.pluginList) {
+			const bp = frozenVersions.get(p);
+			const pluginSettingContainer = new Setting(containerEl)
+				.setName(createLink(p))
+				.setDesc(bp?.version ? ` Tracked version: ${bp.version} ${bp.version === "latest" ? "" : "(frozen)"}` : "");
+
+			if (!bp?.version || bp.version === "latest") {
+				// Only show update button for plugins tracking latest version
+				pluginSettingContainer.addButton((btn: ButtonComponent) => {
+					btn
+						.setIcon("sync")
+						.setTooltip("Check and update plugin")
+						.onClick(async () => {
+							const updated = await this.plugin.betaPlugins.updatePlugin(p, false, true);
+						});
+				});
+			}
+
+			// Container for the edit and delete buttons
+			pluginSettingContainer
 				.addButton((btn: ButtonComponent) => {
 					btn.setIcon("edit");
 					btn.setTooltip("Change version");
 					btn.onClick(() => {
-						this.plugin.app.setting.close();
-						this.plugin.betaPlugins.displayAddNewPluginModal(true, true, bp.repo, bp.version, bp.token);
+						this.plugin.betaPlugins.displayAddNewPluginModal(true, true, p, bp?.version, bp?.token);
+						this.plugin.app.setting.updatePluginSection();
 					});
 				})
 				.addButton((btn: ButtonComponent) => {
@@ -129,7 +119,7 @@ export class BratSettingsTab extends PluginSettingTab {
 							const { parentElement } = buttonEl;
 							if (parentElement?.parentElement) {
 								parentElement.parentElement.remove();
-								this.plugin.betaPlugins.deletePlugin(bp.repo);
+								this.plugin.betaPlugins.deletePlugin(p);
 							}
 						}
 					});

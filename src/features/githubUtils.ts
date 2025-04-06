@@ -1,5 +1,4 @@
 import { compareVersions } from "compare-versions";
-import type { PluginManifest } from "obsidian";
 import { request } from "obsidian";
 
 export interface ReleaseVersion {
@@ -252,9 +251,10 @@ export const grabReleaseFromRepository = async (
 	personalAccessToken?: string,
 ): Promise<Release | null> => {
 	try {
-		const apiUrl = version
-			? `https://api.github.com/repos/${repositoryPath}/releases/tags/${version}`
-			: `https://api.github.com/repos/${repositoryPath}/releases`;
+		const apiUrl =
+			version && version !== "latest"
+				? `https://api.github.com/repos/${repositoryPath}/releases/tags/${version}`
+				: `https://api.github.com/repos/${repositoryPath}/releases`;
 
 		const headers: Record<string, string> = {
 			Accept: "application/vnd.github.v3+json",
@@ -269,7 +269,8 @@ export const grabReleaseFromRepository = async (
 
 		if (response === "404: Not Found") return null;
 
-		const releases: Release[] = version ? [JSON.parse(response)] : JSON.parse(response);
+		// If we fetch a specific version, we get a single release object
+		const releases: Release[] = version && version !== "latest" ? [JSON.parse(response)] : JSON.parse(response);
 
 		if (debugLogging) {
 			console.log(`grabReleaseFromRepository for ${repositoryPath}:`, releases);

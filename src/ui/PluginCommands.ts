@@ -14,16 +14,7 @@ export default class PluginCommands {
 		{
 			id: "AddBetaPlugin",
 			icon: "BratIcon",
-			name: "Plugins: Add a beta plugin for testing",
-			showInRibbon: true,
-			callback: () => {
-				this.plugin.betaPlugins.displayAddNewPluginModal(false, false);
-			},
-		},
-		{
-			id: "AddBetaPluginWithFrozenVersion",
-			icon: "BratIcon",
-			name: "Plugins: Add a beta plugin with frozen version based on a release tag",
+			name: "Plugins: Add a beta plugin for testing (with or without version)",
 			showInRibbon: true,
 			callback: () => {
 				this.plugin.betaPlugins.displayAddNewPluginModal(false, true);
