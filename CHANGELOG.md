@@ -3,7 +3,7 @@
 ## 1.1.2
 
 - feat: ✨ Unify regular and frozen plugins into one list (tracking `latest` or freezing a specific version)
-- feat: ✨ Added quick update check button for plugins tracking latest version
+- feat: ✨ Added quick update check button for plugins tracking latest version in settings tab
 
 ## 1.1.1
 
