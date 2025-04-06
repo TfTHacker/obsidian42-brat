@@ -57,22 +57,22 @@ BRAT examines your repository's GitHub releases. For installation and updates, i
 This approach makes BRAT more robust as it uses GitHub releases as the source of truth.
 
 >[!IMPORTANT]
->Important note about versioning
->Obsidian does not support the full `semver` spec. If you use `-preview` and other branches to build beta versions of your plugin, Obsidian will not pick up the final release automatically unless the version number is bumped at least a minor release number higher than the beta version. In these cases, it is best to use BRAT to upgrade from to the latest release.
->
->| Semantic Versions | |
->|---------|---|
->| The results of a Semver comparison from lowest to highest version | |
->| `1.0.0` | 1 |
->| `1.0.1-alpha.25` | 2 |
->| `1.0.1-beta.5`| 3 |
->| `1.0.1-preview.1` | 4 |
->| `1.0.1` | 5 |
->| `1.0.2` | 6 |
+>Obsidian does not support the full `semver` spec. If you use `-preview` and other branches to build beta versions of your plugin, Obsidian will not pick up the final release automatically, unless the version number is bumped at least a minor release number higher than the beta version. In these cases, it is best to use BRAT to upgrade from to the latest release.
 >
 >If your users have installed a pre-release like `1.0.1-preview.1`, Obsidian will not pick up `1.0.1` once its release, and they would have to update manually via BRAT.
 >
 >However, once `1.0.2` or higher is released, Obsidian's update mechanism will kick-in again, offering to upgrade the respective (pre-)release.
+>
+>The following table illustrates the results of a Semver compliant comparison from lowest to highest version and indicates which versions will and will not be picked up by Obsidian's update mechanism.
+>
+>| Semantic Versions | | |
+>|---------|---|----------|
+>| `1.0.0` | 1 | |
+>| `1.0.1-alpha.25` | 2 | |
+>| `1.0.1-beta.5`| 3 | |
+>| *`1.0.1-preview.1`* | 4  | *Installed by user with BRAT* |
+>| `1.0.1` | 5 | Not picked up by Obsidian's update mechanism |
+>| **`1.0.2`** | 6 | **Picked up by Obsidian's update mechanism** |
 
 ## Sample Plugin Repository
 
