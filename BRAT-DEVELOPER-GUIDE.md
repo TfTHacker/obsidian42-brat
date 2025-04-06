@@ -2,7 +2,8 @@
 
 This guide explains how to set up your Obsidian plugin for beta testing with BRAT.
 
->[!WARNING] Please note: these notes only apply to plugins. Themes follow a different process.
+>[!WARNING]
+>Please note: these notes only apply to plugins. Themes follow a different process.
 
 ## How Obsidian loads plugins
 
