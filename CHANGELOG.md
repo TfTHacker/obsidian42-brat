@@ -1,10 +1,19 @@
-# 1.1.0
+# Changelog
+
+## 1.1.1
+
+- feat: ✨ Support for private repositories in frozen version mode with per repo API Key
+- feat: ✨ Improved validation of repository addresses
+- fix: 🚑️ Only use API token for GitHub requests if one is provided
+- fix: 💄 Display repository as text instead of input field for existing frozen version plugins
+
+## 1.1.0
 
 - feat: ✨ use manifest from latest valid github release for BRAT in <https://github.com/TfTHacker/obsidian42-brat/pull/93>
 - feat: ✨ fetch available versions into dropdown when adding frozen version in <https://github.com/TfTHacker/obsidian42-brat/pull/96>
 - feat: ✨ allow user to update frozen version
 
-## For developers: changes with respect to using `manifest-beta.json`
+### For developers: changes with respect to using `manifest-beta.json`
 
 By using the github releases instead of `manifest-beta.json` the plugin will:
 
@@ -23,11 +32,11 @@ It will also make BRAT more robust, as it will always use the true release list 
 
 **Full Changelog**: <https://github.com/TfTHacker/obsidian42-brat/compare/1.0.6...1.1.0>
 
-# 1.0.6
+## 1.0.6
 
 - Fix: [#92](https://github.com/TfTHacker/obsidian42-brat/issues/92) - BRAT icon could not be disabled.
 
-# 1.0.5
+## 1.0.5
 
 ### Updates
 
@@ -36,21 +45,21 @@ It will also make BRAT more robust, as it will always use the true release list 
 - Transition to Biome from EsLint and Prettier.
 - The output log file format for when debugging is enabled in BRAT has changed. It now appends to the log file, not prepends.
 
-# 1.0.3
+## 1.0.3
 
 ### fix
 
 - modified main.ts to better conform to obdisidan.dt.ts
 - chore: update all dependencies.
 
-# 1.0.2
+## 1.0.2
 
 ### Fix
 
 - Improved the update logic to better handle when a personal access token has failed.
 - chore: update all dependencies.
 
-# 1.0.1
+## 1.0.1
 
 ### New
 
@@ -58,21 +67,21 @@ It will also make BRAT more robust, as it will always use the true release list 
 - BRAT is no longer in beta, though it will always be in beta since we add new features. So I am bumping this up to 1.0.0.
 - Moved the build process to use GitHub Actions. This will allow for more automation in the future.
 
-# 0.8.3
+## 0.8.3
 
 ### Fix
 
 - New auto-enable for new plugin installs not persisting the enabled state. (Issue: <https://github.com/TfTHacker/obsidian42-brat/issues/74>)
 - chore: update all dependencies.
 
-# 0.8.2
+## 0.8.2
 
 ### New
 
 - A new setting controls if a beta plugin is auto-enabled after installation. This means after it is installed, it will be enabled in settings. This reduces the additional step of manually enabling a plugin after installation. This setting is now enabled by default.
 - chore: update all dependencies.
 
-# 0.8.1
+## 0.8.1
 
 ### New
 
@@ -84,7 +93,7 @@ It will also make BRAT more robust, as it will always use the true release list 
 
 - Bug introduced with 8.02 when manifest-beta.json is used that a plugin will not installed. (<https://github.com/TfTHacker/obsidian42-brat/issues/71>) Thank you for reporting this [mProjectsCode](https://github.com/mProjectsCode).
 
-# 0.8.0
+## 0.8.0
 
 ### New
 
@@ -94,7 +103,7 @@ It will also make BRAT more robust, as it will always use the true release list 
 - **Major** code refactoring - the goal was to make this strongly typed according to Typescript rules and additionally applied a new protocol to the formatting of the code. The result is extensive changes in all files. While this won't mean a lot to users, it will make the code easier to maintain and understand for others.
 - chore: update all dependencies.
 
-# 0.7.1
+## 0.7.1
 
 ### New
 
@@ -108,7 +117,7 @@ It will also make BRAT more robust, as it will always use the true release list 
 
 - updated to the newest esbuild and also all project dependencies
 
-# 0.7.0
+## 0.7.0
 
 ## Major updates to **THEMES** support
 
