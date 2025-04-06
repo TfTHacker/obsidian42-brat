@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.1.2
+
+- feat: ✨ Unify regular and frozen plugins into one list (tracking `latest` or freezing a specific version)
+- feat: ✨ Added quick update check button for plugins tracking latest version
+
 ## 1.1.1
 
 - feat: ✨ Support for private repositories in frozen version mode with per repo API Key
