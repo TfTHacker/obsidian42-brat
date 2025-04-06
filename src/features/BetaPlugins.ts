@@ -31,9 +31,25 @@ export default class BetaPlugins {
 	 * @param openSettingsTabAfterwards - will open settings screen afterwards. Used when this command is called from settings tab
 	 * @param useFrozenVersion - install the plugin using frozen version.
 	 * @param prefillRepo - prefill the repository field in the modal.
+	 * @param prefillVersion - prefill the version field in the modal.
+	 * @param prefillPrivateApiKey - prefill the private API key field in the modal.
 	 */
-	displayAddNewPluginModal(openSettingsTabAfterwards = false, useFrozenVersion = false, prefillRepo = ""): void {
-		const newPlugin = new AddNewPluginModal(this.plugin, this, openSettingsTabAfterwards, useFrozenVersion, prefillRepo);
+	displayAddNewPluginModal(
+		openSettingsTabAfterwards = false,
+		useFrozenVersion = false,
+		prefillRepo = "",
+		prefillVersion = "",
+		prefillPrivateApiKey = "",
+	): void {
+		const newPlugin = new AddNewPluginModal(
+			this.plugin,
+			this,
+			openSettingsTabAfterwards,
+			useFrozenVersion,
+			prefillRepo,
+			prefillVersion,
+			prefillPrivateApiKey,
+		);
 		newPlugin.open();
 	}
 
@@ -52,11 +68,16 @@ export default class BetaPlugins {
 		getBetaManifest = false,
 		reportIssues = false,
 		specifyVersion = "",
+		privateApiKey = "",
 	): Promise<PluginManifest | null> {
 		const noticeTimeout = 15;
 
 		// check if the repository is private
-		const isPrivate = await isPrivateRepo(repositoryPath, this.plugin.settings.debuggingMode, this.plugin.settings.personalAccessToken);
+		const isPrivate = await isPrivateRepo(
+			repositoryPath,
+			this.plugin.settings.debuggingMode,
+			privateApiKey || this.plugin.settings.personalAccessToken,
+		);
 
 		// Grab the manifest.json for the latest release from the repository
 		const release: Release | null = await grabReleaseFromRepository(
@@ -65,7 +86,7 @@ export default class BetaPlugins {
 			getBetaManifest,
 			this.plugin.settings.debuggingMode,
 			isPrivate,
-			this.plugin.settings.personalAccessToken,
+			privateApiKey || this.plugin.settings.personalAccessToken,
 		);
 
 		if (!release) {
@@ -85,7 +106,7 @@ export default class BetaPlugins {
 			"manifest.json",
 			this.plugin.settings.debuggingMode,
 			isPrivate,
-			this.plugin.settings.personalAccessToken,
+			privateApiKey || this.plugin.settings.personalAccessToken,
 		);
 
 		if (!rawManifest) {
@@ -142,9 +163,10 @@ export default class BetaPlugins {
 		manifest: PluginManifest,
 		getManifest: boolean,
 		specifyVersion = "",
+		privateApiKey = "",
 	): Promise<ReleaseFiles> {
 		// check if the repository is private
-		const isPrivate = await isPrivateRepo(repositoryPath, this.plugin.settings.debuggingMode, this.plugin.settings.personalAccessToken);
+		const isPrivate = await isPrivateRepo(repositoryPath, this.plugin.settings.debuggingMode, privateApiKey);
 
 		// Get the latest release from the repository
 		const release: Release | null = await grabReleaseFromRepository(
@@ -153,7 +175,7 @@ export default class BetaPlugins {
 			getManifest,
 			this.plugin.settings.debuggingMode,
 			isPrivate,
-			this.plugin.settings.personalAccessToken,
+			privateApiKey || this.plugin.settings.personalAccessToken,
 		);
 
 		if (!release) {
@@ -171,7 +193,7 @@ export default class BetaPlugins {
 				"main.js",
 				this.plugin.settings.debuggingMode,
 				isPrivate,
-				this.plugin.settings.personalAccessToken,
+				privateApiKey || this.plugin.settings.personalAccessToken,
 			),
 			manifest: reallyGetManifestOrNot
 				? await grabReleaseFileFromRepository(
@@ -179,7 +201,7 @@ export default class BetaPlugins {
 						"manifest.json",
 						this.plugin.settings.debuggingMode,
 						isPrivate,
-						this.plugin.settings.personalAccessToken,
+						privateApiKey || this.plugin.settings.personalAccessToken,
 					)
 				: "",
 			styles: await grabReleaseFileFromRepository(
@@ -187,7 +209,7 @@ export default class BetaPlugins {
 				"styles.css",
 				this.plugin.settings.debuggingMode,
 				isPrivate,
-				this.plugin.settings.personalAccessToken,
+				privateApiKey || this.plugin.settings.personalAccessToken,
 			),
 		};
 	}
@@ -231,6 +253,7 @@ export default class BetaPlugins {
 		specifyVersion = "",
 		forceReinstall = false,
 		enableAfterInstall = this.plugin.settings.enableAfterInstall,
+		privateApiKey = "",
 	): Promise<boolean> {
 		if (this.plugin.settings.debuggingMode)
 			console.log(
@@ -242,14 +265,15 @@ export default class BetaPlugins {
 				specifyVersion,
 				forceReinstall,
 				enableAfterInstall,
+				privateApiKey ? "private" : "public",
 			);
 
 		const noticeTimeout = 10;
 		// attempt to get manifest-beta.json
-		let primaryManifest = await this.validateRepository(repositoryPath, true, false, specifyVersion);
+		let primaryManifest = await this.validateRepository(repositoryPath, true, false, specifyVersion, privateApiKey);
 		const usingBetaManifest: boolean = !!primaryManifest;
 		// attempt to get manifest.json
-		if (!usingBetaManifest) primaryManifest = await this.validateRepository(repositoryPath, false, true, specifyVersion);
+		if (!usingBetaManifest) primaryManifest = await this.validateRepository(repositoryPath, false, true, specifyVersion, privateApiKey);
 
 		if (primaryManifest === null) {
 			const msg = `${repositoryPath}\nA manifest.json file does not exist in the latest release of the repository. This plugin cannot be installed.`;
@@ -282,7 +306,7 @@ export default class BetaPlugins {
 		}
 
 		const getRelease = async () => {
-			const rFiles = await this.getAllReleaseFiles(repositoryPath, primaryManifest, usingBetaManifest, specifyVersion);
+			const rFiles = await this.getAllReleaseFiles(repositoryPath, primaryManifest, usingBetaManifest, specifyVersion, privateApiKey);
 
 			console.log("rFiles", rFiles);
 			// if beta, use that manifest, or if there is no manifest in release, use the primaryManifest
@@ -303,7 +327,7 @@ export default class BetaPlugins {
 			const releaseFiles = await getRelease();
 			if (releaseFiles === null) return false;
 			await this.writeReleaseFilesToPluginFolder(primaryManifest.id, releaseFiles);
-			if (!forceReinstall) addBetaPluginToList(this.plugin, repositoryPath, specifyVersion);
+			if (!forceReinstall) addBetaPluginToList(this.plugin, repositoryPath, specifyVersion, privateApiKey);
 			if (enableAfterInstall) {
 				const { plugins } = this.plugin.app;
 				const pluginTargetFolderPath = normalizePath(`${plugins.getPluginFolder()}/${primaryManifest.id}`);
@@ -335,7 +359,7 @@ export default class BetaPlugins {
 			} catch (e) {
 				if ((e as ErrnoType).errno === -4058 || (e as ErrnoType).errno === -2) {
 					// file does not exist, try installing the plugin
-					await this.addPlugin(repositoryPath, false, usingBetaManifest, false, specifyVersion);
+					await this.addPlugin(repositoryPath, false, usingBetaManifest, false, specifyVersion, false, enableAfterInstall, privateApiKey);
 					// even though failed, return true since install will be attempted
 					return true;
 				}

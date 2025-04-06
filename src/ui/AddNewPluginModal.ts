@@ -1,5 +1,6 @@
-import { Modal, Setting, type TextComponent } from "obsidian";
+import { ButtonComponent, Modal, Setting, type TextComponent } from "obsidian";
 import { type ReleaseVersion, fetchReleaseVersions } from "src/features/githubUtils";
+import { createLink } from "src/utils/utils";
 import type BetaPlugins from "../features/BetaPlugins";
 import type BratPlugin from "../main";
 import { existBetaPluginInList } from "../settings";
@@ -18,17 +19,27 @@ export default class AddNewPluginModal extends Modal {
 	enableAfterInstall: boolean;
 	version: string;
 	versionSetting: Setting | null;
-	addPluginButton: HTMLButtonElement | null;
+	addPluginButton: ButtonComponent | null;
+	privateApiKey: string;
 
-	constructor(plugin: BratPlugin, betaPlugins: BetaPlugins, openSettingsTabAfterwards = false, useFrozenVersion = false, prefillRepo = "") {
+	constructor(
+		plugin: BratPlugin,
+		betaPlugins: BetaPlugins,
+		openSettingsTabAfterwards = false,
+		useFrozenVersion = false,
+		prefillRepo = "",
+		prefillVersion = "",
+		prefillPrivateApiKey = "",
+	) {
 		super(plugin.app);
 		this.plugin = plugin;
 		this.betaPlugins = betaPlugins;
 		this.address = prefillRepo;
+		this.version = prefillVersion;
+		this.privateApiKey = prefillPrivateApiKey;
 		this.openSettingsTabAfterwards = openSettingsTabAfterwards;
 		this.useFrozenVersion = useFrozenVersion;
 		this.enableAfterInstall = plugin.settings.enableAfterInstall;
-		this.version = "";
 		this.versionSetting = null;
 		this.addPluginButton = null;
 	}
@@ -42,6 +53,9 @@ export default class AddNewPluginModal extends Modal {
 		const existingFrozenPlugin = this.plugin.settings.pluginSubListFrozenVersion.find((p) => p.repo === scrubbedAddress);
 		if (existingFrozenPlugin) {
 			existingFrozenPlugin.version = this.version;
+			if (this.privateApiKey) {
+				existingFrozenPlugin.token = this.privateApiKey;
+			}
 			await this.plugin.saveSettings();
 			const result = await this.betaPlugins.addPlugin(
 				scrubbedAddress,
@@ -51,6 +65,7 @@ export default class AddNewPluginModal extends Modal {
 				this.version,
 				true, // Force reinstall
 				this.enableAfterInstall,
+				this.privateApiKey,
 			);
 			if (result) {
 				this.close();
@@ -63,27 +78,37 @@ export default class AddNewPluginModal extends Modal {
 			return;
 		}
 
-		const result = await this.betaPlugins.addPlugin(scrubbedAddress, false, false, false, this.version, false, this.enableAfterInstall);
+		const result = await this.betaPlugins.addPlugin(
+			scrubbedAddress,
+			false,
+			false,
+			false,
+			this.version,
+			false,
+			this.enableAfterInstall,
+			this.privateApiKey,
+		);
 		if (result) {
 			this.close();
 		}
 	}
 
-	private updateVersionDropdown(settingEl: Setting, versions: ReleaseVersion[]): void {
+	private updateVersionDropdown(settingEl: Setting, versions: ReleaseVersion[], selected = ""): void {
 		settingEl.clear();
 		settingEl.addDropdown((dropdown) => {
 			dropdown.addOption("", "Select a version");
 			for (const version of versions) {
 				dropdown.addOption(version.version, `${version.version} ${version.prerelease ? "(Prerelease)" : ""}`);
 			}
+			dropdown.setValue(selected);
 			dropdown.onChange((value) => {
 				this.version = value;
 				// Enable add plugin button if version is selected
 				if (this.addPluginButton) {
 					if (this.version !== "") {
-						this.addPluginButton.disabled = false;
+						this.addPluginButton.setDisabled(false);
 					} else {
-						this.addPluginButton.disabled = true;
+						this.addPluginButton.setDisabled(true);
 					}
 				}
 			});
@@ -99,56 +124,86 @@ export default class AddNewPluginModal extends Modal {
 					: "Github repository for frozen beta plugin:"
 				: "Github repository for beta plugin:",
 		});
+
 		this.contentEl.createEl("form", {}, (formEl) => {
 			formEl.addClass("brat-modal");
-			new Setting(formEl).addText((textEl) => {
-				textEl.setPlaceholder("Repository (example: https://github.com/GitubUserName/repository-name)");
-				textEl.setValue(this.address);
 
-				// If we have a prefilled repo, trigger the version dropdown update
-				if (this.address) {
-					textEl.setDisabled(true); // Disable the input field
-					window.setTimeout(async () => {
-						await this.updateVersionDropwdown(textEl);
-					}, 100);
-				}
+			if (this.address && this.useFrozenVersion) {
+				// Show as text for prefilled frozen version
+				this.contentEl.createDiv("repository-setting", (repoEl) => {
+					repoEl.addClass("brat-modal");
+					repoEl.createSpan({ text: createLink(this.address) });
+				});
+				this.contentEl.createEl("hr", { cls: "divider" });
+			}
+			if (!this.address || !this.useFrozenVersion) {
+				new Setting(formEl).setClass("repository-setting").then((setting) => {
+					// Show as input field for new plugins
+					setting.addText((textEl) => {
+						textEl.setPlaceholder("Repository (example: https://github.com/GitubUserName/repository-name)");
+						textEl.setValue(this.address);
+						textEl.onChange((value) => {
+							this.address = value.trim();
+							if (this.useFrozenVersion && (!this.address || !this.isValidGitHubRepo(this.address))) {
+								// Disable version dropdown if useFrozenVersion is true and address is empty
+								if (this.versionSetting) {
+									this.updateVersionDropdown(this.versionSetting, []);
+									this.versionSetting.settingEl.classList.add("disabled-setting");
+									this.versionSetting.setDisabled(true);
+									textEl.inputEl.classList.remove("valid-repository");
+									textEl.inputEl.classList.remove("invalid-repository");
+								}
+							}
 
-				textEl.onChange((value) => {
-					this.address = value.trim();
+							// If the GitHub Repository matches the GitHub pattern, enable the "Add Plugin"
+							if (!this.useFrozenVersion) {
+								if (this.isValidGitHubRepo(this.address)) this.addPluginButton?.setDisabled(false);
+								else this.addPluginButton?.setDisabled(true);
+							}
+						});
 
-					// Disable version dropdown if useFrozenVersion is true and address is empty
-					if (this.useFrozenVersion && this.address === "") {
-						if (this.versionSetting) {
-							this.updateVersionDropdown(this.versionSetting, []);
-							this.versionSetting.settingEl.classList.add("disabled-setting");
-							this.versionSetting.setDisabled(true);
-							textEl.inputEl.classList.remove("valid-repository");
-							textEl.inputEl.classList.remove("invalid-repository");
+						textEl.inputEl.addEventListener("keydown", async (e: KeyboardEvent) => {
+							if (e.key === "Enter") {
+								if (this.address && ((this.useFrozenVersion && this.version !== "") || !this.useFrozenVersion)) {
+									e.preventDefault();
+									void this.submitForm();
+								}
+
+								// Populate version dropdown
+								await this.updateVersionDropwdownEl(this.version, textEl);
+							}
+						});
+
+						// Update version dropdown when input loses focus
+						if (this.useFrozenVersion) {
+							textEl.inputEl.addEventListener("blur", async () => {
+								await this.updateVersionDropwdownEl(this.version, textEl);
+							});
 						}
-					}
+						textEl.inputEl.style.width = "100%";
+					});
 				});
-				textEl.inputEl.addEventListener("keydown", async (e: KeyboardEvent) => {
-					if (e.key === "Enter") {
-						if (this.address !== " " && ((this.useFrozenVersion && this.version !== "") || !this.useFrozenVersion)) {
-							e.preventDefault();
-							void this.submitForm();
-						}
-
-						// Populate version dropdown
-						await this.updateVersionDropwdown(textEl);
-					}
-				});
-
-				// Update version dropdown when input loses focus
-				textEl.inputEl.addEventListener("blur", async () => {
-					await this.updateVersionDropwdown(textEl);
-				});
-				textEl.inputEl.style.width = "100%";
-			});
-
+			}
 			if (this.useFrozenVersion) {
+				// First add API key input for private repositories
+				new Setting(formEl).setClass("apikey-setting").addText((textEl) => {
+					textEl
+						.setPlaceholder("GitHub API key for private repository (optional)")
+						.setValue(this.privateApiKey)
+						.onChange(async (value) => {
+							this.privateApiKey = value.trim();
+							// Update version dropdown when API key changes
+							if (this.address) {
+								await this.updateVersionDropwdownEl(this.version, textEl);
+							}
+						});
+					textEl.inputEl.type = "password";
+					textEl.inputEl.style.width = "100%";
+				});
+
+				// Then add version dropdown
 				this.versionSetting = new Setting(formEl).setClass("version-setting").setClass("disabled-setting");
-				this.updateVersionDropdown(this.versionSetting, []);
+				this.updateVersionDropdown(this.versionSetting, [], this.version);
 				this.versionSetting.setDisabled(true);
 			}
 
@@ -174,14 +229,22 @@ export default class AddNewPluginModal extends Modal {
 				buttonContainerEl.createEl("button", { attr: { type: "button" }, text: "Never mind" }).addEventListener("click", () => {
 					this.close();
 				});
-				this.addPluginButton = buttonContainerEl.createEl("button", {
-					attr: { type: "submit" },
-					cls: "mod-cta",
-					text: this.useFrozenVersion ? (this.address ? "Change Version" : "Add Plugin") : "Add Plugin",
-				});
+				this.addPluginButton = new ButtonComponent(buttonContainerEl)
+					.setButtonText(this.useFrozenVersion ? (this.address ? "Change Version" : "Add Plugin") : "Add Plugin")
+					.setClass("mod-cta")
+					.onClick((e: Event) => {
+						e.preventDefault();
+						if (this.address !== "") {
+							if ((this.useFrozenVersion && this.version !== "") || !this.useFrozenVersion) {
+								this.addPluginButton?.setDisabled(true);
+
+								void this.submitForm();
+							}
+						}
+					});
 
 				// Disable "Add Plugin" if adding a frozen version only
-				if (this.useFrozenVersion) this.addPluginButton.disabled = true;
+				if (this.useFrozenVersion || this.address === "") this.addPluginButton?.setDisabled(true);
 			});
 
 			const newDiv = formEl.createDiv();
@@ -205,22 +268,34 @@ export default class AddNewPluginModal extends Modal {
 				e.preventDefault();
 				if (this.address !== "") {
 					if ((this.useFrozenVersion && this.version !== "") || !this.useFrozenVersion) {
+						this.addPluginButton?.setDisabled(true);
 						void this.submitForm();
 					}
 				}
 			});
 		});
+
+		if (this.address) {
+			// If we have a prefilled repo, trigger the version dropdown update
+			window.setTimeout(async () => {
+				await this.updateVersionDropwdownEl(this.version);
+			}, 100);
+		}
 	}
 
 	/**
 	 * Update the version dropdown
-	 * @param addressInputEl - The address input element (Only needed if we keep the color-coding of the address input)
+	 * @param selectedVersion - The version to select in the dropdown
+	 * @param validateInputEl - The address input element (Only needed if we keep the color-coding of the address input)
 	 */
-	private async updateVersionDropwdown(addressInputEl: TextComponent) {
+	private async updateVersionDropwdownEl(selectedVersion = "", validateInputEl?: TextComponent) {
+		if (this.plugin.settings.debuggingMode) {
+			console.log(`[BRAT] Updating version dropdown for ${this.address} with selected version ${selectedVersion}`);
+		}
 		if (this.useFrozenVersion && this.address) {
 			// Clear the version dropdown
 			if (this.versionSetting) {
-				this.updateVersionDropdown(this.versionSetting, []);
+				this.updateVersionDropdown(this.versionSetting, [], selectedVersion);
 			}
 			let scrubbedAddress = this.address.replace("https://github.com/", "");
 			if (scrubbedAddress.endsWith(".git")) {
@@ -229,24 +304,24 @@ export default class AddNewPluginModal extends Modal {
 			const versions = await fetchReleaseVersions(
 				scrubbedAddress,
 				this.plugin.settings.debuggingMode,
-				this.plugin.settings.personalAccessToken,
+				this.privateApiKey || this.plugin.settings.personalAccessToken,
 			);
 
 			if (versions && versions.length > 0) {
 				// Add valid-repository class
-				addressInputEl.inputEl.classList.remove("invalid-repository");
-				addressInputEl.inputEl.classList.add("valid-repository");
+				validateInputEl?.inputEl.classList.remove("invalid-repository");
+				validateInputEl?.inputEl.classList.add("valid-repository");
 
 				if (this.versionSetting) {
 					this.versionSetting.settingEl.classList.remove("disabled-setting");
 					this.versionSetting.setDisabled(false);
 					// Add new dropdown to existing version setting
-					this.updateVersionDropdown(this.versionSetting, versions);
+					this.updateVersionDropdown(this.versionSetting, versions, selectedVersion);
 				}
 			} else {
 				// Add invalid-repository class
-				addressInputEl.inputEl.classList.remove("valid-repository");
-				addressInputEl.inputEl.classList.add("invalid-repository");
+				validateInputEl?.inputEl.classList.remove("valid-repository");
+				validateInputEl?.inputEl.classList.add("invalid-repository");
 
 				if (this.versionSetting) {
 					this.versionSetting.settingEl.classList.add("disabled-setting");
@@ -266,5 +341,17 @@ export default class AddNewPluginModal extends Modal {
 			// @ts-ignore
 			this.plugin.app.setting.openTabById(this.plugin.APP_ID);
 		}
+	}
+
+	private isValidGitHubRepo(address: string): boolean {
+		// Remove trailing .git if present
+		const cleanAddress = address.trim().replace(/\.git$/, "");
+
+		// Match either format:
+		// 1. user/repo
+		// 2. https://github.com/user/repo
+		const githubPattern = /^(?:https:\/\/github\.com\/)?([a-zA-Z0-9._-]+)\/([a-zA-Z0-9._-]+)$/;
+
+		return githubPattern.test(cleanAddress);
 	}
 }

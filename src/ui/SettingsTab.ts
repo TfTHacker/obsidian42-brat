@@ -2,21 +2,9 @@ import type { App, ButtonComponent, ToggleComponent } from "obsidian";
 import { PluginSettingTab, Setting } from "obsidian";
 import { themeDelete } from "../features/themes";
 import type BratPlugin from "../main";
+import { createLink } from "../utils/utils";
 import AddNewTheme from "./AddNewTheme";
 import { promotionalLinks } from "./Promotional";
-
-const createLink = (githubResource: string, optionalText?: string): DocumentFragment => {
-	const newLink = new DocumentFragment();
-	const linkElement = document.createElement("a");
-	linkElement.textContent = githubResource;
-	linkElement.href = `https://github.com/${githubResource}`;
-	newLink.appendChild(linkElement);
-	if (optionalText) {
-		const textNode = document.createTextNode(optionalText);
-		newLink.appendChild(textNode);
-	}
-	return newLink;
-};
 
 export class BratSettingsTab extends PluginSettingTab {
 	plugin: BratPlugin;
@@ -128,7 +116,7 @@ export class BratSettingsTab extends PluginSettingTab {
 					btn.setTooltip("Change version");
 					btn.onClick(() => {
 						this.plugin.app.setting.close();
-						this.plugin.betaPlugins.displayAddNewPluginModal(true, true, bp.repo);
+						this.plugin.betaPlugins.displayAddNewPluginModal(true, true, bp.repo, bp.version, bp.token);
 					});
 				})
 				.addButton((btn: ButtonComponent) => {

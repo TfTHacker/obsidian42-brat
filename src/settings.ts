@@ -8,8 +8,9 @@ export interface ThemeInforamtion {
 }
 
 export interface PluginFrozenVersion {
-	repo: string;
-	version: string;
+	repo: string; // path to the GitHub repository
+	version: string; // version of the plugin
+	token?: string; // optional private API key
 }
 
 export interface Settings {
@@ -49,7 +50,7 @@ export const DEFAULT_SETTINGS: Settings = {
  * @param  repositoryPath - path to the GitHub repository
  * @param  specifyVersion  - if the plugin needs to stay at the frozen version, we need to also record the version
  */
-export function addBetaPluginToList(plugin: BratPlugin, repositoryPath: string, specifyVersion = ""): void {
+export function addBetaPluginToList(plugin: BratPlugin, repositoryPath: string, specifyVersion = "", privateApiKey = ""): void {
 	let save = false;
 	if (!plugin.settings.pluginList.contains(repositoryPath)) {
 		plugin.settings.pluginList.unshift(repositoryPath);
@@ -59,6 +60,7 @@ export function addBetaPluginToList(plugin: BratPlugin, repositoryPath: string, 
 		plugin.settings.pluginSubListFrozenVersion.unshift({
 			repo: repositoryPath,
 			version: specifyVersion,
+			token: privateApiKey ? privateApiKey : undefined,
 		});
 		save = true;
 	}
