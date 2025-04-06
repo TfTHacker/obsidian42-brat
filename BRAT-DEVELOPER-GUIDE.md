@@ -56,7 +56,8 @@ BRAT examines your repository's GitHub releases. For installation and updates, i
 
 This approach makes BRAT more robust as it uses GitHub releases as the source of truth.
 
->[!IMPORTANT] Important note about versioning
+>[!IMPORTANT]
+>Important note about versioning
 >Obsidian does not support the full `semver` spec. If you use `-preview` and other branches to build beta versions of your plugin, Obsidian will not pick up the final release automatically unless the version number is bumped at least a minor release number higher than the beta version. In these cases, it is best to use BRAT to upgrade from to the latest release.
 >
 >| Semantic Versions | |
