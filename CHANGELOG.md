@@ -9,26 +9,19 @@
 
 ## 1.1.0
 
-- feat: ✨ use manifest from latest valid github release for BRAT in <https://github.com/TfTHacker/obsidian42-brat/pull/93>
-- feat: ✨ fetch available versions into dropdown when adding frozen version in <https://github.com/TfTHacker/obsidian42-brat/pull/96>
-- feat: ✨ allow user to update frozen version
+- feat: ✨ use manifest from github releases instead of repository root
+- feat: ✨ fetch available versions into dropdown when adding frozen version
+- feat: ✨ allow user to update frozen version plugins
 
-### For developers: changes with respect to using `manifest-beta.json`
+### Changes to Plugin Installation Process
 
-By using the github releases instead of `manifest-beta.json` the plugin will:
+With v1.1.0, BRAT now uses GitHub releases as the source of truth for plugin installations:
 
-- download a specific frozen version if specified (independently of whether it is defined as “pre-release” or not), or
-- download the latest version available as a release *or* pre-releasae, giving priority to the highest version number according to the semantic version rules (see below)
+- For frozen versions: Downloads the specified release version
+- For latest versions: Downloads the latest release or pre-release, using semantic versioning
+- Fetches `manifest.json` directly from release assets
 
-Specifically, it will fetch the `manifest.json` from the **latest (or specified) (pre-)release** package in the repository to install and update a plugin.
-
-This makes BRAT independent of the version numbering in the repository root, and also allows developers to use `semantic-release` and `beta` branches to develop pre-releases that all work with BRAT.
-
-For plugin devs, this means that `manifest-beta.json` is not strictly necessary anymore, although having it in a repository doesn't hurt at all and will keep your beta version backwards compatible with older BRAT versions.
-
-As far as I understand, Obsidian and plugins like the Obsidian plugin tracker currently look at the master `manifest.json` in the default branch of a plugin repository when updating plugins, which is also compatible with this change. If a developer releases a “beta” version as an independent, but “full” release in his repository (e.g. without updating the `manifest.json` in the repository), BRAT will also pick it up independently of the version number in the master `mainfest.json` of the repository.
-
-It will also make BRAT more robust, as it will always use the true release list as its source of truth.
+Note: `manifest-beta.json` is still supported for backwards compatibility but is no longer required for beta testing. Use GitHub's release system instead.
 
 **Full Changelog**: <https://github.com/TfTHacker/obsidian42-brat/compare/1.0.6...1.1.0>
 
