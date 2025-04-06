@@ -7,16 +7,14 @@ export interface ReleaseVersion {
 	prerelease: boolean; // Indicates if the release is a pre-release
 }
 
-const GITHUB_RAW_USERCONTENT_PATH = "https://raw.githubusercontent.com/";
-
-export const isPrivateRepo = async (repository: string, debugLogging = true, personalAccessToken = ""): Promise<boolean> => {
+export const isPrivateRepo = async (repository: string, debugLogging = true, accessToken = ""): Promise<boolean> => {
 	const URL = `https://api.github.com/repos/${repository}`;
 	try {
 		const response = await request({
 			url: URL,
-			headers: personalAccessToken
+			headers: accessToken
 				? {
-						Authorization: `Token ${personalAccessToken}`,
+						Authorization: `Token ${accessToken}`,
 					}
 				: {},
 		});
@@ -34,18 +32,16 @@ export const isPrivateRepo = async (repository: string, debugLogging = true, per
  * @param repository - path to GitHub repository in format USERNAME/repository
  * @returns array of version strings, or null if error
  */
-export const fetchReleaseVersions = async (
-	repository: string,
-	debugLogging = true,
-	personalAccessToken = "",
-): Promise<ReleaseVersion[] | null> => {
+export const fetchReleaseVersions = async (repository: string, debugLogging = true, accessToken = ""): Promise<ReleaseVersion[] | null> => {
 	const URL = `https://api.github.com/repos/${repository}/releases`;
 	try {
 		const response = await request({
 			url: URL,
-			headers: {
-				Authorization: `Token ${personalAccessToken}`,
-			},
+			headers: accessToken
+				? {
+						Authorization: `Token ${accessToken}`,
+					}
+				: {},
 		});
 		const data = await JSON.parse(response);
 		return data.map((release: { tag_name: string; prerelease: boolean }) => ({
