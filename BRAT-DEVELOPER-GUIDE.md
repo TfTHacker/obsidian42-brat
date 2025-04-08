@@ -74,6 +74,16 @@ This approach makes BRAT more robust as it uses GitHub releases as the source of
 >| `1.0.1` | 5 | Not picked up by Obsidian's update mechanism |
 >| **`1.0.2`** | 6 | **Picked up by Obsidian's update mechanism** |
 
+## GitHub API Rate Limits
+
+If you are a plugin developer yourself and/or do a lot of installing and reinstalling of plugins via BRAT, you might hit [GitHub API rate limits](https://docs.github.com/en/rest/using-the-rest-api/rate-limits-for-the-rest-api?apiVersion=2022-11-28#primary-rate-limit-for-unauthenticated-users) (60 request per hour for anonymous requests). You avoid this by adding a personal access token (PAT) to BRAT which increases the limit to 5000 requests per hour. You will need a read only [PAT](https://github.com/settings/personal-access-tokens/) with "Read-only access to public repositories" and "Read access to code, metadata, and repository custom properties".
+
+![image](https://github.com/user-attachments/assets/38a0fef5-7fea-4dd1-9e14-c0e53c536416)
+
+![image](https://github.com/user-attachments/assets/085bce05-a58c-4936-b56a-45244e05280f)
+
+Once created, add this PAT on BRAT's main settings page. A future update will improve the error handling in case API limits are hit.
+
 ## Sample Plugin Repository
 
 For an example of how to setup your repository for use with BRAT see: <https://github.com/TfTHacker/obsidian-brat-example-plugin>
