@@ -3,6 +3,7 @@ export function createLink(githubResource: string, optionalText?: string): Docum
 	const linkElement = document.createElement("a");
 	linkElement.textContent = githubResource;
 	linkElement.href = `https://github.com/${githubResource}`;
+	linkElement.target = "_blank";
 	newLink.appendChild(linkElement);
 	if (optionalText) {
 		const textNode = document.createTextNode(optionalText);
