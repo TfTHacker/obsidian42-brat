@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.1.3
+
+- perf: 🚸 open blank target window when creating link elements
+- fix: 🐛 include private access token for individual repository  in update check
+- fix: 🐛 fix update command suggester for refactored plugin list
+- fix: 🥅 catch and inform user about GitHub Rate Limits
+- docs: 🧑‍💻 add section on github api rate limits and PAT's
+
 ## 1.1.2
 
 - feat: ✨ Unify regular and frozen plugins into one list (tracking `latest` or freezing a specific version)
