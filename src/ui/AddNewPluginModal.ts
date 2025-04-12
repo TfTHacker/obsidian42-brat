@@ -53,10 +53,10 @@ export default class AddNewPluginModal extends Modal {
 		// If it's an existing frozen version plugin, update it instead of checking for duplicates
 		const existingFrozenPlugin = this.plugin.settings.pluginSubListFrozenVersion.find((p) => p.repo === scrubbedAddress);
 		if (existingFrozenPlugin) {
+			// Update version and token (also clear token if empty)
 			existingFrozenPlugin.version = this.version;
-			if (this.privateApiKey) {
-				existingFrozenPlugin.token = this.privateApiKey;
-			}
+			existingFrozenPlugin.token = this.privateApiKey || "";
+
 			await this.plugin.saveSettings();
 			const result = await this.betaPlugins.addPlugin(
 				scrubbedAddress,
