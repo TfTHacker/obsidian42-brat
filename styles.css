@@ -8,6 +8,10 @@
 .brat-modal .invalid-repository {
   border-color: var(--color-red) !important;
 }
+.brat-modal .validation-error {
+  border-color: var(--color-orange) !important;
+}
+
 .brat-modal .disabled-setting {
   opacity: 0.5;
 }

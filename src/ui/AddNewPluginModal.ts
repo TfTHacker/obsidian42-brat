@@ -1,5 +1,6 @@
 import { ButtonComponent, Modal, Setting, type TextComponent } from "obsidian";
 import { type ReleaseVersion, fetchReleaseVersions } from "src/features/githubUtils";
+import { GHRateLimitError } from "src/utils/GHRateLimitError";
 import { createLink } from "src/utils/utils";
 import type BetaPlugins from "../features/BetaPlugins";
 import type BratPlugin from "../main";
@@ -15,7 +16,7 @@ export default class AddNewPluginModal extends Modal {
 	betaPlugins: BetaPlugins;
 	address: string;
 	openSettingsTabAfterwards: boolean;
-	readonly useFrozenVersion: boolean;
+	readonly trackFixedVersion: boolean;
 	enableAfterInstall: boolean;
 	version: string;
 	versionSetting: Setting | null;
@@ -38,7 +39,7 @@ export default class AddNewPluginModal extends Modal {
 		this.version = prefillVersion;
 		this.privateApiKey = prefillPrivateApiKey;
 		this.openSettingsTabAfterwards = openSettingsTabAfterwards;
-		this.useFrozenVersion = useFrozenVersion;
+		this.trackFixedVersion = useFrozenVersion;
 		this.enableAfterInstall = plugin.settings.enableAfterInstall;
 		this.versionSetting = null;
 		this.addPluginButton = null;
@@ -129,55 +130,63 @@ export default class AddNewPluginModal extends Modal {
 		this.contentEl.createEl("form", {}, (formEl) => {
 			formEl.addClass("brat-modal");
 
-			if (!this.address || !this.useFrozenVersion) {
-				new Setting(formEl).setClass("repository-setting").then((setting) => {
+			if (!this.address || !this.trackFixedVersion) {
+				const repoSetting = new Setting(formEl).setClass("repository-setting");
+
+				// Add validation status element
+				const validationStatusEl = repoSetting.settingEl.createDiv("validation-status");
+				validationStatusEl.style.color = "var(--text-error)";
+				validationStatusEl.style.marginTop = "6px";
+				validationStatusEl.style.fontSize = "0.8em";
+
+				repoSetting.then((setting) => {
 					// Show as input field for new plugins
-					setting.addText((textEl) => {
-						textEl.setPlaceholder("Repository (example: https://github.com/GitubUserName/repository-name)");
-						textEl.setValue(this.address);
-						textEl.onChange((value) => {
+					setting.addText((repositoryAddressEl) => {
+						repositoryAddressEl.setPlaceholder("Repository (example: https://github.com/GitubUserName/repository-name)");
+						repositoryAddressEl.setValue(this.address);
+						repositoryAddressEl.onChange((value) => {
 							this.address = value.trim();
-							if (this.useFrozenVersion && (!this.address || !this.isValidGitHubRepo(this.address))) {
+							if (this.trackFixedVersion && (!this.address || !this.isGitHubRepositoryMatch(this.address))) {
 								// Disable version dropdown if useFrozenVersion is true and address is empty
 								if (this.versionSetting) {
 									this.updateVersionDropdown(this.versionSetting, []);
 									this.versionSetting.settingEl.classList.add("disabled-setting");
 									this.versionSetting.setDisabled(true);
-									textEl.inputEl.classList.remove("valid-repository");
-									textEl.inputEl.classList.remove("invalid-repository");
+									repositoryAddressEl.inputEl.classList.remove("valid-repository");
+									repositoryAddressEl.inputEl.classList.remove("invalid-repository");
 								}
 							}
 
 							// If the GitHub Repository matches the GitHub pattern, enable the "Add Plugin"
-							if (!this.useFrozenVersion) {
-								if (this.isValidGitHubRepo(this.address)) this.addPluginButton?.setDisabled(false);
+							if (!this.trackFixedVersion) {
+								if (this.isGitHubRepositoryMatch(this.address)) this.addPluginButton?.setDisabled(false);
 								else this.addPluginButton?.setDisabled(true);
 							}
 						});
 
-						textEl.inputEl.addEventListener("keydown", async (e: KeyboardEvent) => {
+						repositoryAddressEl.inputEl.addEventListener("keydown", async (e: KeyboardEvent) => {
 							if (e.key === "Enter") {
-								if (this.address && ((this.useFrozenVersion && this.version !== "") || !this.useFrozenVersion)) {
+								if (this.address && ((this.trackFixedVersion && this.version !== "") || !this.trackFixedVersion)) {
 									e.preventDefault();
 									void this.submitForm();
 								}
 
 								// Populate version dropdown
-								await this.updateVersionDropwdownEl(this.version, textEl);
+								await this.updateRepositoryVersionInfo(this.version, repositoryAddressEl);
 							}
 						});
 
 						// Update version dropdown when input loses focus
-						if (this.useFrozenVersion) {
-							textEl.inputEl.addEventListener("blur", async () => {
-								await this.updateVersionDropwdownEl(this.version, textEl);
+						if (this.trackFixedVersion) {
+							repositoryAddressEl.inputEl.addEventListener("blur", async () => {
+								await this.updateRepositoryVersionInfo(this.version, repositoryAddressEl, validationStatusEl);
 							});
 						}
-						textEl.inputEl.style.width = "100%";
+						repositoryAddressEl.inputEl.style.width = "100%";
 					});
 				});
 			}
-			if (this.useFrozenVersion) {
+			if (this.trackFixedVersion) {
 				new Setting(formEl).setClass("api-setting").addText((textEl) => {
 					textEl
 						.setPlaceholder("GitHub API key for private repository (optional)")
@@ -186,7 +195,7 @@ export default class AddNewPluginModal extends Modal {
 							this.privateApiKey = value.trim();
 							// Update version dropdown when API key changes
 							if (this.address) {
-								await this.updateVersionDropwdownEl(this.version, textEl);
+								await this.updateRepositoryVersionInfo(this.version, textEl);
 							}
 						});
 					textEl.inputEl.type = "password";
@@ -222,12 +231,12 @@ export default class AddNewPluginModal extends Modal {
 					this.close();
 				});
 				this.addPluginButton = new ButtonComponent(buttonContainerEl)
-					.setButtonText(this.useFrozenVersion ? (this.address ? "Change Version" : "Add Plugin") : "Add Plugin")
+					.setButtonText(this.trackFixedVersion ? (this.address ? "Change Version" : "Add Plugin") : "Add Plugin")
 					.setClass("mod-cta")
 					.onClick((e: Event) => {
 						e.preventDefault();
 						if (this.address !== "") {
-							if ((this.useFrozenVersion && this.version !== "") || !this.useFrozenVersion) {
+							if ((this.trackFixedVersion && this.version !== "") || !this.trackFixedVersion) {
 								this.addPluginButton?.setDisabled(true);
 
 								void this.submitForm();
@@ -236,7 +245,7 @@ export default class AddNewPluginModal extends Modal {
 					});
 
 				// Disable "Add Plugin" if adding a frozen version only
-				if (this.useFrozenVersion || this.address === "") this.addPluginButton?.setDisabled(true);
+				if (this.trackFixedVersion || this.address === "") this.addPluginButton?.setDisabled(true);
 			});
 
 			const newDiv = formEl.createDiv();
@@ -259,7 +268,7 @@ export default class AddNewPluginModal extends Modal {
 			formEl.addEventListener("submit", (e: Event) => {
 				e.preventDefault();
 				if (this.address !== "") {
-					if ((this.useFrozenVersion && this.version !== "") || !this.useFrozenVersion) {
+					if ((this.trackFixedVersion && this.version !== "") || !this.trackFixedVersion) {
 						this.addPluginButton?.setDisabled(true);
 						void this.submitForm();
 					}
@@ -270,29 +279,39 @@ export default class AddNewPluginModal extends Modal {
 		if (this.address) {
 			// If we have a prefilled repo, trigger the version dropdown update
 			window.setTimeout(async () => {
-				await this.updateVersionDropwdownEl(this.version);
+				await this.updateRepositoryVersionInfo(this.version);
 			}, 100);
 		}
 	}
 
 	/**
-	 * Update the version dropdown
+	 * Update the repository validation and version dropdown
 	 * @param selectedVersion - The version to select in the dropdown
-	 * @param validateInputEl - The address input element (Only needed if we keep the color-coding of the address input)
+	 * @param validateInputEl - The address input element
+	 * @param validationStatusEl - The error element (used for errors, incl. GitHub Rate limit)
+	 * @returns {Promise<void>}
 	 */
-	private async updateVersionDropwdownEl(selectedVersion = "", validateInputEl?: TextComponent) {
+	private async updateRepositoryVersionInfo(selectedVersion = "", validateInputEl?: TextComponent, validationStatusEl?: HTMLElement) {
 		if (this.plugin.settings.debuggingMode) {
 			console.log(`[BRAT] Updating version dropdown for ${this.address} with selected version ${selectedVersion}`);
 		}
-		if (this.useFrozenVersion && this.address) {
+
+		if (!this.address) {
+			if (validationStatusEl) {
+				validationStatusEl.setText("Repository address is required.");
+			}
+			return;
+		}
+		if (this.versionSetting && this.trackFixedVersion) {
 			// Clear the version dropdown
-			if (this.versionSetting) {
-				this.updateVersionDropdown(this.versionSetting, [], selectedVersion);
-			}
-			let scrubbedAddress = this.address.replace("https://github.com/", "");
-			if (scrubbedAddress.endsWith(".git")) {
-				scrubbedAddress = scrubbedAddress.slice(0, -4);
-			}
+			this.updateVersionDropdown(this.versionSetting, [], selectedVersion);
+		}
+		let scrubbedAddress = this.address.replace("https://github.com/", "");
+		if (scrubbedAddress.endsWith(".git")) {
+			scrubbedAddress = scrubbedAddress.slice(0, -4);
+		}
+
+		try {
 			const versions = await fetchReleaseVersions(
 				scrubbedAddress,
 				this.plugin.settings.debuggingMode,
@@ -323,6 +342,32 @@ export default class AddNewPluginModal extends Modal {
 					}
 				}
 			}
+		} catch (error) {
+			if (error instanceof GHRateLimitError) {
+				// Add invalid-repository class
+				validateInputEl?.inputEl.classList.remove("valid-repository");
+				validateInputEl?.inputEl.classList.add("validation-error");
+				validationStatusEl?.setText(`GitHub API rate limit exceeded. Try again in ${error.getMinutesToReset()} minutes.`);
+
+				if (this.versionSetting) {
+					this.versionSetting.settingEl.classList.add("disabled-setting");
+					this.versionSetting.setDisabled(true);
+					if (this.addPluginButton) {
+						this.addPluginButton.disabled = true;
+					}
+				}
+
+				toastMessage(
+					this.plugin,
+					`${error.message} Consider adding a personal access token in BRAT settings for higher limits. See documentation for details.`,
+					20,
+					(): void => {
+						window.open("https://github.com/TfTHacker/obsidian42-brat/blob/main/BRAT-DEVELOPER-GUIDE.md#github-api-rate-limits");
+					},
+				);
+
+				// toastMessage(this.plugin, `GitHub API rate limit exceeded. Try again in ${error.getMinutesToReset()} minutes.`, 10);
+			}
 		}
 	}
 
@@ -335,7 +380,7 @@ export default class AddNewPluginModal extends Modal {
 		}
 	}
 
-	private isValidGitHubRepo(address: string): boolean {
+	private isGitHubRepositoryMatch(address: string): boolean {
 		// Remove trailing .git if present
 		const cleanAddress = address.trim().replace(/\.git$/, "");
 

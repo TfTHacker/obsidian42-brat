@@ -1,15 +1,23 @@
 import { compareVersions } from "compare-versions";
-import { request } from "obsidian";
+import { type RequestUrlParam, request } from "obsidian";
+import { GHRateLimitError } from "../utils/GHRateLimitError";
 
 export interface ReleaseVersion {
 	version: string; // The tag name of the release
 	prerelease: boolean; // Indicates if the release is a pre-release
 }
 
+interface GitHubErrorResponse {
+	status: number;
+	headers: {
+		[key: string]: string;
+	};
+}
+
 export const isPrivateRepo = async (repository: string, debugLogging = true, accessToken = ""): Promise<boolean> => {
 	const URL = `https://api.github.com/repos/${repository}`;
 	try {
-		const response = await request({
+		const response = await gitHubRequest({
 			url: URL,
 			headers: accessToken
 				? {
@@ -19,8 +27,12 @@ export const isPrivateRepo = async (repository: string, debugLogging = true, acc
 		});
 		const data = await JSON.parse(response);
 		return data.private;
-	} catch (e) {
-		if (debugLogging) console.log("error in isPrivateRepo", URL, e);
+	} catch (error) {
+		// Special handling for rate limit errors
+		if (error instanceof GHRateLimitError) {
+			throw error; // Rethrow rate limit errors
+		}
+		if (debugLogging) console.log("error in isPrivateRepo", URL, error);
 		return false;
 	}
 };
@@ -34,7 +46,7 @@ export const isPrivateRepo = async (repository: string, debugLogging = true, acc
 export const fetchReleaseVersions = async (repository: string, debugLogging = true, accessToken = ""): Promise<ReleaseVersion[] | null> => {
 	const URL = `https://api.github.com/repos/${repository}/releases`;
 	try {
-		const response = await request({
+		const response = await gitHubRequest({
 			url: URL,
 			headers: accessToken
 				? {
@@ -47,8 +59,13 @@ export const fetchReleaseVersions = async (repository: string, debugLogging = tr
 			version: release.tag_name,
 			prerelease: release.prerelease,
 		}));
-	} catch (e) {
-		if (debugLogging) console.log("error in fetchReleaseVersions", URL, e);
+	} catch (error) {
+		// Special handling for rate limit errors
+		if (error instanceof GHRateLimitError) {
+			throw error; // Rethrow rate limit errors
+		}
+
+		if (debugLogging) console.log("error in fetchReleaseVersions", URL, error);
 		return null;
 	}
 };
@@ -92,6 +109,10 @@ export const grabReleaseFileFromRepository = async (
 		});
 		return download === "Not Found" || download === `{"error":"Not Found"}` ? null : download;
 	} catch (error) {
+		// Special handling for rate limit errors
+		if (error instanceof GHRateLimitError) {
+			throw error;
+		}
 		if (debugLogging) console.log("error in grabReleaseFileFromRepository", URL, error);
 		return null;
 	}
@@ -260,12 +281,14 @@ export const grabReleaseFromRepository = async (
 			Accept: "application/vnd.github.v3+json",
 		};
 
-		// Authenticated requests get a higher rate limit
 		if ((isPrivate && personalAccessToken) || personalAccessToken) {
 			headers.Authorization = `Token ${personalAccessToken}`;
 		}
 
-		const response = await request({ url: apiUrl, headers });
+		const response = await gitHubRequest({
+			url: apiUrl,
+			headers,
+		});
 
 		if (response === "404: Not Found") return null;
 
@@ -281,9 +304,67 @@ export const grabReleaseFromRepository = async (
 			null
 		);
 	} catch (error) {
+		// Special handling for rate limit errors
+		if (error instanceof GHRateLimitError) {
+			throw error; // Rethrow rate limit errors
+		}
+
 		if (debugLogging) {
 			console.log(`Error in grabReleaseFromRepository for ${repositoryPath}:`, error);
 		}
 		return null;
+	}
+};
+
+/**
+ *	Wrapper for Obsidian `request` that catches GitHub Rate Limits
+ *	@param options - Request options
+ *	@param debugLogging - Enable debug logging (default: true)
+ */
+export const gitHubRequest = async (options: RequestUrlParam, debugLogging?: true): Promise<string> => {
+	let limit = 0;
+	let remaining = 0;
+	let reset = 0;
+
+	const now = Math.floor(Date.now() / 1000);
+
+	try {
+		const response = await request(options);
+		return response;
+	} catch (error) {
+		// Update rate limits from response headers
+		const gitHubError = error as GitHubErrorResponse;
+		const headers = gitHubError.headers;
+		if (headers) {
+			limit = Number.parseInt(headers["x-ratelimit-limit"]);
+			remaining = Number.parseInt(headers["x-ratelimit-remaining"]);
+			reset = Number.parseInt(headers["x-ratelimit-reset"]);
+		}
+		if (gitHubError.status === 403 && remaining === 0) {
+			const rateLimitError = new GHRateLimitError(limit, remaining, reset, options.url);
+
+			if (debugLogging) {
+				console.error(
+					"BRAT\nGitHub API rate limit exceeded:",
+					`\nRequest: ${rateLimitError.requestUrl}`,
+					`\nRate limits - Remaining: ${rateLimitError.remaining}`,
+					`\nReset in: ${rateLimitError.getMinutesToReset()} minutes`,
+				);
+			}
+			throw rateLimitError;
+		}
+
+		if (gitHubError.status === 404) {
+			throw new Error("404: Not Found");
+		}
+
+		if (gitHubError.status >= 400) {
+			throw new Error(`GitHub API returned status ${gitHubError.status}`);
+		}
+
+		if (debugLogging) {
+			console.log("GitHub request failed:", error);
+		}
+		throw error;
 	}
 };

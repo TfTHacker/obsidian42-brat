@@ -1,6 +1,7 @@
 import { compareVersions } from "compare-versions";
 import type { PluginManifest } from "obsidian";
 import { Notice, apiVersion, normalizePath, requireApiVersion } from "obsidian";
+import { GHRateLimitError } from "src/utils/GHRateLimitError";
 import type BratPlugin from "../main";
 import { addBetaPluginToList } from "../settings";
 import AddNewPluginModal from "../ui/AddNewPluginModal";
@@ -73,80 +74,108 @@ export default class BetaPlugins {
 	): Promise<PluginManifest | null> {
 		const noticeTimeout = 15;
 
-		// check if the repository is private
-		const isPrivate = await isPrivateRepo(
-			repositoryPath,
-			this.plugin.settings.debuggingMode,
-			privateApiKey || this.plugin.settings.personalAccessToken,
-		);
+		// GitHub API access might throw a rate limit
+		try {
+			// check if the repository is private
+			const isPrivate = await isPrivateRepo(
+				repositoryPath,
+				this.plugin.settings.debuggingMode,
+				privateApiKey || this.plugin.settings.personalAccessToken,
+			);
 
-		// Grab the manifest.json for the latest release from the repository
-		const release: Release | null = await grabReleaseFromRepository(
-			repositoryPath,
-			specifyVersion,
-			getBetaManifest,
-			this.plugin.settings.debuggingMode,
-			isPrivate,
-			privateApiKey || this.plugin.settings.personalAccessToken,
-		);
+			// Grab the manifest.json for the latest release from the repository
+			const release: Release | null = await grabReleaseFromRepository(
+				repositoryPath,
+				specifyVersion,
+				getBetaManifest,
+				this.plugin.settings.debuggingMode,
+				isPrivate,
+				privateApiKey || this.plugin.settings.personalAccessToken,
+			);
 
-		if (!release) {
-			if (reportIssues) {
+			if (!release) {
+				if (reportIssues) {
+					toastMessage(
+						this.plugin,
+						`${repositoryPath}\nThis does not seem to be an obsidian plugin with valid releases, as there are no releases available.`,
+						noticeTimeout,
+					);
+					console.error("BRAT: validateRepository", repositoryPath, getBetaManifest, reportIssues);
+				}
+				return null;
+			}
+
+			const rawManifest = await grabReleaseFileFromRepository(
+				release,
+				"manifest.json",
+				this.plugin.settings.debuggingMode,
+				isPrivate,
+				privateApiKey || this.plugin.settings.personalAccessToken,
+			);
+
+			if (!rawManifest) {
+				// this is a plugin with a manifest json, try to see if there is a beta version
+				if (reportIssues) {
+					toastMessage(
+						this.plugin,
+						`${repositoryPath}\nThis does not seem to be an obsidian plugin, as there is no manifest.json file.`,
+						noticeTimeout,
+					);
+					console.error("BRAT: validateRepository", repositoryPath, getBetaManifest, reportIssues);
+				}
+				return null;
+			}
+
+			// Parse the returned file and verify that the mainfest has some key elements, like ID and version
+			const manifestJson = JSON.parse(rawManifest) as PluginManifest;
+			if (!("id" in manifestJson)) {
+				// this is a plugin with a manifest json, try to see if there is a beta version
+				if (reportIssues)
+					toastMessage(
+						this.plugin,
+						`${repositoryPath}\nThe plugin id attribute for the release is missing from the manifest file`,
+						noticeTimeout,
+					);
+				return null;
+			}
+			if (!("version" in manifestJson)) {
+				// this is a plugin with a manifest json, try to see if there is a beta version
+				if (reportIssues)
+					toastMessage(
+						this.plugin,
+						`${repositoryPath}\nThe version attribute for the release is missing from the manifest file`,
+						noticeTimeout,
+					);
+				return null;
+			}
+
+			return manifestJson;
+		} catch (error) {
+			if (error instanceof GHRateLimitError) {
+				const msg = `GitHub API rate limit exceeded. Reset in ${error.getMinutesToReset()} minutes.`;
+				if (reportIssues) toastMessage(this.plugin, msg, noticeTimeout);
+				console.error(`BRAT: validateRepository ${error}`);
+
 				toastMessage(
 					this.plugin,
-					`${repositoryPath}\nThis does not seem to be an obsidian plugin with valid releases, as there are no releases available.`,
-					noticeTimeout,
+					`${error.message} Consider adding a personal access token in BRAT settings for higher limits. See documentation for details.`,
+					20,
+					(): void => {
+						window.open("https://github.com/TfTHacker/obsidian42-brat/blob/main/BRAT-DEVELOPER-GUIDE.md#github-api-rate-limits");
+					},
 				);
-				console.error("BRAT: validateRepository", repositoryPath, getBetaManifest, reportIssues);
+
+				throw error;
 			}
-			return null;
-		}
 
-		const rawManifest = await grabReleaseFileFromRepository(
-			release,
-			"manifest.json",
-			this.plugin.settings.debuggingMode,
-			isPrivate,
-			privateApiKey || this.plugin.settings.personalAccessToken,
-		);
-
-		if (!rawManifest) {
-			// this is a plugin with a manifest json, try to see if there is a beta version
-			if (reportIssues) {
-				toastMessage(
-					this.plugin,
-					`${repositoryPath}\nThis does not seem to be an obsidian plugin, as there is no manifest.json file.`,
-					noticeTimeout,
-				);
-				console.error("BRAT: validateRepository", repositoryPath, getBetaManifest, reportIssues);
-			}
-			return null;
-		}
-
-		// Parse the returned file and verify that the mainfest has some key elements, like ID and version
-		const manifestJson = JSON.parse(rawManifest) as PluginManifest;
-		if (!("id" in manifestJson)) {
-			// this is a plugin with a manifest json, try to see if there is a beta version
 			if (reportIssues)
 				toastMessage(
 					this.plugin,
-					`${repositoryPath}\nThe plugin id attribute for the release is missing from the manifest file`,
+					`${repositoryPath}\nUnspecified error encountered: ${error}, verify debug for more information.`,
 					noticeTimeout,
 				);
 			return null;
 		}
-		if (!("version" in manifestJson)) {
-			// this is a plugin with a manifest json, try to see if there is a beta version
-			if (reportIssues)
-				toastMessage(
-					this.plugin,
-					`${repositoryPath}\nThe version attribute for the release is missing from the manifest file`,
-					noticeTimeout,
-				);
-			return null;
-		}
-
-		return manifestJson;
 	}
 
 	/**
