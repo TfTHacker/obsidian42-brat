@@ -94,7 +94,7 @@ export class BratSettingsTab extends PluginSettingTab {
 						.setIcon("sync")
 						.setTooltip("Check and update plugin")
 						.onClick(async () => {
-							const updated = await this.plugin.betaPlugins.updatePlugin(p, false, true);
+							const updated = await this.plugin.betaPlugins.updatePlugin(p, false, true, false, bp?.token);
 						});
 				});
 			}

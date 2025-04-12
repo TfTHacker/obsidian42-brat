@@ -44,22 +44,35 @@ export default class PluginCommands {
 			name: "Plugins: Choose a single plugin version to update",
 			showInRibbon: true,
 			callback: () => {
-				const frozenVersions = new Map(this.plugin.settings.pluginSubListFrozenVersion.map((f) => [f.repo, f.version]));
+				const frozenVersions = new Map(
+					this.plugin.settings.pluginSubListFrozenVersion.map((f) => [
+						f.repo,
+						{
+							version: f.version,
+							token: f.token,
+						},
+					]),
+				);
 				const pluginList: SuggesterItem[] = Object.values(this.plugin.settings.pluginList)
 					.filter((repo) => {
-						const version = frozenVersions.get(repo);
-						return !version || version === "latest";
+						const frozen = frozenVersions.get(repo);
+						return !frozen?.version || frozen.version === "latest";
 					})
 					.map((repo) => {
-						return { display: repo, info: repo };
+						const frozen = frozenVersions.get(repo);
+						return {
+							display: repo,
+							info: repo,
+						};
 					});
 				const gfs = new GenericFuzzySuggester(this.plugin);
 				gfs.setSuggesterData(pluginList);
 				gfs.display((results) => {
 					const msg = `Checking for updates for ${results.info as string}`;
+					const frozen = frozenVersions.get(results.info as string);
 					void this.plugin.log(msg, true);
 					toastMessage(this.plugin, `\n${msg}`, 3);
-					void this.plugin.betaPlugins.updatePlugin(results.info as string, false, true);
+					void this.plugin.betaPlugins.updatePlugin(results.info as string, false, true, false, frozen?.token);
 				});
 			},
 		},
