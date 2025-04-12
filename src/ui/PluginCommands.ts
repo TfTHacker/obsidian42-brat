@@ -44,11 +44,14 @@ export default class PluginCommands {
 			name: "Plugins: Choose a single plugin version to update",
 			showInRibbon: true,
 			callback: () => {
-				const pluginSubListFrozenVersionNames = new Set(this.plugin.settings.pluginSubListFrozenVersion.map((f) => f.repo));
+				const frozenVersions = new Map(this.plugin.settings.pluginSubListFrozenVersion.map((f) => [f.repo, f.version]));
 				const pluginList: SuggesterItem[] = Object.values(this.plugin.settings.pluginList)
-					.filter((f) => !pluginSubListFrozenVersionNames.has(f))
-					.map((m) => {
-						return { display: m, info: m };
+					.filter((repo) => {
+						const version = frozenVersions.get(repo);
+						return !version || version === "latest";
+					})
+					.map((repo) => {
+						return { display: repo, info: repo };
 					});
 				const gfs = new GenericFuzzySuggester(this.plugin);
 				gfs.setSuggesterData(pluginList);
