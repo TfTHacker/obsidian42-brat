@@ -373,7 +373,7 @@ export default class BetaPlugins {
 				await this.plugin.log(`${repositoryPath} reinstalled`, true);
 				toastMessage(
 					this.plugin,
-					`${repositoryPath}\nPlugin has been reinstalled and reloaded with version ${primaryManifest.version}`,
+					`${repositoryPath}\nPlugin has been reinstalled and reloaded with version ${primaryManifest.version} (fetching ${specifyVersion})`,
 					noticeTimeout,
 				);
 			} else {

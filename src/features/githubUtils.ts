@@ -1,4 +1,3 @@
-import { compareVersions } from "compare-versions";
 import { type RequestUrlParam, request } from "obsidian";
 import { GHRateLimitError } from "../utils/GHRateLimitError";
 
@@ -271,6 +270,7 @@ export const grabReleaseFromRepository = async (
 	isPrivate = false,
 	personalAccessToken?: string,
 ): Promise<Release | null> => {
+	// TODO: Iterate over all releases (pages)
 	try {
 		const apiUrl =
 			version && version !== "latest"
@@ -299,10 +299,8 @@ export const grabReleaseFromRepository = async (
 			console.log(`grabReleaseFromRepository for ${repositoryPath}:`, releases);
 		}
 
-		return (
-			releases.sort((a, b) => compareVersions(b.tag_name, a.tag_name)).filter((release) => includePrereleases || !release.prerelease)[0] ??
-			null
-		);
+		// Release JSON is sorted newest to oldest already
+		return releases.filter((release) => includePrereleases || !release.prerelease)[0] ?? null;
 	} catch (error) {
 		// Special handling for rate limit errors
 		if (error instanceof GHRateLimitError) {
