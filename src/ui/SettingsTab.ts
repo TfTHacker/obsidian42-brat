@@ -72,7 +72,7 @@ export class BratSettingsTab extends PluginSettingTab {
 		});
 
 		new Setting(containerEl).addButton((cb: ButtonComponent) => {
-			cb.setButtonText("Add Beta plugin");
+			cb.setButtonText("Add beta plugin");
 			cb.onClick(() => {
 				this.plugin.betaPlugins.displayAddNewPluginModal(true, true);
 			});
@@ -129,7 +129,7 @@ export class BratSettingsTab extends PluginSettingTab {
 		new Setting(containerEl).setName("Beta themes list").setHeading();
 
 		new Setting(containerEl).addButton((cb: ButtonComponent) => {
-			cb.setButtonText("Add Beta Theme");
+			cb.setButtonText("Add beta theme");
 			cb.onClick(() => {
 				this.plugin.app.setting.close();
 				new AddNewTheme(this.plugin).open();
@@ -157,7 +157,7 @@ export class BratSettingsTab extends PluginSettingTab {
 		new Setting(containerEl).setName("Monitoring").setHeading();
 
 		new Setting(containerEl)
-			.setName("Enable Notifications")
+			.setName("Enable notifications")
 			.setDesc("BRAT will provide popup notifications for its various activities. Turn this off means  no notifications from BRAT.")
 			.addToggle((cb: ToggleComponent) => {
 				cb.setValue(this.plugin.settings.notificationsEnabled);
@@ -168,7 +168,7 @@ export class BratSettingsTab extends PluginSettingTab {
 			});
 
 		new Setting(containerEl)
-			.setName("Enable Logging")
+			.setName("Enable logging")
 			.setDesc("Plugin updates will be logged to a file in the log file.")
 			.addToggle((cb: ToggleComponent) => {
 				cb.setValue(this.plugin.settings.loggingEnabled);
@@ -179,7 +179,7 @@ export class BratSettingsTab extends PluginSettingTab {
 			});
 
 		new Setting(this.containerEl)
-			.setName("BRAT Log File Location")
+			.setName("BRAT log file location")
 			.setDesc("Logs will be saved to this file. Don't add .md to the file name.")
 			.addSearch((cb) => {
 				cb.setPlaceholder("Example: BRAT-log")
@@ -191,7 +191,7 @@ export class BratSettingsTab extends PluginSettingTab {
 			});
 
 		new Setting(containerEl)
-			.setName("Enable Verbose Logging")
+			.setName("Enable verbose logging")
 			.setDesc("Get a lot  more information in  the log.")
 			.addToggle((cb: ToggleComponent) => {
 				cb.setValue(this.plugin.settings.loggingVerboseEnabled);
@@ -202,7 +202,7 @@ export class BratSettingsTab extends PluginSettingTab {
 			});
 
 		new Setting(containerEl)
-			.setName("Debugging Mode")
+			.setName("Debugging mode")
 			.setDesc("Atomic Bomb level console logging. Can be used for troubleshoting and development.")
 			.addToggle((cb: ToggleComponent) => {
 				cb.setValue(this.plugin.settings.debuggingMode);
@@ -213,7 +213,7 @@ export class BratSettingsTab extends PluginSettingTab {
 			});
 
 		new Setting(containerEl)
-			.setName("Personal Access Token")
+			.setName("Personal access token")
 			.setDesc("If you need to access private repositories, enter the personal access token here.")
 			.addText((text) => {
 				text

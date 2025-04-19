@@ -97,7 +97,7 @@ export default class AddNewPluginModal extends Modal {
 		settingEl.clear();
 		settingEl.addDropdown((dropdown) => {
 			dropdown.addOption("", "Select a version");
-			dropdown.addOption("latest", "Latest Version");
+			dropdown.addOption("latest", "Latest version");
 			for (const version of versions) {
 				dropdown.addOption(version.version, `${version.version} ${version.prerelease ? "(Prerelease)" : ""}`);
 			}
@@ -237,7 +237,7 @@ export default class AddNewPluginModal extends Modal {
 					});
 
 				this.addPluginButton = new ButtonComponent(buttonContainerEl)
-					.setButtonText(this.trackFixedVersion ? (this.address ? "Change Version" : "Add Plugin") : "Add Plugin")
+					.setButtonText(this.trackFixedVersion ? (this.address ? "Change version" : "Add plugin") : "Add plugin")
 					.setClass("mod-cta")
 					.onClick((e: Event) => {
 						e.preventDefault();

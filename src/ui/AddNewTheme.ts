@@ -66,7 +66,7 @@ export default class AddNewTheme extends Modal {
 				buttonContainerEl.createEl("button", {
 					attr: { type: "submit" },
 					cls: "mod-cta",
-					text: "Add Theme",
+					text: "Add theme",
 				});
 			});
 
