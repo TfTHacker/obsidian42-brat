@@ -1,4 +1,4 @@
-import { ButtonComponent, Modal, Setting, type TextComponent } from "obsidian";
+import { ButtonComponent, DropdownComponent, Modal, Setting, type TextComponent } from "obsidian";
 import { type ReleaseVersion, fetchReleaseVersions } from "src/features/githubUtils";
 import { GHRateLimitError } from "src/utils/GHRateLimitError";
 import { createLink } from "src/utils/utils";
@@ -19,8 +19,9 @@ export default class AddNewPluginModal extends Modal {
 	readonly trackFixedVersion: boolean;
 	enableAfterInstall: boolean;
 	version: string;
-	versionSetting: Setting | null;
-	addPluginButton: ButtonComponent | null;
+	versionSetting: Setting | null = null;
+	addPluginButton: ButtonComponent | null = null;
+	cancelButton: ButtonComponent | null = null;
 	privateApiKey: string;
 
 	constructor(
@@ -41,8 +42,6 @@ export default class AddNewPluginModal extends Modal {
 		this.openSettingsTabAfterwards = openSettingsTabAfterwards;
 		this.trackFixedVersion = useFrozenVersion;
 		this.enableAfterInstall = plugin.settings.enableAfterInstall;
-		this.versionSetting = null;
-		this.addPluginButton = null;
 	}
 
 	async submitForm(): Promise<void> {
@@ -168,6 +167,9 @@ export default class AddNewPluginModal extends Modal {
 							if (e.key === "Enter") {
 								if (this.address && ((this.trackFixedVersion && this.version !== "") || !this.trackFixedVersion)) {
 									e.preventDefault();
+									this.addPluginButton?.setDisabled(true);
+									this.cancelButton?.setDisabled(true);
+									this.versionSetting?.setDisabled(true);
 									void this.submitForm();
 								}
 
@@ -227,9 +229,13 @@ export default class AddNewPluginModal extends Modal {
 					},
 				);
 
-				buttonContainerEl.createEl("button", { attr: { type: "button" }, text: "Never mind" }).addEventListener("click", () => {
-					this.close();
-				});
+				this.cancelButton = new ButtonComponent(buttonContainerEl)
+					.setButtonText("Never mind")
+					.setClass("mod-cancel")
+					.onClick((e: Event) => {
+						this.close();
+					});
+
 				this.addPluginButton = new ButtonComponent(buttonContainerEl)
 					.setButtonText(this.trackFixedVersion ? (this.address ? "Change Version" : "Add Plugin") : "Add Plugin")
 					.setClass("mod-cta")
@@ -237,8 +243,11 @@ export default class AddNewPluginModal extends Modal {
 						e.preventDefault();
 						if (this.address !== "") {
 							if ((this.trackFixedVersion && this.version !== "") || !this.trackFixedVersion) {
+								// Submit the form
 								this.addPluginButton?.setDisabled(true);
-
+								this.addPluginButton?.setButtonText("Installing …");
+								this.cancelButton?.setDisabled(true);
+								this.versionSetting?.setDisabled(true);
 								void this.submitForm();
 							}
 						}
@@ -337,9 +346,7 @@ export default class AddNewPluginModal extends Modal {
 				if (this.versionSetting) {
 					this.versionSetting.settingEl.classList.add("disabled-setting");
 					this.versionSetting.setDisabled(true);
-					if (this.addPluginButton) {
-						this.addPluginButton.disabled = true;
-					}
+					this.addPluginButton?.setDisabled(true);
 				}
 			}
 		} catch (error) {
@@ -352,9 +359,7 @@ export default class AddNewPluginModal extends Modal {
 				if (this.versionSetting) {
 					this.versionSetting.settingEl.classList.add("disabled-setting");
 					this.versionSetting.setDisabled(true);
-					if (this.addPluginButton) {
-						this.addPluginButton.disabled = true;
-					}
+					this.addPluginButton?.setDisabled(true);
 				}
 
 				toastMessage(
