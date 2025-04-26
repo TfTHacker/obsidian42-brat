@@ -36,9 +36,28 @@ Since v1.1.0, BRAT primarily works with GitHub releases. When installing or upda
 
 1. For a specific version (frozen): Download that exact release version, regardless of whether it's marked as a pre-release
 
-2. For latest version: Download the latest available release or pre-release, prioritizing by semantic version number
+2. For latest version: Download the latest available release or pre-release, prioritizing by semantic version number of the release
 
 The `manifest.json` is fetched directly from the release assets, making BRAT independent of the version numbering in the repository root.
+
+## Release Tag and Name, and Manifest Version Handling
+
+When BRAT installs or updates a plugin, it validates both the release tag version and the version in the `manifest.json` asset.
+
+If there is a mismatch between the release tag version and name (e.g., `1.0.1-beta.0`) and the version in the released `manifest.json` asset (e.g. `1.0.0`), BRAT will:
+   - Use the release tag version as the source of truth
+   - Override the version in the `manifest.json` to match the release tag
+   - Display a notification about the mismatch
+
+>[!IMPORTANT]
+>Obsidian itself requires that release tag, release name, and the version stored in the released `manifest.json` [are the same](https://docs.obsidian.md/Plugins/Releasing/Release+your+plugin+with+GitHub+Actions). This applies to beta plugins tested with BRAT too. It is best you always ensure the version in your released `manifest.json` file matches your release tag version and release name. For example:
+>- Release tag: `1.0.1-beta.0`
+>- Release name: `1.0.1-beta.0`
+>- Version in released `manifest.json`: `1.0.1-beta.0`
+
+
+>[!INFO]
+>BRAT is a bit opinionated with respect to semantic versions but will attempt to normalize non-standard version strings using the [`semver`](https://github.com/npm/node-semver?tab=readme-ov-file#coercion) library for comparison operations. 
 
 ## Legacy: older BRAT installs and manifest-beta.json
 
