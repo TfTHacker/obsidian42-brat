@@ -1,4 +1,3 @@
-import { compareVersions } from "compare-versions";
 import type { PluginManifest } from "obsidian";
 import { Notice, apiVersion, normalizePath, requireApiVersion } from "obsidian";
 import { GHRateLimitError } from "src/utils/GHRateLimitError";
@@ -9,6 +8,8 @@ import { isConnectedToInternet } from "../utils/internetconnection";
 import { toastMessage } from "../utils/notifications";
 import { type Release, grabReleaseFileFromRepository, grabReleaseFromRepository, isPrivateRepo } from "./githubUtils";
 
+const compareVersions = require('semver/functions/compare');
+const semverCoerce = require('semver/functions/coerce');
 /**
  * all the files needed for a plugin based on the release files are hre
  */
@@ -56,14 +57,23 @@ export default class BetaPlugins {
 	}
 
 	/**
-	 * Validates that a GitHub repository is plugin
-	 *
-	 * @param repositoryPath - GithubUser/RepositoryName (example: TfThacker/obsidian42-brat)
-	 * @param getBetaManifest - test the beta version of the manifest, not at the root
-	 * @param false - [false description]
-	 * @param reportIssues - will display notices as it finds issues
-	 *
-	 * @returns the manifest file if found, or null if its incomplete
+	 * Validates a GitHub repository to determine if it contains a valid Obsidian plugin.
+	 * 
+	 * @param repositoryPath - The path to the GitHub repository.
+	 * @param getBetaManifest - Whether to fetch the beta manifest instead of the stable one. Defaults to `false`.
+	 * @param reportIssues - Whether to display error messages to the user. Defaults to `false`.
+	 * @param specifyVersion - A specific version to validate. Defaults to an empty string, which fetches the latest release.
+	 * @param privateApiKey - An optional private API key for accessing private repositories. Defaults to an empty string.
+	 * 
+	 * @returns A promise that resolves to the plugin's `PluginManifest` if valid, or `null` if validation fails.
+	 * 
+	 * @throws GHRateLimitError - If the GitHub API rate limit is exceeded.
+	 * 
+	 * @remarks
+	 * - The function checks if the repository is private and fetches the latest release or a specified version.
+	 * - It validates the presence of a `manifest.json` file and ensures it contains required attributes (`id` and `version`).
+	 * - If the version in the `manifest.json` does not match the release version, the release version will override the manifest version.
+	 * - Error messages are logged or displayed based on the `reportIssues` flag.
 	 */
 	async validateRepository(
 		repositoryPath: string,
@@ -149,6 +159,20 @@ export default class BetaPlugins {
 				return null;
 			}
 
+			const expectedVersion = semverCoerce(release.tag_name, {includePrerelease: true, loose: true});
+			const manifestVersion = semverCoerce(manifestJson.version, {includePrerelease: true, loose: true});
+		
+			if (compareVersions(expectedVersion, manifestVersion) !== 0) {
+				if (reportIssues)
+					toastMessage(
+						this.plugin,
+						`${repositoryPath}\nVersion mismatch detected:\nRelease tag version: ${release.tag_name}\nManifest version: ${manifestJson.version}\n\nThe release tag version will be used to ensure consistency.`,
+						noticeTimeout,
+					);
+
+				// Overwrite the manifest version with the release version
+				manifestJson.version = expectedVersion.version;
+			}
 			return manifestJson;
 		} catch (error) {
 			if (error instanceof GHRateLimitError) {
@@ -302,7 +326,7 @@ export default class BetaPlugins {
 
 		const noticeTimeout = 10;
 		// attempt to get manifest-beta.json
-		let primaryManifest = await this.validateRepository(repositoryPath, true, false, specifyVersion, privateApiKey);
+		let primaryManifest = await this.validateRepository(repositoryPath, true, true, specifyVersion, privateApiKey);
 		const usingBetaManifest: boolean = !!primaryManifest;
 		// attempt to get manifest.json
 		if (!usingBetaManifest) primaryManifest = await this.validateRepository(repositoryPath, false, true, specifyVersion, privateApiKey);
@@ -409,7 +433,10 @@ export default class BetaPlugins {
 			}
 
 			const localManifestJson = (await JSON.parse(localManifestContents)) as PluginManifest;
-			if (compareVersions(localManifestJson.version, primaryManifest.version) === -1) {
+			// FIX for issue #105: Not all developers use semver compliant version tags
+			const localVersion = semverCoerce(localManifestJson.version, {includePrerelease: true, loose: true});
+			const remoteVersion = semverCoerce(primaryManifest.version, {includePrerelease: true, loose: true});
+			if (compareVersions(localVersion, remoteVersion) === -1) {
 				// Remote version is higher, update
 				const releaseFiles = await getRelease();
 				if (releaseFiles === null) return false;
