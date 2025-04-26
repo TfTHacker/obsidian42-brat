@@ -19,6 +19,7 @@
   "devDependencies": {
     "@biomejs/biome": "1.9.4",
     "@types/node": "^22.10.1",
+    "@types/semver": "^7.7.0",
     "builtin-modules": "4.0.0",
     "esbuild": "0.25.0",
     "esbuild-copy-static-files": "^0.1.0",
@@ -31,7 +32,7 @@
     "typescript": "5.7.2"
   },
   "dependencies": {
-    "compare-versions": "^6.1.1",
-    "obsidian-daily-notes-interface": "^0.9.4"
+    "obsidian-daily-notes-interface": "^0.9.4",
+    "semver": "^7.7.1"
   }
 }
