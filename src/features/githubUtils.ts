@@ -1,6 +1,9 @@
 import { type RequestUrlParam, request } from "obsidian";
 import { GHRateLimitError } from "../utils/GHRateLimitError";
 
+const compareVersions = require('semver/functions/compare');
+const semverCoerce = require('semver/functions/coerce');
+
 export interface ReleaseVersion {
 	version: string; // The tag name of the release
 	prerelease: boolean; // Indicates if the release is a pre-release
@@ -270,7 +273,6 @@ export const grabReleaseFromRepository = async (
 	isPrivate = false,
 	personalAccessToken?: string,
 ): Promise<Release | null> => {
-	// TODO: Iterate over all releases (pages)
 	try {
 		const apiUrl =
 			version && version !== "latest"
@@ -298,10 +300,12 @@ export const grabReleaseFromRepository = async (
 		if (debugLogging) {
 			console.log(`grabReleaseFromRepository for ${repositoryPath}:`, releases);
 		}
-
-		// Release JSON is sorted newest to oldest already
-		return releases.filter((release) => includePrereleases || !release.prerelease)[0] ?? null;
-	} catch (error) {
+		return (releases.sort((a, b) => { 
+			// FIX for issue #105: Not all developers use semver compliant version tags
+			const aVersion = semverCoerce(a.tag_name, {includePrerelease: true, loose: true});
+			const bVersion = semverCoerce(b.tag_name, {includePrerelease: true, loose: true});
+			return compareVersions(bVersion, aVersion)}).filter((release) => includePrereleases || !release.prerelease)[0] ?? null);
+		} catch (error) {
 		// Special handling for rate limit errors
 		if (error instanceof GHRateLimitError) {
 			throw error; // Rethrow rate limit errors
