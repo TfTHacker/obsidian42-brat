@@ -46,7 +46,7 @@ export default class AddNewPluginModal extends Modal {
 
 	async submitForm(): Promise<void> {
 		if (this.address === "") return;
-		let scrubbedAddress = this.address.toLowerCase().replace("https://github.com/", "");
+		let scrubbedAddress = this.address.replace("https://github.com/", "");
 		if (scrubbedAddress.endsWith(".git")) scrubbedAddress = scrubbedAddress.slice(0, -4);
 
 		// If it's an existing frozen version plugin, update it instead of checking for duplicates
