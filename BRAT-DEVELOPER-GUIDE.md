@@ -54,9 +54,7 @@ If there is a mismatch between the release tag version and name (e.g., `1.0.1-be
 >- Release tag: `1.0.1-beta.0`
 >- Release name: `1.0.1-beta.0`
 >- Version in released `manifest.json`: `1.0.1-beta.0`
-
-
->[!INFO]
+>
 >BRAT is a bit opinionated with respect to semantic versions but will attempt to normalize non-standard version strings using the [`semver`](https://github.com/npm/node-semver?tab=readme-ov-file#coercion) library for comparison operations. 
 
 ## Legacy: older BRAT installs and manifest-beta.json
