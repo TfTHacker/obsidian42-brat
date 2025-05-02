@@ -55,7 +55,6 @@ If there is a mismatch between the release tag version and name (e.g., `1.0.1-be
 >- Release name: `1.0.1-beta.0`
 >- Version in released `manifest.json`: `1.0.1-beta.0`
 
-
 >[!INFO]
 >BRAT is a bit opinionated with respect to semantic versions but will attempt to normalize non-standard version strings using the [`semver`](https://github.com/npm/node-semver?tab=readme-ov-file#coercion) library for comparison operations. 
 
@@ -73,7 +72,7 @@ BRAT examines your repository's GitHub releases. For installation and updates, i
 
 1. Fetch the list of available releases
 
-2. Select the appropriate release (specific version for frozen installs, latest by semver otherwise)
+2. Select the appropriate release (specific version for frozen installs, latest by semver otherwise) based on the release tag
 
 3. Download the `manifest.json`, `main.js`, and `styles.css` directly from the release assets
 
