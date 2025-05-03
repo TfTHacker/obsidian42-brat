@@ -1,4 +1,4 @@
-import { ButtonComponent, DropdownComponent, Modal, Setting, type TextComponent } from "obsidian";
+import { ButtonComponent, Modal, Setting, type TextComponent } from "obsidian";
 import { type ReleaseVersion, fetchReleaseVersions } from "src/features/githubUtils";
 import { GHRateLimitError } from "src/utils/GHRateLimitError";
 import { createLink } from "src/utils/utils";
@@ -7,6 +7,7 @@ import type BratPlugin from "../main";
 import { existBetaPluginInList } from "../settings";
 import { toastMessage } from "../utils/notifications";
 import { promotionalLinks } from "./Promotional";
+import { VersionSuggestModal } from "./VersionSuggestModal";
 
 /**
  * Add a beta plugin to the list of plugins being tracked and updated
@@ -95,26 +96,56 @@ export default class AddNewPluginModal extends Modal {
 
 	private updateVersionDropdown(settingEl: Setting, versions: ReleaseVersion[], selected = ""): void {
 		settingEl.clear();
-		settingEl.addDropdown((dropdown) => {
-			dropdown.addOption("", "Select a version");
-			dropdown.addOption("latest", "Latest version");
-			for (const version of versions) {
-				dropdown.addOption(version.version, `${version.version} ${version.prerelease ? "(Prerelease)" : ""}`);
-			}
-			dropdown.setValue(selected);
-			dropdown.onChange((value) => {
-				this.version = value;
-				// Enable add plugin button if version is selected
-				if (this.addPluginButton) {
-					if (this.version !== "") {
-						this.addPluginButton.setDisabled(false);
-					} else {
-						this.addPluginButton.setDisabled(true);
-					}
+
+		const VERSION_THRESHOLD = 20;
+
+		if (versions.length < VERSION_THRESHOLD) {
+			// Use dropdown for fewer versions
+			settingEl.addDropdown((dropdown) => {
+				dropdown.addOption("", "Select a version");
+				dropdown.addOption("latest", "Latest version");
+				for (const version of versions) {
+					dropdown.addOption(version.version, `${version.version} ${version.prerelease ? "(Prerelease)" : ""}`);
 				}
+				dropdown.setValue(selected);
+				dropdown.onChange((value) => {
+					this.version = value;
+					this.updateAddButtonState();
+				});
+
+				dropdown.selectEl.addClass("brat-version-selector");
+				dropdown.selectEl.style.width = "100%";
 			});
-			dropdown.selectEl.style.width = "100%";
-		});
+		} else {
+			// Use suggest modal for many versions
+			settingEl.addButton((button) => {
+				button
+					.setButtonText(selected === "latest" ? "Latest version" : selected || "Select a version...")
+					.setClass("brat-version-selector")
+					.setClass("button")
+					.onClick((e: Event) => {
+						e.preventDefault();
+						const latest: ReleaseVersion = {
+							version: "latest",
+							prerelease: false,
+						};
+						const suggestedVersions: ReleaseVersion[] = [latest, ...versions];
+						const modal = new VersionSuggestModal(this.app, this.address, suggestedVersions, selected, (version: string) => {
+							this.version = version;
+							button.setButtonText(version === "latest" ? "Latest version" : version || "Select a version...");
+							this.updateAddButtonState();
+						});
+						modal.open();
+					});
+			});
+		}
+	}
+
+	// Helper method to update add button state
+	private updateAddButtonState(): void {
+		if (this.addPluginButton) {
+			this.addPluginButton.setDisabled(this.version === "");
+		}
 	}
 
 	onOpen(): void {
@@ -387,7 +418,10 @@ export default class AddNewPluginModal extends Modal {
 
 	private isGitHubRepositoryMatch(address: string): boolean {
 		// Remove trailing .git if present
-		const cleanAddress = address.trim().replace(/\.git$/, "").toLowerCase();
+		const cleanAddress = address
+			.trim()
+			.replace(/\.git$/, "")
+			.toLowerCase();
 
 		// Match either format:
 		// 1. user/repo

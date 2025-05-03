@@ -288,7 +288,7 @@ export const grabReleaseFromRepository = async (
 		}
 
 		const response = await gitHubRequest({
-			url: `${apiUrl}?per_page=100`,
+			url: apiUrl,
 			headers,
 		});
 
