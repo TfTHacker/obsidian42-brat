@@ -69,9 +69,11 @@ export class BratSettingsTab extends PluginSettingTab {
 		});
 
 		new Setting(containerEl).addButton((cb: ButtonComponent) => {
-			cb.setButtonText("Add beta plugin").onClick(() => {
-				this.plugin.betaPlugins.displayAddNewPluginModal(true, true);
-			});
+			cb.setButtonText("Add beta plugin")
+				.setCta()
+				.onClick(() => {
+					this.plugin.betaPlugins.displayAddNewPluginModal(true, true);
+				});
 		});
 
 		const frozenVersions = new Map(
@@ -129,10 +131,12 @@ export class BratSettingsTab extends PluginSettingTab {
 		new Setting(containerEl).setName("Beta themes list").setHeading();
 
 		new Setting(containerEl).addButton((cb: ButtonComponent) => {
-			cb.setButtonText("Add beta theme").onClick(() => {
-				this.plugin.app.setting.close();
-				new AddNewTheme(this.plugin).open();
-			});
+			cb.setButtonText("Add beta theme")
+				.setCta()
+				.onClick(() => {
+					this.plugin.app.setting.close();
+					new AddNewTheme(this.plugin).open();
+				});
 		});
 
 		for (const bp of this.plugin.settings.themesList) {
