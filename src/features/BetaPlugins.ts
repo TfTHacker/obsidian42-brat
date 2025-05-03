@@ -1,6 +1,6 @@
 import type { PluginManifest } from "obsidian";
 import { Notice, apiVersion, normalizePath, requireApiVersion } from "obsidian";
-import { GHRateLimitError } from "src/utils/GHRateLimitError";
+import { GHRateLimitError, GitHubResponseError } from "src/utils/GitHubAPIErrors";
 import type BratPlugin from "../main";
 import { addBetaPluginToList } from "../settings";
 import AddNewPluginModal from "../ui/AddNewPluginModal";
@@ -8,8 +8,8 @@ import { isConnectedToInternet } from "../utils/internetconnection";
 import { toastMessage } from "../utils/notifications";
 import { type Release, grabReleaseFileFromRepository, grabReleaseFromRepository, isPrivateRepo } from "./githubUtils";
 
-const compareVersions = require('semver/functions/compare');
-const semverCoerce = require('semver/functions/coerce');
+const compareVersions = require("semver/functions/compare");
+const semverCoerce = require("semver/functions/coerce");
 /**
  * all the files needed for a plugin based on the release files are hre
  */
@@ -58,17 +58,17 @@ export default class BetaPlugins {
 
 	/**
 	 * Validates a GitHub repository to determine if it contains a valid Obsidian plugin.
-	 * 
+	 *
 	 * @param repositoryPath - The path to the GitHub repository.
 	 * @param getBetaManifest - Whether to fetch the beta manifest instead of the stable one. Defaults to `false`.
 	 * @param reportIssues - Whether to display error messages to the user. Defaults to `false`.
 	 * @param specifyVersion - A specific version to validate. Defaults to an empty string, which fetches the latest release.
 	 * @param privateApiKey - An optional private API key for accessing private repositories. Defaults to an empty string.
-	 * 
+	 *
 	 * @returns A promise that resolves to the plugin's `PluginManifest` if valid, or `null` if validation fails.
-	 * 
+	 *
 	 * @throws GHRateLimitError - If the GitHub API rate limit is exceeded.
-	 * 
+	 *
 	 * @remarks
 	 * - The function checks if the repository is private and fetches the latest release or a specified version.
 	 * - It validates the presence of a `manifest.json` file and ensures it contains required attributes (`id` and `version`).
@@ -159,9 +159,9 @@ export default class BetaPlugins {
 				return null;
 			}
 
-			const expectedVersion = semverCoerce(release.tag_name, {includePrerelease: true, loose: true});
-			const manifestVersion = semverCoerce(manifestJson.version, {includePrerelease: true, loose: true});
-		
+			const expectedVersion = semverCoerce(release.tag_name, { includePrerelease: true, loose: true });
+			const manifestVersion = semverCoerce(manifestJson.version, { includePrerelease: true, loose: true });
+
 			if (compareVersions(expectedVersion, manifestVersion) !== 0) {
 				if (reportIssues)
 					toastMessage(
@@ -188,6 +188,23 @@ export default class BetaPlugins {
 						window.open("https://github.com/TfTHacker/obsidian42-brat/blob/main/BRAT-DEVELOPER-GUIDE.md#github-api-rate-limits");
 					},
 				);
+
+				throw error;
+			}
+
+			if (error instanceof GitHubResponseError) {
+				if (reportIssues) {
+					if (error.status === 401) {
+						toastMessage(
+							this.plugin,
+							`${repositoryPath}\nGitHub API Authentication error. Please verify that your personal access token is valid and set correctly.`,
+							noticeTimeout,
+						);
+					} else {
+						toastMessage(this.plugin, `${repositoryPath}\nGitHub API error ${error.status}: ${error.message}`, noticeTimeout);
+					}
+				}
+				console.error(`BRAT: validateRepository ${error}`);
 
 				throw error;
 			}
@@ -311,167 +328,190 @@ export default class BetaPlugins {
 		enableAfterInstall = this.plugin.settings.enableAfterInstall,
 		privateApiKey = "",
 	): Promise<boolean> {
-		if (this.plugin.settings.debuggingMode)
-			console.log(
-				"BRAT: addPlugin",
-				repositoryPath,
-				updatePluginFiles,
-				seeIfUpdatedOnly,
-				reportIfNotUpdted,
-				specifyVersion,
-				forceReinstall,
-				enableAfterInstall,
-				privateApiKey ? "private" : "public",
-			);
-
-		const noticeTimeout = 10;
-		// attempt to get manifest-beta.json
-		let primaryManifest = await this.validateRepository(repositoryPath, true, true, specifyVersion, privateApiKey);
-		const usingBetaManifest: boolean = !!primaryManifest;
-		// attempt to get manifest.json
-		if (!usingBetaManifest) primaryManifest = await this.validateRepository(repositoryPath, false, true, specifyVersion, privateApiKey);
-
-		if (primaryManifest === null) {
-			const msg = `${repositoryPath}\nA manifest.json file does not exist in the latest release of the repository. This plugin cannot be installed.`;
-			await this.plugin.log(msg, true);
-			toastMessage(this.plugin, msg, noticeTimeout);
-			return false;
-		}
-
-		if (!Object.hasOwn(primaryManifest, "version")) {
-			const msg = `${repositoryPath}\nThe manifest.json file in the latest release or pre-release of the repository does not have a version number in the file. This plugin cannot be installed.`;
-			await this.plugin.log(msg, true);
-			toastMessage(this.plugin, msg, noticeTimeout);
-			return false;
-		}
-
-		// Check manifest minAppVersion and current version of Obisidan, don't load plugin if not compatible
-		if (!Object.hasOwn(primaryManifest, "minAppVersion")) {
-			if (!requireApiVersion(primaryManifest.minAppVersion)) {
-				const msg = `Plugin: ${repositoryPath}\n\nThe manifest.json for this plugin indicates that the Obsidian version of the app needs to be ${primaryManifest.minAppVersion}, but this installation of Obsidian is ${apiVersion}. \n\nYou will need to update your Obsidian to use this plugin or contact the plugin developer for more information.`;
-				await this.plugin.log(msg, true);
-				toastMessage(this.plugin, msg, 30);
-				return false;
-			}
-		}
-
-		// now the user must be able to access the repo
-
-		interface ErrnoType {
-			errno: number;
-		}
-
-		const getRelease = async () => {
-			const rFiles = await this.getAllReleaseFiles(repositoryPath, primaryManifest, usingBetaManifest, specifyVersion, privateApiKey);
-
-			console.log("rFiles", rFiles);
-			// if beta, use that manifest, or if there is no manifest in release, use the primaryManifest
-			if (usingBetaManifest || rFiles.manifest === "") rFiles.manifest = JSON.stringify(primaryManifest);
-
-			if (this.plugin.settings.debuggingMode) console.log("BRAT: rFiles.manifest", usingBetaManifest, rFiles);
-
-			if (rFiles.mainJs === null) {
-				const msg = `${repositoryPath}\nThe release is not complete and cannot be download. main.js is missing from the Release`;
-				await this.plugin.log(msg, true);
-				toastMessage(this.plugin, msg, noticeTimeout);
-				return null;
-			}
-			return rFiles;
-		};
-
-		if (!updatePluginFiles || forceReinstall) {
-			const releaseFiles = await getRelease();
-			if (releaseFiles === null) return false;
-			await this.writeReleaseFilesToPluginFolder(primaryManifest.id, releaseFiles);
-			if (!forceReinstall) addBetaPluginToList(this.plugin, repositoryPath, specifyVersion, privateApiKey);
-			if (enableAfterInstall) {
-				const { plugins } = this.plugin.app;
-				const pluginTargetFolderPath = normalizePath(`${plugins.getPluginFolder()}/${primaryManifest.id}`);
-				await plugins.loadManifest(pluginTargetFolderPath);
-				await plugins.enablePluginAndSave(primaryManifest.id);
-			}
-			await this.plugin.app.plugins.loadManifests();
-			if (forceReinstall) {
-				// reload if enabled
-				await this.reloadPlugin(primaryManifest.id);
-				await this.plugin.log(`${repositoryPath} reinstalled`, true);
-				toastMessage(
-					this.plugin,
-					`${repositoryPath}\nPlugin has been reinstalled and reloaded with version ${primaryManifest.version}`,
-					noticeTimeout,
+		try {
+			if (this.plugin.settings.debuggingMode) {
+				console.log(
+					"BRAT: addPlugin",
+					repositoryPath,
+					updatePluginFiles,
+					seeIfUpdatedOnly,
+					reportIfNotUpdted,
+					specifyVersion,
+					forceReinstall,
+					enableAfterInstall,
+					privateApiKey ? "private" : "public",
 				);
-			} else {
-				const versionText = specifyVersion === "" ? "" : ` (version: ${specifyVersion})`;
-				let msg = `${repositoryPath}${versionText}\nThe plugin has been registered with BRAT.`;
-				if (!enableAfterInstall) {
-					msg += " You may still need to enable it the Community Plugin List.";
-				}
-				await this.plugin.log(msg, true);
-				toastMessage(this.plugin, msg, noticeTimeout);
-			}
-		} else {
-			// test if the plugin needs to be updated
-			// if a specified version is provided, then we shall skip the update
-			const pluginTargetFolderPath = `${this.plugin.app.vault.configDir}/plugins/${primaryManifest.id}/`;
-			let localManifestContents = "";
-			try {
-				localManifestContents = await this.plugin.app.vault.adapter.read(`${pluginTargetFolderPath}manifest.json`);
-			} catch (e) {
-				if ((e as ErrnoType).errno === -4058 || (e as ErrnoType).errno === -2) {
-					// file does not exist, try installing the plugin
-					await this.addPlugin(repositoryPath, false, usingBetaManifest, false, specifyVersion, false, enableAfterInstall, privateApiKey);
-					// even though failed, return true since install will be attempted
-					return true;
-				}
-				console.log("BRAT - Local Manifest Load", primaryManifest.id, JSON.stringify(e, null, 2));
 			}
 
-			if (specifyVersion !== "" && specifyVersion !== "latest") {
-				// skip the frozen version plugin
-				toastMessage(this.plugin, `The version of ${repositoryPath} is frozen, not updating.`, 3);
+			const noticeTimeout = 10;
+			// attempt to get manifest-beta.json
+			let primaryManifest = await this.validateRepository(repositoryPath, true, true, specifyVersion, privateApiKey);
+			const usingBetaManifest: boolean = !!primaryManifest;
+			// attempt to get manifest.json
+			if (!usingBetaManifest) primaryManifest = await this.validateRepository(repositoryPath, false, true, specifyVersion, privateApiKey);
+
+			if (primaryManifest === null) {
+				const msg = `${repositoryPath}\nA manifest.json file does not exist in the latest release of the repository. This plugin cannot be installed.`;
+				await this.plugin.log(msg, true);
+				toastMessage(this.plugin, msg, noticeTimeout);
 				return false;
 			}
 
-			const localManifestJson = (await JSON.parse(localManifestContents)) as PluginManifest;
-			// FIX for issue #105: Not all developers use semver compliant version tags
-			const localVersion = semverCoerce(localManifestJson.version, {includePrerelease: true, loose: true});
-			const remoteVersion = semverCoerce(primaryManifest.version, {includePrerelease: true, loose: true});
-			if (compareVersions(localVersion, remoteVersion) === -1) {
-				// Remote version is higher, update
+			if (!Object.hasOwn(primaryManifest, "version")) {
+				const msg = `${repositoryPath}\nThe manifest.json file in the latest release or pre-release of the repository does not have a version number in the file. This plugin cannot be installed.`;
+				await this.plugin.log(msg, true);
+				toastMessage(this.plugin, msg, noticeTimeout);
+				return false;
+			}
+
+			// Check manifest minAppVersion and current version of Obisidan, don't load plugin if not compatible
+			if (!Object.hasOwn(primaryManifest, "minAppVersion")) {
+				if (!requireApiVersion(primaryManifest.minAppVersion)) {
+					const msg = `Plugin: ${repositoryPath}\n\nThe manifest.json for this plugin indicates that the Obsidian version of the app needs to be ${primaryManifest.minAppVersion}, but this installation of Obsidian is ${apiVersion}. \n\nYou will need to update your Obsidian to use this plugin or contact the plugin developer for more information.`;
+					await this.plugin.log(msg, true);
+					toastMessage(this.plugin, msg, 30);
+					return false;
+				}
+			}
+
+			// now the user must be able to access the repo
+
+			interface ErrnoType {
+				errno: number;
+			}
+
+			const getRelease = async () => {
+				const rFiles = await this.getAllReleaseFiles(repositoryPath, primaryManifest, usingBetaManifest, specifyVersion, privateApiKey);
+
+				console.log("rFiles", rFiles);
+				// if beta, use that manifest, or if there is no manifest in release, use the primaryManifest
+				if (usingBetaManifest || rFiles.manifest === "") rFiles.manifest = JSON.stringify(primaryManifest);
+
+				if (this.plugin.settings.debuggingMode) console.log("BRAT: rFiles.manifest", usingBetaManifest, rFiles);
+
+				if (rFiles.mainJs === null) {
+					const msg = `${repositoryPath}\nThe release is not complete and cannot be download. main.js is missing from the Release`;
+					await this.plugin.log(msg, true);
+					toastMessage(this.plugin, msg, noticeTimeout);
+					return null;
+				}
+				return rFiles;
+			};
+
+			if (!updatePluginFiles || forceReinstall) {
 				const releaseFiles = await getRelease();
 				if (releaseFiles === null) return false;
+				await this.writeReleaseFilesToPluginFolder(primaryManifest.id, releaseFiles);
+				if (!forceReinstall) addBetaPluginToList(this.plugin, repositoryPath, specifyVersion, privateApiKey);
+				if (enableAfterInstall) {
+					const { plugins } = this.plugin.app;
+					const pluginTargetFolderPath = normalizePath(`${plugins.getPluginFolder()}/${primaryManifest.id}`);
+					await plugins.loadManifest(pluginTargetFolderPath);
+					await plugins.enablePluginAndSave(primaryManifest.id);
+				}
+				await this.plugin.app.plugins.loadManifests();
+				if (forceReinstall) {
+					// reload if enabled
+					await this.reloadPlugin(primaryManifest.id);
+					await this.plugin.log(`${repositoryPath} reinstalled`, true);
+					toastMessage(
+						this.plugin,
+						`${repositoryPath}\nPlugin has been reinstalled and reloaded with version ${primaryManifest.version}`,
+						noticeTimeout,
+					);
+				} else {
+					const versionText = specifyVersion === "" ? "" : ` (version: ${specifyVersion})`;
+					let msg = `${repositoryPath}${versionText}\nThe plugin has been registered with BRAT.`;
+					if (!enableAfterInstall) {
+						msg += " You may still need to enable it the Community Plugin List.";
+					}
+					await this.plugin.log(msg, true);
+					toastMessage(this.plugin, msg, noticeTimeout);
+				}
+			} else {
+				// test if the plugin needs to be updated
+				// if a specified version is provided, then we shall skip the update
+				const pluginTargetFolderPath = `${this.plugin.app.vault.configDir}/plugins/${primaryManifest.id}/`;
+				let localManifestContents = "";
+				try {
+					localManifestContents = await this.plugin.app.vault.adapter.read(`${pluginTargetFolderPath}manifest.json`);
+				} catch (e) {
+					if ((e as ErrnoType).errno === -4058 || (e as ErrnoType).errno === -2) {
+						// file does not exist, try installing the plugin
+						await this.addPlugin(repositoryPath, false, usingBetaManifest, false, specifyVersion, false, enableAfterInstall, privateApiKey);
+						// even though failed, return true since install will be attempted
+						return true;
+					}
+					console.log("BRAT - Local Manifest Load", primaryManifest.id, JSON.stringify(e, null, 2));
+				}
 
-				if (seeIfUpdatedOnly) {
-					// dont update, just report it
-					const msg = `There is an update available for ${primaryManifest.id} from version ${localManifestJson.version} to ${primaryManifest.version}. `;
+				if (specifyVersion !== "" && specifyVersion !== "latest") {
+					// skip the frozen version plugin
+					toastMessage(this.plugin, `The version of ${repositoryPath} is frozen, not updating.`, 3);
+					return false;
+				}
+
+				const localManifestJson = (await JSON.parse(localManifestContents)) as PluginManifest;
+				// FIX for issue #105: Not all developers use semver compliant version tags
+				const localVersion = semverCoerce(localManifestJson.version, { includePrerelease: true, loose: true });
+				const remoteVersion = semverCoerce(primaryManifest.version, { includePrerelease: true, loose: true });
+				if (compareVersions(localVersion, remoteVersion) === -1) {
+					// Remote version is higher, update
+					const releaseFiles = await getRelease();
+					if (releaseFiles === null) return false;
+
+					if (seeIfUpdatedOnly) {
+						// dont update, just report it
+						const msg = `There is an update available for ${primaryManifest.id} from version ${localManifestJson.version} to ${primaryManifest.version}. `;
+						await this.plugin.log(
+							`${msg}[Release Info](https://github.com/${repositoryPath}/releases/tag/${primaryManifest.version})`,
+							true,
+						);
+						toastMessage(this.plugin, msg, 30, () => {
+							if (primaryManifest) {
+								window.open(`https://github.com/${repositoryPath}/releases/tag/${primaryManifest.version}`);
+							}
+						});
+						return false;
+					}
+					await this.writeReleaseFilesToPluginFolder(primaryManifest.id, releaseFiles);
+					// @ts-ignore
+					await this.plugin.app.plugins.loadManifests();
+					await this.reloadPlugin(primaryManifest.id);
+					const msg = `${primaryManifest.id}\nPlugin has been updated from version ${localManifestJson.version} to ${primaryManifest.version}. `;
 					await this.plugin.log(`${msg}[Release Info](https://github.com/${repositoryPath}/releases/tag/${primaryManifest.version})`, true);
 					toastMessage(this.plugin, msg, 30, () => {
 						if (primaryManifest) {
 							window.open(`https://github.com/${repositoryPath}/releases/tag/${primaryManifest.version}`);
 						}
 					});
-					return false;
+					return true;
 				}
-				await this.writeReleaseFilesToPluginFolder(primaryManifest.id, releaseFiles);
-				// @ts-ignore
-				await this.plugin.app.plugins.loadManifests();
-				await this.reloadPlugin(primaryManifest.id);
-				const msg = `${primaryManifest.id}\nPlugin has been updated from version ${localManifestJson.version} to ${primaryManifest.version}. `;
-				await this.plugin.log(`${msg}[Release Info](https://github.com/${repositoryPath}/releases/tag/${primaryManifest.version})`, true);
-				toastMessage(this.plugin, msg, 30, () => {
-					if (primaryManifest) {
-						window.open(`https://github.com/${repositoryPath}/releases/tag/${primaryManifest.version}`);
-					}
-				});
+
+				if (reportIfNotUpdted) {
+					toastMessage(this.plugin, `No update available for ${repositoryPath}`, 3);
+				}
 				return true;
 			}
+		} catch (error) {
+			// Log the error with context
+			console.error(`BRAT: Error adding plugin ${repositoryPath}:`, {
+				error,
+				updatePluginFiles,
+				seeIfUpdatedOnly,
+				specifyVersion,
+				forceReinstall,
+			});
 
-			if (reportIfNotUpdted) {
-				toastMessage(this.plugin, `No update available for ${repositoryPath}`, 3);
-			}
-			return true;
+			// Show user-friendly error message
+			const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
+			// Log to BRAT's logging system
+			await this.plugin.log(`Error ${updatePluginFiles ? "updating" : "adding"} plugin ${repositoryPath}: ${errorMessage}`, true);
+
+			return false;
 		}
-		return true;
+
+		return false;
 	}
 
 	/**

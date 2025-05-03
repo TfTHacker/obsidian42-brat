@@ -1,6 +1,6 @@
 import { ButtonComponent, Modal, Setting, type TextComponent } from "obsidian";
 import { type ReleaseVersion, fetchReleaseVersions } from "src/features/githubUtils";
-import { GHRateLimitError } from "src/utils/GHRateLimitError";
+import { GHRateLimitError, GitHubResponseError } from "src/utils/GitHubAPIErrors";
 import { createLink } from "src/utils/utils";
 import type BetaPlugins from "../features/BetaPlugins";
 import type BratPlugin from "../main";
@@ -380,7 +380,7 @@ export default class AddNewPluginModal extends Modal {
 					this.addPluginButton?.setDisabled(true);
 				}
 			}
-		} catch (error) {
+		} catch (error: unknown) {
 			if (error instanceof GHRateLimitError) {
 				// Add invalid-repository class
 				validateInputEl?.inputEl.classList.remove("valid-repository");
@@ -403,6 +403,22 @@ export default class AddNewPluginModal extends Modal {
 				);
 
 				// toastMessage(this.plugin, `GitHub API rate limit exceeded. Try again in ${error.getMinutesToReset()} minutes.`, 10);
+			}
+
+			if (error instanceof GitHubResponseError) {
+				const gitHubError = error as GitHubResponseError;
+				switch (gitHubError.status) {
+					case 404:
+						validationStatusEl?.setText("Repository not found.");
+						break;
+					case 403:
+						validationStatusEl?.setText("Access denied. Check your personal access token.");
+						break;
+					default:
+						validationStatusEl?.setText(`Error: ${gitHubError.message}`);
+						break;
+				}
+				toastMessage(this.plugin, `${gitHubError.message} `, 20);
 			}
 		}
 	}
