@@ -24,8 +24,7 @@ export class BratSettingsTab extends PluginSettingTab {
 				'If enabled beta plugins will be automatically enabled after installtion by default. Note: you can toggle this on and off for each plugin in the "Add Plugin" form.',
 			)
 			.addToggle((cb: ToggleComponent) => {
-				cb.setValue(this.plugin.settings.enableAfterInstall);
-				cb.onChange(async (value: boolean) => {
+				cb.setValue(this.plugin.settings.enableAfterInstall).onChange(async (value: boolean) => {
 					this.plugin.settings.enableAfterInstall = value;
 					await this.plugin.saveSettings();
 				});
@@ -37,8 +36,7 @@ export class BratSettingsTab extends PluginSettingTab {
 				"If enabled all beta plugins will be checked for updates each time Obsidian starts. Note: this does not update frozen version plugins.",
 			)
 			.addToggle((cb: ToggleComponent) => {
-				cb.setValue(this.plugin.settings.updateAtStartup);
-				cb.onChange(async (value: boolean) => {
+				cb.setValue(this.plugin.settings.updateAtStartup).onChange(async (value: boolean) => {
 					this.plugin.settings.updateAtStartup = value;
 					await this.plugin.saveSettings();
 				});
@@ -48,8 +46,7 @@ export class BratSettingsTab extends PluginSettingTab {
 			.setName("Auto-update themes at startup")
 			.setDesc("If enabled all beta themes will be checked for updates each time Obsidian starts.")
 			.addToggle((cb: ToggleComponent) => {
-				cb.setValue(this.plugin.settings.updateThemesAtStartup);
-				cb.onChange(async (value: boolean) => {
+				cb.setValue(this.plugin.settings.updateThemesAtStartup).onChange(async (value: boolean) => {
 					this.plugin.settings.updateThemesAtStartup = value;
 					await this.plugin.saveSettings();
 				});
@@ -72,8 +69,7 @@ export class BratSettingsTab extends PluginSettingTab {
 		});
 
 		new Setting(containerEl).addButton((cb: ButtonComponent) => {
-			cb.setButtonText("Add beta plugin");
-			cb.onClick(() => {
+			cb.setButtonText("Add beta plugin").onClick(() => {
 				this.plugin.betaPlugins.displayAddNewPluginModal(true, true);
 			});
 		});
@@ -93,9 +89,8 @@ export class BratSettingsTab extends PluginSettingTab {
 					btn
 						.setIcon("sync")
 						.setTooltip("Check and update plugin")
-						.setClass("mod-cta")
 						.onClick(async () => {
-							const updated = await this.plugin.betaPlugins.updatePlugin(p, false, true, false, bp?.token);
+							await this.plugin.betaPlugins.updatePlugin(p, false, true, false, bp?.token);
 						});
 				});
 			}
@@ -103,36 +98,38 @@ export class BratSettingsTab extends PluginSettingTab {
 			// Container for the edit and removal buttons
 			pluginSettingContainer
 				.addButton((btn: ButtonComponent) => {
-					btn.setIcon("edit");
-					btn.setTooltip("Change version");
-					btn.onClick(() => {
-						this.plugin.betaPlugins.displayAddNewPluginModal(true, true, p, bp?.version, bp?.token);
-						this.plugin.app.setting.updatePluginSection();
-					});
+					btn
+						.setIcon("edit")
+						.setTooltip("Change version")
+						.onClick(() => {
+							this.plugin.betaPlugins.displayAddNewPluginModal(true, true, p, bp?.version, bp?.token);
+							this.plugin.app.setting.updatePluginSection();
+						});
 				})
 				.addButton((btn: ButtonComponent) => {
-					btn.setIcon("cross");
-					btn.setTooltip("Remove this beta plugin");
-					btn.setWarning();
-					btn.onClick(() => {
-						if (btn.buttonEl.textContent === "") btn.setButtonText("Click once more to confirm removal");
-						else {
-							const { buttonEl } = btn;
-							const { parentElement } = buttonEl;
-							if (parentElement?.parentElement) {
-								parentElement.parentElement.remove();
-								this.plugin.betaPlugins.deletePlugin(p);
+					btn
+						.setIcon("cross")
+						.setTooltip("Remove this beta plugin")
+						.setWarning()
+						.onClick(() => {
+							if (btn.buttonEl.textContent === "") {
+								btn.setButtonText("Click once more to confirm removal");
+							} else {
+								const { buttonEl } = btn;
+								const { parentElement } = buttonEl;
+								if (parentElement?.parentElement) {
+									parentElement.parentElement.remove();
+									this.plugin.betaPlugins.deletePlugin(p);
+								}
 							}
-						}
-					});
+						});
 				});
 		}
 
 		new Setting(containerEl).setName("Beta themes list").setHeading();
 
 		new Setting(containerEl).addButton((cb: ButtonComponent) => {
-			cb.setButtonText("Add beta theme");
-			cb.onClick(() => {
+			cb.setButtonText("Add beta theme").onClick(() => {
 				this.plugin.app.setting.close();
 				new AddNewTheme(this.plugin).open();
 			});
@@ -140,19 +137,20 @@ export class BratSettingsTab extends PluginSettingTab {
 
 		for (const bp of this.plugin.settings.themesList) {
 			new Setting(containerEl).setName(createLink(bp.repo)).addButton((btn: ButtonComponent) => {
-				btn.setIcon("cross");
-				btn.setTooltip("Delete this beta theme");
-				btn.onClick(() => {
-					if (btn.buttonEl.textContent === "") btn.setButtonText("Click once more to confirm removal");
-					else {
-						const { buttonEl } = btn;
-						const { parentElement } = buttonEl;
-						if (parentElement?.parentElement) {
-							parentElement.parentElement.remove();
-							themeDelete(this.plugin, bp.repo);
+				btn
+					.setIcon("cross")
+					.setTooltip("Delete this beta theme")
+					.onClick(() => {
+						if (btn.buttonEl.textContent === "") btn.setButtonText("Click once more to confirm removal");
+						else {
+							const { buttonEl } = btn;
+							const { parentElement } = buttonEl;
+							if (parentElement?.parentElement) {
+								parentElement.parentElement.remove();
+								themeDelete(this.plugin, bp.repo);
+							}
 						}
-					}
-				});
+					});
 			});
 		}
 
@@ -173,8 +171,7 @@ export class BratSettingsTab extends PluginSettingTab {
 			.setName("Enable logging")
 			.setDesc("Plugin updates will be logged to a file in the log file.")
 			.addToggle((cb: ToggleComponent) => {
-				cb.setValue(this.plugin.settings.loggingEnabled);
-				cb.onChange(async (value: boolean) => {
+				cb.setValue(this.plugin.settings.loggingEnabled).onChange(async (value: boolean) => {
 					this.plugin.settings.loggingEnabled = value;
 					await this.plugin.saveSettings();
 				});
@@ -196,8 +193,7 @@ export class BratSettingsTab extends PluginSettingTab {
 			.setName("Enable verbose logging")
 			.setDesc("Get a lot  more information in  the log.")
 			.addToggle((cb: ToggleComponent) => {
-				cb.setValue(this.plugin.settings.loggingVerboseEnabled);
-				cb.onChange(async (value: boolean) => {
+				cb.setValue(this.plugin.settings.loggingVerboseEnabled).onChange(async (value: boolean) => {
 					this.plugin.settings.loggingVerboseEnabled = value;
 					await this.plugin.saveSettings();
 				});
@@ -207,8 +203,7 @@ export class BratSettingsTab extends PluginSettingTab {
 			.setName("Debugging mode")
 			.setDesc("Atomic Bomb level console logging. Can be used for troubleshoting and development.")
 			.addToggle((cb: ToggleComponent) => {
-				cb.setValue(this.plugin.settings.debuggingMode);
-				cb.onChange(async (value: boolean) => {
+				cb.setValue(this.plugin.settings.debuggingMode).onChange(async (value: boolean) => {
 					this.plugin.settings.debuggingMode = value;
 					await this.plugin.saveSettings();
 				});
