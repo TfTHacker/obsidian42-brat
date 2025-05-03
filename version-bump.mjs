@@ -20,7 +20,7 @@ if (targetSemver.prerelease.length === 0) {
     writeFileSync("versions.json", JSON.stringify(versions, null, "\t"));
   }
 } else {
-  console.warning(
+  console.log(
     `Skipping version bump in manifest.json for pre-release version: ${targetVersion}`
   );
 }
