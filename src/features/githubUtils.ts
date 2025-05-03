@@ -333,8 +333,6 @@ export const gitHubRequest = async (options: RequestUrlParam, debugLogging?: tru
 	let remaining = 0;
 	let reset = 0;
 
-	const now = Math.floor(Date.now() / 1000);
-
 	try {
 		const response = await request(options);
 		return response;
