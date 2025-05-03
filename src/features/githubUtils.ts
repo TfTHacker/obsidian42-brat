@@ -46,10 +46,10 @@ export const isPrivateRepo = async (repository: string, debugLogging = true, acc
  * @returns array of version strings, or null if error
  */
 export const fetchReleaseVersions = async (repository: string, debugLogging = true, accessToken = ""): Promise<ReleaseVersion[] | null> => {
-	const URL = `https://api.github.com/repos/${repository}/releases`;
+	const apiUrl = `https://api.github.com/repos/${repository}/releases`;
 	try {
 		const response = await gitHubRequest({
-			url: URL,
+			url: `${apiUrl}?per_page=100`,
 			headers: accessToken
 				? {
 						Authorization: `Token ${accessToken}`,
@@ -67,7 +67,7 @@ export const fetchReleaseVersions = async (repository: string, debugLogging = tr
 			throw error; // Rethrow rate limit errors
 		}
 
-		if (debugLogging) console.log("error in fetchReleaseVersions", URL, error);
+		if (debugLogging) console.log("error in fetchReleaseVersions", apiUrl, error);
 		return null;
 	}
 };
@@ -288,7 +288,7 @@ export const grabReleaseFromRepository = async (
 		}
 
 		const response = await gitHubRequest({
-			url: apiUrl,
+			url: `${apiUrl}?per_page=100`,
 			headers,
 		});
 
