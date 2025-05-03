@@ -511,7 +511,7 @@ export default class BetaPlugins {
 			return false;
 		}
 
-		return false;
+		return true;
 	}
 
 	/**
