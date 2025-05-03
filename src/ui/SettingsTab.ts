@@ -93,13 +93,14 @@ export class BratSettingsTab extends PluginSettingTab {
 					btn
 						.setIcon("sync")
 						.setTooltip("Check and update plugin")
+						.setClass("mod-cta")
 						.onClick(async () => {
 							const updated = await this.plugin.betaPlugins.updatePlugin(p, false, true, false, bp?.token);
 						});
 				});
 			}
 
-			// Container for the edit and delete buttons
+			// Container for the edit and removal buttons
 			pluginSettingContainer
 				.addButton((btn: ButtonComponent) => {
 					btn.setIcon("edit");
@@ -111,7 +112,8 @@ export class BratSettingsTab extends PluginSettingTab {
 				})
 				.addButton((btn: ButtonComponent) => {
 					btn.setIcon("cross");
-					btn.setTooltip("Delete this beta plugin");
+					btn.setTooltip("Remove this beta plugin");
+					btn.setWarning();
 					btn.onClick(() => {
 						if (btn.buttonEl.textContent === "") btn.setButtonText("Click once more to confirm removal");
 						else {
