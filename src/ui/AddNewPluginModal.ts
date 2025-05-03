@@ -1,4 +1,4 @@
-import { ButtonComponent, Modal, Setting, type TextComponent } from "obsidian";
+import { ButtonComponent, Modal, Platform, Setting, type TextComponent } from "obsidian";
 import { type ReleaseVersion, fetchReleaseVersions } from "src/features/githubUtils";
 import { GHRateLimitError, GitHubResponseError } from "src/utils/GitHubAPIErrors";
 import { createLink } from "src/utils/utils";
@@ -99,7 +99,8 @@ export default class AddNewPluginModal extends Modal {
 
 		const VERSION_THRESHOLD = 20;
 
-		if (versions.length < VERSION_THRESHOLD) {
+		// With fewer than 20 versions, or on mobile, use a dropdown
+		if (versions.length < VERSION_THRESHOLD || Platform.isMobile) {
 			// Use dropdown for fewer versions
 			settingEl.addDropdown((dropdown) => {
 				dropdown.addOption("", "Select a version");
