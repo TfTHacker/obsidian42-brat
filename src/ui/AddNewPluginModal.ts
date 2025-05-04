@@ -270,7 +270,7 @@ export default class AddNewPluginModal extends Modal {
 
 				this.addPluginButton = new ButtonComponent(buttonContainerEl)
 					.setButtonText(this.trackFixedVersion ? (this.address ? "Change version" : "Add plugin") : "Add plugin")
-					.setClass("mod-cta")
+					.setCta()
 					.onClick((e: Event) => {
 						e.preventDefault();
 						if (this.address !== "") {

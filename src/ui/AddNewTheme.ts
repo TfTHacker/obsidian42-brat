@@ -1,4 +1,4 @@
-import { Modal, Setting } from "obsidian";
+import { ButtonComponent, Modal, Setting } from "obsidian";
 import { themeSave } from "../features/themes";
 import type BratPlugin from "../main";
 import { existBetaThemeinInList } from "../settings";
@@ -60,13 +60,14 @@ export default class AddNewTheme extends Modal {
 			});
 
 			formEl.createDiv("modal-button-container", (buttonContainerEl) => {
-				buttonContainerEl.createEl("button", { attr: { type: "button" }, text: "Never mind" }).addEventListener("click", () => {
+				new ButtonComponent(buttonContainerEl).setButtonText("Never mind").onClick(() => {
 					this.close();
 				});
-				buttonContainerEl.createEl("button", {
-					attr: { type: "submit" },
-					cls: "mod-cta",
-					text: "Add theme",
+
+				new ButtonComponent(buttonContainerEl).setButtonText("Add theme").setCta().onClick((e: Event) => {
+					e.preventDefault();
+					console.log("Add theme button clicked");
+					if (this.address !== "") void this.submitForm();
 				});
 			});
 
@@ -86,11 +87,6 @@ export default class AddNewTheme extends Modal {
 				}
 			}, 50);
 
-			// invoked when button is clicked.
-			formEl.addEventListener("submit", (e: Event) => {
-				e.preventDefault();
-				if (this.address !== "") void this.submitForm();
-			});
 		});
 	}
 
