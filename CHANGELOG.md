@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.1.6
+## [1.1.6](https://github.com/TfTHacker/obsidian42-brat/releases/1.1.6)
 
 ### Features
 
@@ -13,7 +13,7 @@
 * 🥅 catch API authentication errors
 * 🐛 fetch more versions
 
-## 1.1.5
+## [1.1.5](https://github.com/TfTHacker/obsidian42-brat/releases/1.1.5)
 
 ## Documentation 
 
@@ -24,14 +24,14 @@
 
 * fix: :safety_vest: improve handling of *almost-but-not-quite* semver version compliance
 
-## 1.1.4
+## [1.1.4](https://github.com/TfTHacker/obsidian42-brat/releases/1.1.4)
 
 ### Bug Fixes
 
 * 🚸 better ux when installing
 * 🚸 don't attempt to sort releases again, closes [#103](https://github.com/TfTHacker/obsidian42-brat/issues/103)
 
-## 1.1.3
+## [1.1.3](https://github.com/TfTHacker/obsidian42-brat/releases/1.1.3)
 
 ### Documentation
 - 🧑‍💻 add section on github api rate limits and PAT's
@@ -45,13 +45,13 @@
 - 🥅 catch and inform user about GitHub Rate Limits
 
 
-## 1.1.2
+## [1.1.2](https://github.com/TfTHacker/obsidian42-brat/releases/1.1.2)
 
 ### Features 
 -  ✨ Unify regular and frozen plugins into one list (tracking `latest` or freezing a specific version)
 - ✨ Added quick update check button for plugins tracking latest version in settings tab
 
-## 1.1.1
+## [1.1.1](https://github.com/TfTHacker/obsidian42-brat/releases/1.1.1)
 
 ### Features 
 - ✨ Support for private repositories in frozen version mode with per repo API Key
@@ -61,7 +61,7 @@
 - 🚑️ Only use API token for GitHub requests if one is provided
 - 💄 Display repository as text instead of input field for existing frozen version plugins
 
-## 1.1.0
+## [1.1.0](https://github.com/TfTHacker/obsidian42-brat/releases/1.1.0)
 
 ### Features 
 - ✨ use manifest from github releases instead of repository root
@@ -80,11 +80,11 @@ Note: `manifest-beta.json` is still supported for backwards compatibility but is
 
 **Full Changelog**: <https://github.com/TfTHacker/obsidian42-brat/compare/1.0.6...1.1.0>
 
-## 1.0.6
+## [1.0.6](https://github.com/TfTHacker/obsidian42-brat/releases/1.0.6)
 
 - Fix: [#92](https://github.com/TfTHacker/obsidian42-brat/issues/92) - BRAT icon could not be disabled.
 
-## 1.0.5
+## [1.0.5](https://github.com/TfTHacker/obsidian42-brat/releases/1.0.5)
 
 ### Updates
 
@@ -93,21 +93,21 @@ Note: `manifest-beta.json` is still supported for backwards compatibility but is
 - Transition to Biome from EsLint and Prettier.
 - The output log file format for when debugging is enabled in BRAT has changed. It now appends to the log file, not prepends.
 
-## 1.0.3
+## [1.0.3](https://github.com/TfTHacker/obsidian42-brat/releases/1.0.3)
 
 ### fix
 
 - modified main.ts to better conform to obdisidan.dt.ts
 - chore: update all dependencies.
 
-## 1.0.2
+## [1.0.2](https://github.com/TfTHacker/obsidian42-brat/releases/1.0.2)
 
 ### Fix
 
 - Improved the update logic to better handle when a personal access token has failed.
 - chore: update all dependencies.
 
-## 1.0.1
+## [1.0.1](https://github.com/TfTHacker/obsidian42-brat/releases/1.0.1)
 
 ### New
 
@@ -115,21 +115,21 @@ Note: `manifest-beta.json` is still supported for backwards compatibility but is
 - BRAT is no longer in beta, though it will always be in beta since we add new features. So I am bumping this up to 1.0.0.
 - Moved the build process to use GitHub Actions. This will allow for more automation in the future.
 
-## 0.8.3
+## [0.8.3](https://github.com/TfTHacker/obsidian42-brat/releases/0.8.3)
 
 ### Fix
 
 - New auto-enable for new plugin installs not persisting the enabled state. (Issue: <https://github.com/TfTHacker/obsidian42-brat/issues/74>)
 - chore: update all dependencies.
 
-## 0.8.2
+## [0.8.2](https://github.com/TfTHacker/obsidian42-brat/releases/0.8.2)
 
 ### New
 
 - A new setting controls if a beta plugin is auto-enabled after installation. This means after it is installed, it will be enabled in settings. This reduces the additional step of manually enabling a plugin after installation. This setting is now enabled by default.
 - chore: update all dependencies.
 
-## 0.8.1
+## [0.8.1](https://github.com/TfTHacker/obsidian42-brat/releases/0.8.1)
 
 ### New
 
@@ -141,7 +141,7 @@ Note: `manifest-beta.json` is still supported for backwards compatibility but is
 
 - Bug introduced with 8.02 when manifest-beta.json is used that a plugin will not installed. (<https://github.com/TfTHacker/obsidian42-brat/issues/71>) Thank you for reporting this [mProjectsCode](https://github.com/mProjectsCode).
 
-## 0.8.0
+## [0.8.0](https://github.com/TfTHacker/obsidian42-brat/releases/0.8.0)
 
 ### New
 
@@ -151,7 +151,7 @@ Note: `manifest-beta.json` is still supported for backwards compatibility but is
 - **Major** code refactoring - the goal was to make this strongly typed according to Typescript rules and additionally applied a new protocol to the formatting of the code. The result is extensive changes in all files. While this won't mean a lot to users, it will make the code easier to maintain and understand for others.
 - chore: update all dependencies.
 
-## 0.7.1
+## [0.7.1](https://github.com/TfTHacker/obsidian42-brat/releases/0.7.1)
 
 ### New
 
@@ -165,7 +165,7 @@ Note: `manifest-beta.json` is still supported for backwards compatibility but is
 
 - updated to the newest esbuild and also all project dependencies
 
-## 0.7.0
+## [0.7.0](https://github.com/TfTHacker/obsidian42-brat/releases/0.7.0)
 
 ## Major updates to **THEMES** support
 
@@ -185,7 +185,7 @@ Note: `manifest-beta.json` is still supported for backwards compatibility but is
 
 ---
 
-# 0.6.37
+# [0.6.37](https://github.com/TfTHacker/obsidian42-brat/releases/0.6.37)
 
 - Bug fixes
 - Updating core libraries
