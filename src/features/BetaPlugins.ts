@@ -404,11 +404,13 @@ export default class BetaPlugins {
 				await this.writeReleaseFilesToPluginFolder(primaryManifest.id, releaseFiles);
 				if (!forceReinstall) addBetaPluginToList(this.plugin, repositoryPath, specifyVersion, privateApiKey);
 				if (enableAfterInstall) {
+					// @ts-ignore
 					const { plugins } = this.plugin.app;
 					const pluginTargetFolderPath = normalizePath(`${plugins.getPluginFolder()}/${primaryManifest.id}`);
 					await plugins.loadManifest(pluginTargetFolderPath);
 					await plugins.enablePluginAndSave(primaryManifest.id);
 				}
+				// @ts-ignore
 				await this.plugin.app.plugins.loadManifests();
 				if (forceReinstall) {
 					// reload if enabled
@@ -623,6 +625,7 @@ export default class BetaPlugins {
 		// @ts-ignore
 		const pl = this.plugin.app.plugins;
 		const manifests: PluginManifest[] = Object.values(pl.manifests);
+		// @ts-ignore
 		const enabledPlugins: PluginManifest[] = Object.values(pl.plugins).map((p) => p.manifest);
 		return enabled
 			? manifests.filter((manifest) => enabledPlugins.find((pluginName) => manifest.id === pluginName.id))
