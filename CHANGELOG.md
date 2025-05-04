@@ -1,39 +1,74 @@
 # Changelog
 
-## [1.1.6](https://github.com/TfTHacker/obsidian42-brat/compare/1.1.6-beta.1...1.1.6) (2025-05-04)
+## 1.1.6
+
+### Features
+
+* feat: ✨ use suggest modal for long plugin version lists (See also [#107](https://github.com/TfTHacker/obsidian42-brat/issues/107))
 
 ### Bug Fixes
 
-* :bug: fix a regression with addPlugin calls and error handling ([3e81f08](https://github.com/TfTHacker/obsidian42-brat/commit/3e81f0898f1803204958fce7e82a350b60a06b93))
-* :children_crossing: on mobile, always use a dropdown for the versions selection ([81bf4fb](https://github.com/TfTHacker/obsidian42-brat/commit/81bf4fb6cd1710936862e1faf6cd8e708d60d3e4))
+* :bug: fix a regression with addPlugin calls and error handling 
+* :children_crossing: on mobile, always use a dropdown for the versions selection
+* 🥅 catch API authentication errors
+* 🐛 fetch more versions
+
+## 1.1.5
+
+## Documentation 
+
+* :safety_vest: update developer docs
+* :memo: clarify that releases are selected based on release tag
+
+## Bug Fixes
+
+* fix: :safety_vest: improve handling of *almost-but-not-quite* semver version compliance
+
+## 1.1.4
+
+### Bug Fixes
+
+* 🚸 better ux when installing
+* 🚸 don't attempt to sort releases again, closes [#103](https://github.com/TfTHacker/obsidian42-brat/issues/103)
 
 ## 1.1.3
 
-- perf: 🚸 open blank target window when creating link elements
-- fix: 🐛 include private access token for individual repository  in update check
-- fix: 🐛 fix update command suggester for refactored plugin list
-- fix: 🥅 catch and inform user about GitHub Rate Limits
-- docs: 🧑‍💻 add section on github api rate limits and PAT's
+### Documentation
+- 🧑‍💻 add section on github api rate limits and PAT's
+
+### Performance 
+- 🚸 open blank target window when creating link elements
+
+### Bug Fixes
+-  🐛 include private access token for individual repository  in update check
+- 🐛 fix update command suggester for refactored plugin list
+- 🥅 catch and inform user about GitHub Rate Limits
+
 
 ## 1.1.2
 
-- feat: ✨ Unify regular and frozen plugins into one list (tracking `latest` or freezing a specific version)
-- feat: ✨ Added quick update check button for plugins tracking latest version in settings tab
+### Features 
+-  ✨ Unify regular and frozen plugins into one list (tracking `latest` or freezing a specific version)
+- ✨ Added quick update check button for plugins tracking latest version in settings tab
 
 ## 1.1.1
 
-- feat: ✨ Support for private repositories in frozen version mode with per repo API Key
-- feat: ✨ Improved validation of repository addresses
-- fix: 🚑️ Only use API token for GitHub requests if one is provided
-- fix: 💄 Display repository as text instead of input field for existing frozen version plugins
+### Features 
+- ✨ Support for private repositories in frozen version mode with per repo API Key
+- ✨ Improved validation of repository addresses
+
+### Bug Fixes
+- 🚑️ Only use API token for GitHub requests if one is provided
+- 💄 Display repository as text instead of input field for existing frozen version plugins
 
 ## 1.1.0
 
-- feat: ✨ use manifest from github releases instead of repository root
-- feat: ✨ fetch available versions into dropdown when adding frozen version
-- feat: ✨ allow user to update frozen version plugins
+### Features 
+- ✨ use manifest from github releases instead of repository root
+- ✨ fetch available versions into dropdown when adding frozen version
+- ✨ allow user to update frozen version plugins
 
-### Changes to Plugin Installation Process
+### ⚠️ Changes to Plugin Installation Process
 
 With v1.1.0, BRAT now uses GitHub releases as the source of truth for plugin installations:
 
