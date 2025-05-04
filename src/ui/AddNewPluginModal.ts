@@ -17,7 +17,7 @@ export default class AddNewPluginModal extends Modal {
 	betaPlugins: BetaPlugins;
 	address: string;
 	openSettingsTabAfterwards: boolean;
-	readonly trackFixedVersion: boolean;
+	readonly updateVersion: boolean;
 	enableAfterInstall: boolean;
 	version: string;
 	versionSetting: Setting | null = null;
@@ -29,7 +29,7 @@ export default class AddNewPluginModal extends Modal {
 		plugin: BratPlugin,
 		betaPlugins: BetaPlugins,
 		openSettingsTabAfterwards = false,
-		useFrozenVersion = false,
+		updateVersion = false,
 		prefillRepo = "",
 		prefillVersion = "",
 		prefillPrivateApiKey = "",
@@ -41,7 +41,7 @@ export default class AddNewPluginModal extends Modal {
 		this.version = prefillVersion;
 		this.privateApiKey = prefillPrivateApiKey;
 		this.openSettingsTabAfterwards = openSettingsTabAfterwards;
-		this.trackFixedVersion = useFrozenVersion;
+		this.updateVersion = updateVersion;
 		this.enableAfterInstall = plugin.settings.enableAfterInstall;
 	}
 
@@ -161,7 +161,7 @@ export default class AddNewPluginModal extends Modal {
 		this.contentEl.createEl("form", {}, (formEl) => {
 			formEl.addClass("brat-modal");
 
-			if (!this.address || !this.trackFixedVersion) {
+			if (!this.address || !this.updateVersion) {
 				const repoSetting = new Setting(formEl).setClass("repository-setting");
 
 				// Add validation status element
@@ -177,8 +177,8 @@ export default class AddNewPluginModal extends Modal {
 						repositoryAddressEl.setValue(this.address);
 						repositoryAddressEl.onChange((value) => {
 							this.address = value.trim();
-							if (this.trackFixedVersion && (!this.address || !this.isGitHubRepositoryMatch(this.address))) {
-								// Disable version dropdown if useFrozenVersion is true and address is empty
+							if (this.version !== "" && (!this.address || !this.isGitHubRepositoryMatch(this.address))) {
+								// Disable version dropdown if version is set and address is empty
 								if (this.versionSetting) {
 									this.updateVersionDropdown(this.versionSetting, []);
 									this.versionSetting.settingEl.classList.add("disabled-setting");
@@ -189,7 +189,7 @@ export default class AddNewPluginModal extends Modal {
 							}
 
 							// If the GitHub Repository matches the GitHub pattern, enable the "Add Plugin"
-							if (!this.trackFixedVersion) {
+							if (!this.version) {
 								if (this.isGitHubRepositoryMatch(this.address)) this.addPluginButton?.setDisabled(false);
 								else this.addPluginButton?.setDisabled(true);
 							}
@@ -197,7 +197,7 @@ export default class AddNewPluginModal extends Modal {
 
 						repositoryAddressEl.inputEl.addEventListener("keydown", async (e: KeyboardEvent) => {
 							if (e.key === "Enter") {
-								if (this.address && ((this.trackFixedVersion && this.version !== "") || !this.trackFixedVersion)) {
+								if (this.address && ((this.updateVersion && this.version !== "") || !this.updateVersion)) {
 									e.preventDefault();
 									this.addPluginButton?.setDisabled(true);
 									this.cancelButton?.setDisabled(true);
@@ -211,7 +211,7 @@ export default class AddNewPluginModal extends Modal {
 						});
 
 						// Update version dropdown when input loses focus
-						if (this.trackFixedVersion) {
+						if (this.updateVersion) {
 							repositoryAddressEl.inputEl.addEventListener("blur", async () => {
 								await this.updateRepositoryVersionInfo(this.version, repositoryAddressEl, validationStatusEl);
 							});
@@ -220,27 +220,26 @@ export default class AddNewPluginModal extends Modal {
 					});
 				});
 			}
-			if (this.trackFixedVersion) {
-				new Setting(formEl).setClass("api-setting").addText((textEl) => {
-					textEl
-						.setPlaceholder("GitHub API key for private repository (optional)")
-						.setValue(this.privateApiKey)
-						.onChange(async (value) => {
-							this.privateApiKey = value.trim();
-							// Update version dropdown when API key changes
-							if (this.address) {
-								await this.updateRepositoryVersionInfo(this.version, textEl);
-							}
-						});
-					textEl.inputEl.type = "password";
-					textEl.inputEl.style.width = "100%";
-				});
+			// Add private repo key
+			new Setting(formEl).setClass("api-setting").addText((textEl) => {
+				textEl
+					.setPlaceholder("GitHub API key for private repository (optional)")
+					.setValue(this.privateApiKey)
+					.onChange(async (value) => {
+						this.privateApiKey = value.trim();
+						// Update version dropdown when API key changes
+						if (this.address) {
+							await this.updateRepositoryVersionInfo(this.version, textEl);
+						}
+					});
+				textEl.inputEl.type = "password";
+				textEl.inputEl.style.width = "100%";
+			});
 
-				// Then add version dropdown
-				this.versionSetting = new Setting(formEl).setClass("version-setting").setClass("disabled-setting");
-				this.updateVersionDropdown(this.versionSetting, [], this.version);
-				this.versionSetting.setDisabled(true);
-			}
+			// Then add version dropdown
+			this.versionSetting = new Setting(formEl).setClass("version-setting").setClass("disabled-setting");
+			this.updateVersionDropdown(this.versionSetting, [], this.version);
+			this.versionSetting.setDisabled(true);
 
 			formEl.createDiv("modal-button-container", (buttonContainerEl) => {
 				buttonContainerEl.createEl(
@@ -269,12 +268,12 @@ export default class AddNewPluginModal extends Modal {
 					});
 
 				this.addPluginButton = new ButtonComponent(buttonContainerEl)
-					.setButtonText(this.trackFixedVersion ? (this.address ? "Change version" : "Add plugin") : "Add plugin")
+					.setButtonText(this.updateVersion ? (this.address ? "Change version" : "Add plugin") : "Add plugin")
 					.setCta()
 					.onClick((e: Event) => {
 						e.preventDefault();
 						if (this.address !== "") {
-							if ((this.trackFixedVersion && this.version !== "") || !this.trackFixedVersion) {
+							if ((this.updateVersion && this.version !== "") || !this.updateVersion) {
 								// Submit the form
 								this.addPluginButton?.setDisabled(true);
 								this.addPluginButton?.setButtonText("Installing …");
@@ -286,7 +285,7 @@ export default class AddNewPluginModal extends Modal {
 					});
 
 				// Disable "Add Plugin" if adding a frozen version only
-				if (this.trackFixedVersion || this.address === "") this.addPluginButton?.setDisabled(true);
+				if (this.updateVersion || this.address === "") this.addPluginButton?.setDisabled(true);
 			});
 
 			const newDiv = formEl.createDiv();
@@ -309,7 +308,7 @@ export default class AddNewPluginModal extends Modal {
 			formEl.addEventListener("submit", (e: Event) => {
 				e.preventDefault();
 				if (this.address !== "") {
-					if ((this.trackFixedVersion && this.version !== "") || !this.trackFixedVersion) {
+					if ((this.updateVersion && this.version !== "") || !this.updateVersion) {
 						this.addPluginButton?.setDisabled(true);
 						void this.submitForm();
 					}
@@ -343,7 +342,7 @@ export default class AddNewPluginModal extends Modal {
 			}
 			return;
 		}
-		if (this.versionSetting && this.trackFixedVersion) {
+		if (this.versionSetting && this.updateVersion) {
 			// Clear the version dropdown
 			this.updateVersionDropdown(this.versionSetting, [], selectedVersion);
 		}
