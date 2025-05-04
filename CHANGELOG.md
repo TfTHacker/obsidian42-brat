@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.6](https://github.com/TfTHacker/obsidian42-brat/compare/1.1.6-beta.1...1.1.6) (2025-05-04)
+
+### Bug Fixes
+
+* :bug: fix a regression with addPlugin calls and error handling ([3e81f08](https://github.com/TfTHacker/obsidian42-brat/commit/3e81f0898f1803204958fce7e82a350b60a06b93))
+* :children_crossing: on mobile, always use a dropdown for the versions selection ([81bf4fb](https://github.com/TfTHacker/obsidian42-brat/commit/81bf4fb6cd1710936862e1faf6cd8e708d60d3e4))
+
 ## 1.1.3
 
 - perf: 🚸 open blank target window when creating link elements
