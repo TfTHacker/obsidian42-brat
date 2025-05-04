@@ -4,7 +4,7 @@
 
 ### Features
 
-* feat: ✨ use suggest modal for long plugin version lists (See also [#107](https://github.com/TfTHacker/obsidian42-brat/issues/107))
+* ✨ use suggest modal for long plugin version lists (See also [#107](https://github.com/TfTHacker/obsidian42-brat/issues/107))
 
 ### Bug Fixes
 
