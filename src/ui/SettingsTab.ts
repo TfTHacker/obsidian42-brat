@@ -2,7 +2,7 @@ import type { App, ButtonComponent, ToggleComponent } from "obsidian";
 import { PluginSettingTab, Setting } from "obsidian";
 import { themeDelete } from "../features/themes";
 import type BratPlugin from "../main";
-import { createGitHubResourceLink } from "../utils/utils";
+import { createGitHubResourceLink, createLink } from "../utils/utils";
 import AddNewTheme from "./AddNewTheme";
 import { promotionalLinks } from "./Promotional";
 
@@ -215,7 +215,14 @@ export class BratSettingsTab extends PluginSettingTab {
 
 		new Setting(containerEl)
 			.setName("Personal access token")
-			.setDesc("If you need to access private repositories, enter the personal access token here.")
+			.setDesc(
+				createLink(
+					"https://github.com/settings/tokens/new?scopes=public_repo",
+					"in your GitHub account",
+					"Create a personal access token ",
+					" to increase rate limits.",
+				),
+			)
 			.addText((text) => {
 				text
 					.setPlaceholder("Enter your personal access token")
