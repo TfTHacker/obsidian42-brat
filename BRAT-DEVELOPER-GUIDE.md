@@ -45,17 +45,19 @@ The `manifest.json` is fetched directly from the release assets, making BRAT ind
 When BRAT installs or updates a plugin, it validates both the release tag version and the version in the `manifest.json` asset.
 
 If there is a mismatch between the release tag version and name (e.g., `1.0.1-beta.0`) and the version in the released `manifest.json` asset (e.g. `1.0.0`), BRAT will:
-   - Use the release tag version as the source of truth
-   - Override the version in the `manifest.json` to match the release tag
-   - Display a notification about the mismatch
+
+- Use the release tag version as the source of truth
+- Override the version in the `manifest.json` to match the release tag
+- Display a notification about the mismatch
 
 >[!IMPORTANT]
 >Obsidian itself requires that release tag, release name, and the version stored in the released `manifest.json` [are the same](https://docs.obsidian.md/Plugins/Releasing/Release+your+plugin+with+GitHub+Actions). This applies to beta plugins tested with BRAT too. It is best you always ensure the version in your released `manifest.json` file matches your release tag version and release name. For example:
+>
 >- Release tag: `1.0.1-beta.0`
 >- Release name: `1.0.1-beta.0`
 >- Version in released `manifest.json`: `1.0.1-beta.0`
 >
->BRAT is a bit opinionated with respect to semantic versions but will attempt to normalize non-standard version strings using the [`semver`](https://github.com/npm/node-semver?tab=readme-ov-file#coercion) library for comparison operations. 
+>BRAT is a bit opinionated with respect to semantic versions but will attempt to normalize non-standard version strings using the [`semver`](https://github.com/npm/node-semver?tab=readme-ov-file#coercion) library for comparison operations.
 
 ## Legacy: older BRAT installs and manifest-beta.json
 
@@ -97,18 +99,17 @@ This approach makes BRAT more robust as it uses GitHub releases as the source of
 
 ## GitHub API Rate Limits
 
-If you are a plugin developer yourself and/or do a lot of installing and reinstalling of plugins via BRAT, you might hit [GitHub API rate limits](https://docs.github.com/en/rest/using-the-rest-api/rate-limits-for-the-rest-api?apiVersion=2022-11-28#primary-rate-limit-for-unauthenticated-users) (60 request per hour for anonymous requests). You avoid this by adding a personal access token (PAT) to BRAT which increases the limit to 5000 requests per hour. You will need a read only [PAT](https://github.com/settings/personal-access-tokens/) with "Repository access" set to "All repositories", granting "Read-only access" for the "Contents" repository permissions:
+If you are a plugin developer yourself and/or do a lot of installing and reinstalling of plugins via BRAT, you might hit [GitHub API rate limits](https://docs.github.com/en/rest/using-the-rest-api/rate-limits-for-the-rest-api?apiVersion=2022-11-28#primary-rate-limit-for-unauthenticated-users) (60 request per hour for anonymous requests). You avoid this by adding a personal access token (PAT) to BRAT:
 
-![image](https://github.com/user-attachments/assets/816b4d02-fae0-41e0-973f-672a5937d65a)
+1. Create a [classical Token with the `public_repo` scope](https://github.com/settings/tokens/new?scopes=public_repo)
+1. Add the created token on BRAT's **main settings** page
 
-![image](https://github.com/user-attachments/assets/d2898fd5-17d8-49a9-be46-710382319d89)
+This increases the limit to 5000 requests per hour.
 
-Once created, add this PAT on BRAT's main settings page.
+## Access to Private Repositories
 
-## Private Repository PAT
-
-If you want to provide read-only access to a private repository (e.g. for private beta tests) you should create a dedicated PAT for that repository only, selecting the repository in question under "Only selected repositories" for "Repository access".
+If you want to provide read-only access to a private repository (e.g. for private beta tests) you must create a dedicated [PAT](https://github.com/settings/personal-access-tokens) for that repository. [Create a New fine-grained personal access token](https://github.com/settings/personal-access-tokens/new) for the repository in question by selecting it under "Only selected repositories" for "Repository access" and grant "Read-only access" for the "Contents" repository permissions:
 
 ![image](https://github.com/user-attachments/assets/da16fb77-623e-4ee2-abf3-0b63ea216e89)
 
-The permissions required remain the same.
+![image](https://github.com/user-attachments/assets/d2898fd5-17d8-49a9-be46-710382319d89)
