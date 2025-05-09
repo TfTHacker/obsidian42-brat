@@ -1,4 +1,4 @@
-export function createLink(githubResource: string, optionalText?: string): DocumentFragment {
+export function createGitHubResourceLink(githubResource: string, optionalText?: string): DocumentFragment {
 	const newLink = new DocumentFragment();
 	const linkElement = document.createElement("a");
 	linkElement.textContent = githubResource;

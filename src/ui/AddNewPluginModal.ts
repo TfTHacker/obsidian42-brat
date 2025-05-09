@@ -1,7 +1,7 @@
 import { ButtonComponent, Modal, Platform, Setting, type TextComponent } from "obsidian";
 import { type ReleaseVersion, fetchReleaseVersions } from "src/features/githubUtils";
 import { GHRateLimitError, GitHubResponseError } from "src/utils/GitHubAPIErrors";
-import { createLink } from "src/utils/utils";
+import { createGitHubResourceLink } from "src/utils/utils";
 import type BetaPlugins from "../features/BetaPlugins";
 import type BratPlugin from "../main";
 import { existBetaPluginInList } from "../settings";
@@ -153,7 +153,7 @@ export default class AddNewPluginModal extends Modal {
 		const heading = this.contentEl.createEl("h4");
 		if (this.address) {
 			heading.appendText("Change plugin version: ");
-			heading.appendChild(createLink(this.address));
+			heading.appendChild(createGitHubResourceLink(this.address));
 		} else {
 			heading.setText("Github repository for beta plugin:");
 		}

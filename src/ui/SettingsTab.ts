@@ -2,7 +2,7 @@ import type { App, ButtonComponent, ToggleComponent } from "obsidian";
 import { PluginSettingTab, Setting } from "obsidian";
 import { themeDelete } from "../features/themes";
 import type BratPlugin from "../main";
-import { createLink } from "../utils/utils";
+import { createGitHubResourceLink } from "../utils/utils";
 import AddNewTheme from "./AddNewTheme";
 import { promotionalLinks } from "./Promotional";
 
@@ -82,7 +82,7 @@ export class BratSettingsTab extends PluginSettingTab {
 		for (const p of this.plugin.settings.pluginList) {
 			const bp = frozenVersions.get(p);
 			const pluginSettingContainer = new Setting(containerEl)
-				.setName(createLink(p))
+				.setName(createGitHubResourceLink(p))
 				.setDesc(bp?.version ? ` Tracked version: ${bp.version} ${bp.version === "latest" ? "" : "(frozen)"}` : "");
 
 			if (!bp?.version || bp.version === "latest") {
@@ -140,7 +140,7 @@ export class BratSettingsTab extends PluginSettingTab {
 		});
 
 		for (const bp of this.plugin.settings.themesList) {
-			new Setting(containerEl).setName(createLink(bp.repo)).addButton((btn: ButtonComponent) => {
+			new Setting(containerEl).setName(createGitHubResourceLink(bp.repo)).addButton((btn: ButtonComponent) => {
 				btn
 					.setIcon("cross")
 					.setTooltip("Delete this beta theme")
