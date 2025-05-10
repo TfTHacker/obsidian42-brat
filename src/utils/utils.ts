@@ -12,7 +12,7 @@ export function createGitHubResourceLink(githubResource: string, optionalText?: 
 	return newLink;
 }
 
-export function createLink(url: string, text: string, prependText?: string, appendText?: string): DocumentFragment {
+export function createLink({ prependText, url, text, appendText }: { prependText?: string; url: string; text: string; appendText?: string; }): DocumentFragment {
 	const newLink = new DocumentFragment();
 	const linkElement = document.createElement("a");
 	linkElement.textContent = text;

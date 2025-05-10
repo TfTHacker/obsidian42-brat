@@ -217,15 +217,17 @@ export class BratSettingsTab extends PluginSettingTab {
 			.setName("Personal access token")
 			.setDesc(
 				createLink(
-					"https://github.com/settings/tokens/new?scopes=public_repo",
-					"in your GitHub account",
-					"Create a personal access token ",
-					" to increase rate limits.",
+					{
+						prependText: "Set a personal access token to increase rate limits for public repositories on GitHub. You can create one in ",
+						url: "https://github.com/settings/tokens/new?scopes=public_repo",
+						text: "your GitHub account settings",
+						appendText: "."
+					},
 				),
 			)
 			.addText((text) => {
 				text
-					.setPlaceholder("Enter your personal access token")
+					.setPlaceholder("Enter your personal access token") 
 					.setValue(this.plugin.settings.personalAccessToken ?? "")
 					.onChange(async (value: string) => {
 						this.plugin.settings.personalAccessToken = value;
