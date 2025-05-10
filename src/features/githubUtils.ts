@@ -9,6 +9,99 @@ export interface ReleaseVersion {
 	prerelease: boolean; // Indicates if the release is a pre-release
 }
 
+interface GitHubTokenInfo {
+	validToken: boolean;
+    currentScopes: string[];
+    acceptedScopes: string[];
+    acceptedPermissions: Record<string, string>;
+    expirationDate: string | null;
+    rateLimit: {
+        limit: number;
+        remaining: number;
+        reset: number;
+        resource: string;
+        used: number;
+    };
+}
+
+/**
+ * Fetches GitHub token information by making a request that will fail
+ * and extracting the information from the error headers
+ * 
+ * @param personalAccessToken - GitHub personal access token
+ * @param debugLogging - Enable debug logging
+ * @returns Token information including scopes, permissions, and rate limits
+ */
+export const validateGitHubToken = async (
+    personalAccessToken: string,
+    debugLogging = false
+): Promise<GitHubTokenInfo> => {
+	try {
+		// Create a time-based "hash" that's likely an invalid repo
+		const timestamp = Date.now() % 1000;
+		const repo = `user${timestamp}/repo${timestamp % 100}`;
+        // Use an invalid URL to force an error response with headers
+		await gitHubRequest({
+            url: `https://api.github.com/repos/${repo}`,
+            headers: {
+                Authorization: `Token ${personalAccessToken}`,
+                Accept: 'application/vnd.github.v3+json'
+            }
+        });
+        
+        throw new Error('Expected request to fail');
+        
+    } catch (error) {
+        if (!(error instanceof GitHubResponseError)) {
+            throw error;
+        }
+
+        const headers = error.headers;
+        if (!headers) {
+            throw new Error('No headers in GitHub response');
+        }
+
+        if (debugLogging) {
+            console.log('GitHub Headers:', headers);
+        }
+
+        // Parse accepted permissions from header
+        const acceptedPermissions: Record<string, string> = {};
+        const permissionsHeader = headers['x-accepted-github-permissions'];
+        if (permissionsHeader) {
+            permissionsHeader.split(',').forEach(perm => {
+                const [key, value] = perm.split('=');
+                acceptedPermissions[key.trim()] = value.trim();
+            });
+        }
+
+		const rawExpirationDate = headers['github-authentication-token-expiration'];
+		const parsedDate = rawExpirationDate ? new Date(rawExpirationDate) : null;
+		const validDate = parsedDate && !isNaN(parsedDate.getTime()) ? parsedDate.toISOString() : null;
+
+		const tokenInfo: GitHubTokenInfo = {
+			validToken: error.status === 404, // Token is valid if we get a 404 (not found error)
+			currentScopes: headers['x-oauth-scopes']?.split(', ') ?? [],
+			acceptedScopes: headers['x-accepted-oauth-scopes']?.split(', ') ?? [],
+			acceptedPermissions,
+			expirationDate: validDate,
+			rateLimit: {
+			limit: parseInt(headers['x-ratelimit-limit'] ?? '0'),
+			remaining: parseInt(headers['x-ratelimit-remaining'] ?? '0'),
+			reset: parseInt(headers['x-ratelimit-reset'] ?? '0'),
+			resource: headers['x-ratelimit-resource'] ?? '',
+			used: parseInt(headers['x-ratelimit-used'] ?? '0')
+			}
+		};
+
+        if (debugLogging) {
+            console.log('Parsed token info:', tokenInfo);
+        }
+
+        return tokenInfo;
+    }
+};
+
 export const isPrivateRepo = async (repository: string, debugLogging = true, accessToken = ""): Promise<boolean> => {
 	const URL = `https://api.github.com/repos/${repository}`;
 	try {
