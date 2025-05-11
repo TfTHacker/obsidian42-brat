@@ -27,3 +27,41 @@
   max-width: 400px;
   justify-content: left;
 }
+
+.brat-token-info {
+  margin-top: 8px;
+  padding: 8px;
+  border-radius: 4px;
+  background-color: var(--background-secondary);
+  font-size: 0.8em;
+}
+
+.brat-token-info.valid {
+  border-left: 3px solid var(--color-green);
+}
+
+.brat-token-info.invalid {
+  border-left: 3px solid var(--color-red);
+}
+
+.brat-token-status {
+  margin-bottom: 4px;
+}
+
+.brat-token-status.valid {
+  color: var(--color-green);
+}
+
+.brat-token-status.invalid {
+  color: var(--color-red);
+}
+
+.brat-token-details {
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
+.brat-token-warning {
+  color: var(--color-orange);
+  margin-top: 4px;
+}

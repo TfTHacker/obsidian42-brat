@@ -1,6 +1,6 @@
 import { type App, ButtonComponent, type TextComponent, type ToggleComponent } from "obsidian";
 import { Modal, PluginSettingTab, Setting } from "obsidian";
-import { TokenErrorType, validateGitHubToken } from "src/features/githubUtils";
+import { type GitHubTokenInfo, TokenErrorType, validateGitHubToken } from "src/features/githubUtils";
 import { themeDelete } from "../features/themes";
 import type BratPlugin from "../main";
 import { createGitHubResourceLink, createLink } from "../utils/utils";
@@ -10,6 +10,8 @@ import { promotionalLinks } from "./Promotional";
 export class BratSettingsTab extends PluginSettingTab {
 	plugin: BratPlugin;
 	accessTokenSetting: TextComponent | null = null;
+	accessTokenButton: ButtonComponent | null = null;
+	tokenInfo: HTMLElement | null = null;
 
 	constructor(app: App, plugin: BratPlugin) {
 		super(app, plugin);
@@ -216,6 +218,7 @@ export class BratSettingsTab extends PluginSettingTab {
 				});
 			});
 
+		// Modify the existing token setting
 		new Setting(containerEl)
 			.setName("Personal access token")
 			.setDesc(
@@ -228,26 +231,111 @@ export class BratSettingsTab extends PluginSettingTab {
 			)
 			.addText((text) => {
 				this.accessTokenSetting = text;
+
 				text
 					.setPlaceholder("Enter your personal access token")
 					.setValue(this.plugin.settings.personalAccessToken ?? "")
 					.onChange(async (value: string) => {
-						// Only save valid tokens
-						this.accessTokenSetting?.inputEl.removeClass("invalid-input");
-						this.accessTokenSetting?.inputEl.removeClass("valid-input");
-
-						if (value !== "" && value !== this.plugin.settings.personalAccessToken && (await this.validateAccessToken(value))) {
-							// Only validate non-empty tokens
-							this.plugin.settings.personalAccessToken = value;
-						} else if (value === "") {
-							// Clearing the token must always be possible
+						if (value === "") {
+							// Save / reset token
 							this.plugin.settings.personalAccessToken = "";
+							this.plugin.saveSettings(); 
+							this.accessTokenButton?.setDisabled(true);
+							this.updateTokenInfo(this.tokenInfo, null);
+						} else {
+							this.accessTokenButton?.setDisabled(false);
 						}
 
-						await this.plugin.saveSettings();
-						return;
+					});
+
+				// Show initial token info if token exists
+				validateGitHubToken(this.plugin.settings.personalAccessToken ?? "").then((patInfo) => {
+					if (patInfo.validToken) {
+						this.accessTokenButton?.setDisabled(true); 
+					} 
+					this.updateTokenInfo(this.tokenInfo, this.plugin.settings.personalAccessToken ? patInfo : null);
+				});
+			})
+			.addButton((btn: ButtonComponent) => { 
+				this.accessTokenButton = btn;
+
+				btn
+					.setButtonText("Validate")
+					.setCta()
+					.onClick(async () => {
+						const value = this.accessTokenSetting?.inputEl.value;
+						if (value) {
+							const patInfo = await validateGitHubToken(value);
+							await this.updateTokenInfo(this.tokenInfo, patInfo);
+							if (patInfo.validToken) {
+								this.plugin.settings.personalAccessToken = value;
+								this.plugin.saveSettings(); 
+								this.accessTokenButton?.setDisabled(true);
+							} 
+						}
 					});
 			});
+
+		this.tokenInfo = this.createTokenInfoElement(containerEl);
+	}
+
+	// ...existing code...
+
+	private createTokenInfoElement(containerEl: HTMLElement): HTMLElement {
+		const tokenInfo = containerEl.createDiv({ cls: "brat-token-info" });
+		tokenInfo.createDiv({ cls: "brat-token-status" });
+		tokenInfo.createDiv({ cls: "brat-token-details" });
+		return tokenInfo;
+	}
+
+	private async updateTokenInfo(tokenInfo: HTMLElement | null, patInfo: GitHubTokenInfo | null): Promise<void> {
+		if (!tokenInfo) return;
+
+		const statusEl = tokenInfo.querySelector(".brat-token-status");
+		const detailsEl = tokenInfo.querySelector(".brat-token-details");
+
+		if (!statusEl || !detailsEl) return;
+
+		tokenInfo.removeClass("valid", "invalid");
+		statusEl.empty();
+		detailsEl.empty();
+
+		if (!patInfo) {
+			tokenInfo.addClass("invalid");
+			statusEl.setText("No token provided");
+			return;
+		}
+
+		if (!patInfo.validToken) {
+			tokenInfo.addClass("invalid");
+			statusEl.setText("⚠️ Invalid token");
+			return;
+		}
+
+		if (patInfo.validToken) {
+			tokenInfo.addClass("valid");
+			statusEl.setText("✓ Valid token");
+
+			// Show rate limit
+			if (patInfo.rateLimit) {
+				detailsEl.createDiv({
+					text: `API Rate Limit: ${patInfo.rateLimit.remaining}/${patInfo.rateLimit.limit}`,
+				});
+			}
+
+			// Show expiration warning if less than 7 days
+			if (patInfo.expirationDate) {
+				const expires = new Date(patInfo.expirationDate);
+				const daysLeft = Math.ceil((expires.getTime() - Date.now()) / (1000 * 60 * 60 * 24));
+
+				if (daysLeft < 7) {
+					detailsEl.createDiv({
+						text: `⚠️ Token expires in ${daysLeft} days`,
+						cls: "brat-token-warning",
+					});
+				}
+			}
+		}
 	}
 
 	private async displayTokenErrorMessageModal(message: string): Promise<void> {
