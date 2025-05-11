@@ -11,95 +11,162 @@ export interface ReleaseVersion {
 
 interface GitHubTokenInfo {
 	validToken: boolean;
-    currentScopes: string[];
-    acceptedScopes: string[];
-    acceptedPermissions: Record<string, string>;
-    expirationDate: string | null;
-    rateLimit: {
-        limit: number;
-        remaining: number;
-        reset: number;
-        resource: string;
-        used: number;
-    };
+	currentScopes: string[];
+	acceptedScopes: string[];
+	acceptedPermissions: string[];
+	expirationDate: string | null;
+	rateLimit: {
+		limit: number;
+		remaining: number;
+		reset: number;
+		resource: string;
+		used: number;
+	};
+	error: TokenValidationError | null;
 }
+
+export enum TokenErrorType {
+	INVALID_PREFIX = "invalid_prefix",
+	EXPIRED = "expired",
+	INSUFFICIENT_SCOPE = "insufficient_scope",
+	NONE = "none",
+}
+
+export interface TokenValidationError {
+	type: TokenErrorType;
+	message: string;
+	details: {
+		validPrefixes?: string[];
+		expirationDate?: string;
+		requiredScopes?: string[];
+		currentScopes?: string[];
+	};
+}
+
+const TOKEN_PREFIXES = ["ghp_", "github_pat_"];
 
 /**
  * Fetches GitHub token information by making a request that will fail
  * and extracting the information from the error headers
- * 
+ *
  * @param personalAccessToken - GitHub personal access token
  * @param debugLogging - Enable debug logging
  * @returns Token information including scopes, permissions, and rate limits
  */
 export const validateGitHubToken = async (
-    personalAccessToken: string,
-    debugLogging = false
+	personalAccessToken: string,
+	validScopes: string[] = ["repo", "public_repo", "metadata=read"],
+	debugLogging = false,
 ): Promise<GitHubTokenInfo> => {
+	// Check token prefix
+	const hasValidPrefix = TOKEN_PREFIXES.some((prefix) => personalAccessToken.toLowerCase().startsWith(prefix.toLowerCase()));
+
+	if (!hasValidPrefix) {
+		const error: TokenValidationError = {
+			type: TokenErrorType.INVALID_PREFIX,
+			message: "Invalid token format",
+			details: {
+				validPrefixes: TOKEN_PREFIXES,
+			},
+		};
+
+		return {
+			validToken: false,
+			currentScopes: [],
+			acceptedScopes: [],
+			acceptedPermissions: [],
+			expirationDate: null,
+			rateLimit: {
+				limit: 0,
+				remaining: 0,
+				reset: 0,
+				resource: "",
+				used: 0,
+			},
+			error,
+		};
+	}
+
 	try {
 		// Create a time-based "hash" that's likely an invalid repo
 		const timestamp = Date.now() % 1000;
 		const repo = `user${timestamp}/repo${timestamp % 100}`;
-        // Use an invalid URL to force an error response with headers
+		// Use an invalid URL to force an error response with headers
 		await gitHubRequest({
-            url: `https://api.github.com/repos/${repo}`,
-            headers: {
-                Authorization: `Token ${personalAccessToken}`,
-                Accept: 'application/vnd.github.v3+json'
-            }
-        });
-        
-        throw new Error('Expected request to fail');
-        
-    } catch (error) {
-        if (!(error instanceof GitHubResponseError)) {
-            throw error;
-        }
+			url: `https://api.github.com/repos/${repo}`,
+			headers: {
+				Authorization: `Token ${personalAccessToken}`,
+				Accept: "application/vnd.github.v3+json",
+			},
+		});
 
-        const headers = error.headers;
-        if (!headers) {
-            throw new Error('No headers in GitHub response');
-        }
+		throw new Error("Expected request to fail");
+	} catch (error) {
+		if (!(error instanceof GitHubResponseError)) {
+			throw error;
+		}
 
-        if (debugLogging) {
-            console.log('GitHub Headers:', headers);
-        }
+		const headers = error.headers;
+		if (!headers) {
+			throw new Error("No headers in GitHub response");
+		}
 
-        // Parse accepted permissions from header
-        const acceptedPermissions: Record<string, string> = {};
-        const permissionsHeader = headers['x-accepted-github-permissions'];
-        if (permissionsHeader) {
-            permissionsHeader.split(',').forEach(perm => {
-                const [key, value] = perm.split('=');
-                acceptedPermissions[key.trim()] = value.trim();
-            });
-        }
+		if (debugLogging) {
+			console.log("GitHub Headers:", headers);
+		}
 
-		const rawExpirationDate = headers['github-authentication-token-expiration'];
+		// Parse accepted permissions from header
+		const rawExpirationDate = headers["github-authentication-token-expiration"];
 		const parsedDate = rawExpirationDate ? new Date(rawExpirationDate) : null;
-		const validDate = parsedDate && !isNaN(parsedDate.getTime()) ? parsedDate.toISOString() : null;
+		const validDate = parsedDate && !Number.isNaN(parsedDate.getTime()) ? parsedDate.toISOString() : null;
 
 		const tokenInfo: GitHubTokenInfo = {
-			validToken: error.status === 404, // Token is valid if we get a 404 (not found error)
-			currentScopes: headers['x-oauth-scopes']?.split(', ') ?? [],
-			acceptedScopes: headers['x-accepted-oauth-scopes']?.split(', ') ?? [],
-			acceptedPermissions,
+			validToken: false,
+			currentScopes: headers["x-oauth-scopes"]?.split(", ") ?? [],
+			acceptedScopes: headers["x-accepted-oauth-scopes"]?.split(", ") ?? [],
+			acceptedPermissions: headers["x-accepted-github-permissions"]?.split(", ") ?? [],
 			expirationDate: validDate,
 			rateLimit: {
-			limit: parseInt(headers['x-ratelimit-limit'] ?? '0'),
-			remaining: parseInt(headers['x-ratelimit-remaining'] ?? '0'),
-			reset: parseInt(headers['x-ratelimit-reset'] ?? '0'),
-			resource: headers['x-ratelimit-resource'] ?? '',
-			used: parseInt(headers['x-ratelimit-used'] ?? '0')
-			}
+				limit: Number.parseInt(headers["x-ratelimit-limit"] ?? "0"),
+				remaining: Number.parseInt(headers["x-ratelimit-remaining"] ?? "0"),
+				reset: Number.parseInt(headers["x-ratelimit-reset"] ?? "0"),
+				resource: headers["x-ratelimit-resource"] ?? "",
+				used: Number.parseInt(headers["x-ratelimit-used"] ?? "0"),
+			},
+			error: null,
 		};
 
-        if (debugLogging) {
-            console.log('Parsed token info:', tokenInfo);
-        }
+		// Check token expiration
+		if (tokenInfo.expirationDate && new Date(tokenInfo.expirationDate) < new Date()) {
+			tokenInfo.error = {
+				type: TokenErrorType.EXPIRED,
+				message: "Token has expired",
+				details: {
+					expirationDate: tokenInfo.expirationDate,
+				},
+			};
+			return tokenInfo;
+		}
 
-        return tokenInfo;
-    }
+		// Check scopes
+		const hasValidScope =
+			tokenInfo.currentScopes.some((scope) => validScopes.includes(scope)) ||
+			tokenInfo.acceptedPermissions.some((scope) => validScopes.includes(scope));
+
+		if (!hasValidScope) {
+			tokenInfo.error = {
+				type: TokenErrorType.INSUFFICIENT_SCOPE,
+				message: "Token lacks required scopes. Check documentation for requirements.",
+				details: {
+					currentScopes: [...tokenInfo.acceptedScopes, ...tokenInfo.acceptedPermissions],
+				},
+			};
+			return tokenInfo;
+		}
+
+		tokenInfo.validToken = error.status === 404; // Token is valid if we get a 404
+		return tokenInfo;
+	}
 };
 
 export const isPrivateRepo = async (repository: string, debugLogging = true, accessToken = ""): Promise<boolean> => {

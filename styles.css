@@ -2,12 +2,15 @@
   margin-top: 5px !important;
 }
 
+.brat-settings .valid-input,
 .brat-modal .valid-repository {
   border-color: var(--color-green) !important;
 }
+.brat-settings .invalid-input,
 .brat-modal .invalid-repository {
   border-color: var(--color-red) !important;
 }
+.brat-settings .validation-error,
 .brat-modal .validation-error {
   border-color: var(--color-orange) !important;
 }

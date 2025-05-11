@@ -1,5 +1,6 @@
-import type { App, ButtonComponent, ToggleComponent } from "obsidian";
-import { PluginSettingTab, Setting } from "obsidian";
+import { type App, ButtonComponent, type TextComponent, type ToggleComponent } from "obsidian";
+import { Modal, PluginSettingTab, Setting } from "obsidian";
+import { TokenErrorType, validateGitHubToken } from "src/features/githubUtils";
 import { themeDelete } from "../features/themes";
 import type BratPlugin from "../main";
 import { createGitHubResourceLink, createLink } from "../utils/utils";
@@ -8,6 +9,7 @@ import { promotionalLinks } from "./Promotional";
 
 export class BratSettingsTab extends PluginSettingTab {
 	plugin: BratPlugin;
+	accessTokenSetting: TextComponent | null = null;
 
 	constructor(app: App, plugin: BratPlugin) {
 		super(app, plugin);
@@ -17,6 +19,7 @@ export class BratSettingsTab extends PluginSettingTab {
 	display(): void {
 		const { containerEl } = this;
 		containerEl.empty();
+		containerEl.addClass("brat-settings");
 
 		new Setting(containerEl)
 			.setName("Auto-enable plugins after installation")
@@ -216,23 +219,91 @@ export class BratSettingsTab extends PluginSettingTab {
 		new Setting(containerEl)
 			.setName("Personal access token")
 			.setDesc(
-				createLink(
-					{
-						prependText: "Set a personal access token to increase rate limits for public repositories on GitHub. You can create one in ",
-						url: "https://github.com/settings/tokens/new?scopes=public_repo",
-						text: "your GitHub account settings",
-						appendText: "."
-					},
-				),
+				createLink({
+					prependText: "Set a personal access token to increase rate limits for public repositories on GitHub. You can create one in ",
+					url: "https://github.com/settings/tokens/new?scopes=public_repo",
+					text: "your GitHub account settings",
+					appendText: ".",
+				}),
 			)
 			.addText((text) => {
+				this.accessTokenSetting = text;
 				text
-					.setPlaceholder("Enter your personal access token") 
+					.setPlaceholder("Enter your personal access token")
 					.setValue(this.plugin.settings.personalAccessToken ?? "")
 					.onChange(async (value: string) => {
-						this.plugin.settings.personalAccessToken = value;
+						// Only save valid tokens
+						this.accessTokenSetting?.inputEl.removeClass("invalid-input");
+						this.accessTokenSetting?.inputEl.removeClass("valid-input");
+
+						if (value !== "" && value !== this.plugin.settings.personalAccessToken && (await this.validateAccessToken(value))) {
+							// Only validate non-empty tokens
+							this.plugin.settings.personalAccessToken = value;
+						} else if (value === "") {
+							// Clearing the token must always be possible
+							this.plugin.settings.personalAccessToken = "";
+						}
+
 						await this.plugin.saveSettings();
+						return;
 					});
 			});
+	}
+
+	private async displayTokenErrorMessageModal(message: string): Promise<void> {
+		const modal = new Modal(this.app);
+		modal.titleEl.setText("Error");
+		modal.contentEl.createEl("p", {
+			text: message,
+		});
+
+		new ButtonComponent(modal.contentEl)
+			.setButtonText("OK")
+			.onClick(() => {
+				modal.close();
+			})
+			.setCta();
+
+		modal.open();
+	}
+
+	private async validateAccessToken(value: string, scopes: string[] = ["repo", "public_repo", "metadata=read"]): Promise<boolean> {
+		try {
+			const patInfo = await validateGitHubToken(value, scopes);
+			if (patInfo?.validToken) {
+				this.accessTokenSetting?.inputEl.addClass("valid-input");
+				return true;
+			}
+
+			this.accessTokenSetting?.inputEl.addClass("invalid-input");
+
+			// Create specific error message based on error type
+			let errorMessage = "Invalid GitHub token. ";
+			if (patInfo.error) {
+				switch (patInfo.error.type) {
+					case TokenErrorType.INVALID_PREFIX:
+						errorMessage += `The token must start with one of the following prefixes: ${patInfo.error.details.validPrefixes?.join(", ")}`;
+						break;
+
+					case TokenErrorType.EXPIRED:
+						errorMessage += `The token expired on ${patInfo.error.details.expirationDate}. Please generate a new token.`;
+						break;
+
+					case TokenErrorType.INSUFFICIENT_SCOPE:
+						errorMessage += "The token has invalid permissions. Please check the documentation for the required scopes.";
+						break;
+
+					default:
+						errorMessage += "The token is invalid or has been revoked.";
+				}
+			}
+
+			await this.displayTokenErrorMessageModal(errorMessage);
+			return false;
+		} catch (e) {
+			console.error("Error validating token: ", e);
+			await this.displayTokenErrorMessageModal("Failed to validate token. Please check your internet connection and try again.");
+			return false;
+		}
 	}
 }
