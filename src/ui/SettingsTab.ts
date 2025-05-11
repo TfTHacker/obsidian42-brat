@@ -226,7 +226,7 @@ export class BratSettingsTab extends PluginSettingTab {
 					prependText: "Set a personal access token to increase rate limits for public repositories on GitHub. You can create one in ",
 					url: "https://github.com/settings/tokens/new?scopes=public_repo",
 					text: "your GitHub account settings",
-					appendText: ".",
+					appendText: " and then add it here. Please consult the documetation for more details.",
 				}),
 			)
 			.addText((text) => {
@@ -308,10 +308,16 @@ export class BratSettingsTab extends PluginSettingTab {
 
 		if (!patInfo.validToken) {
 			tokenInfo.addClass("invalid");
-			statusEl.setText("⚠️ Invalid token");
+			if (patInfo.error.type === TokenErrorType.INVALID_FORMAT) {
+				statusEl.setText("⚠️ Invalid token format. Please verify your token.");
+			}  else if (patInfo.error.type === TokenErrorType.INVALID_PREFIX) {
+				statusEl.setText("⚠️ Invalid token prefix. Valid tokens for BRAT start with `ghp_` or `github_pat_`.");
+			}  else {
+				statusEl.setText("⚠️ Invalid token. Please verify that the token has the right permissions / scope and is not expired.");
+			}
 			return;
 		}
-
+ 
 		if (patInfo.validToken) {
 			tokenInfo.addClass("valid");
 			statusEl.setText("✓ Valid token");

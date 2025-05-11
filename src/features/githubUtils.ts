@@ -22,14 +22,16 @@ export interface GitHubTokenInfo {
 		resource: string;
 		used: number;
 	};
-	error: TokenValidationError | null;
+	error: TokenValidationError;
 }
 
 export enum TokenErrorType {
 	INVALID_PREFIX = "invalid_prefix",
+	INVALID_FORMAT = "invalid_format",
 	EXPIRED = "expired",
 	INSUFFICIENT_SCOPE = "insufficient_scope",
 	NONE = "none",
+	UNKNOWN = "unknown",
 }
 
 export interface TokenValidationError {
@@ -44,7 +46,7 @@ export interface TokenValidationError {
 }
 
 const TOKEN_PREFIXES = ["ghp_", "github_pat_"];
-
+const TOKEN_REGEXP = /^(gh[ps]_[a-zA-Z0-9]{36}|github_pat_[a-zA-Z0-9]{22}_[a-zA-Z0-9]{59})$/;
 /**
  * Fetches GitHub token information by making a request that will fail
  * and extracting the information from the error headers
@@ -60,10 +62,11 @@ export const validateGitHubToken = async (
 ): Promise<GitHubTokenInfo> => {
 	// Check token prefix
 	const hasValidPrefix = TOKEN_PREFIXES.some((prefix) => personalAccessToken.toLowerCase().startsWith(prefix.toLowerCase()));
+	const hasValidFormat = TOKEN_REGEXP.test(personalAccessToken);
 
-	if (!hasValidPrefix) {
+	if (!hasValidPrefix || !hasValidFormat) {
 		const error: TokenValidationError = {
-			type: TokenErrorType.INVALID_PREFIX,
+			type: !hasValidPrefix ? TokenErrorType.INVALID_PREFIX : TokenErrorType.INVALID_FORMAT,
 			message: "Invalid token format",
 			details: {
 				validPrefixes: TOKEN_PREFIXES,
@@ -133,7 +136,11 @@ export const validateGitHubToken = async (
 				resource: headers["x-ratelimit-resource"] ?? "",
 				used: Number.parseInt(headers["x-ratelimit-used"] ?? "0"),
 			},
-			error: null,
+			error: {
+				type: TokenErrorType.NONE,
+				message: "No error",
+				details: {},
+			},
 		};
 
 		// Check token expiration
