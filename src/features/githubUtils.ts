@@ -9,7 +9,7 @@ export interface ReleaseVersion {
 	prerelease: boolean; // Indicates if the release is a pre-release
 }
 
-interface GitHubTokenInfo {
+export interface GitHubTokenInfo {
 	validToken: boolean;
 	currentScopes: string[];
 	acceptedScopes: string[];
