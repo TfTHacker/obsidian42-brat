@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.1.7-beta.5](https://github.com/TfTHacker/obsidian42-brat/compare/1.1.7-beta.4...1.1.7-beta.5) (2025-05-31)
+
+### Bug Fixes
+
+* ♻️ consolidate token validation code ([1473a5d](https://github.com/TfTHacker/obsidian42-brat/commit/1473a5d370a33ae25d2f4faf0a8efc4c287010c6))
+
 ## [1.1.7-beta.4](https://github.com/TfTHacker/obsidian42-brat/compare/1.1.7-beta.3...1.1.7-beta.4) (2025-05-31)
 
 ### Features
