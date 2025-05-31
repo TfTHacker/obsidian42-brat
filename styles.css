@@ -1,5 +1,4 @@
-.brat-modal .modal-button-container,
-.brat-modal .modal-token-container {
+.brat-modal .modal-button-container {
   margin-top: 5px !important;
 }
 
@@ -32,14 +31,14 @@
   justify-content: left;
 }
 
-/* Token info container styles */
-.brat-token-info,
-.token-validation-status {
-  margin-top: 8px;
-  font-size: 0.8em;
+.brat-token-input {
+  min-width: 33%;
 }
 
+/* Token info container styles */
 .brat-token-info {
+  margin-top: 8px;
+  font-size: 0.8em;
   padding: 8px;
   border-radius: 4px;
   background-color: var(--background-secondary);
@@ -52,8 +51,7 @@
 }
 
 .brat-token-info.invalid,
-.brat-token-status.invalid,
-.token-error {
+.brat-token-status.invalid {
   color: var(--color-red);
 }
 
@@ -70,15 +68,13 @@
   margin-bottom: 4px;
 }
 
-.brat-token-details,
-.token-details {
+.brat-token-details {
   margin-top: 4px;
   color: var(--text-muted);
 }
 
 /* Token warnings */
-.brat-token-warning,
-.token-warning {
+.brat-token-warning {
   color: var(--color-orange);
   margin-top: 4px;
 }
@@ -90,13 +86,13 @@
   margin-top: 2px;
 }
 
-/* Inserting this collapsed row between two flex items will make 
- * the flex item that comes after it break to a new row */
+/* Flex break utility */
 .brat-modal .break {
   flex-basis: 100%;
   height: 0;
 }
 
+/* Validation status */
 .brat-modal .validation-status-error {
   color: var(--text-error);
 }
