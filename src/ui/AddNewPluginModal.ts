@@ -500,7 +500,9 @@ export default class AddNewPluginModal extends Modal {
 				const gitHubError = error as GitHubResponseError;
 				switch (gitHubError.status) {
 					case 404:
-						validationStatusEl?.setText("Repository not found. Check the address or provide a private token.");
+						validationStatusEl?.setText(
+							"Repository not found. Check the address or provide a valid token for access to a private repository.",
+						);
 						break;
 					case 403:
 						validationStatusEl?.setText("Access denied. Check your personal access token.");
