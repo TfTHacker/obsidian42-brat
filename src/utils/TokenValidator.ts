@@ -11,31 +11,38 @@ export class TokenValidator {
 	}
 
 	async validateToken(token: string, repository?: string): Promise<boolean> {
+		// Remove valid/invalid classes from the input element
 		this.tokenEl?.inputEl.removeClass("valid-input", "invalid-input");
-		this.statusEl?.empty();
 
 		// No token provided
 		if (!token) {
 			this.statusEl?.setText("No token provided");
+			this.statusEl?.addClass("invalid");
+			this.statusEl?.removeClass("valid");
 			return false;
 		}
 
 		try {
 			const patInfo = await validateGitHubToken(token, repository);
+			this.statusEl?.removeClass("invalid", "valid");
+			this.statusEl?.empty();
 
 			if (patInfo.validToken) {
 				this.tokenEl?.inputEl.addClass("valid-input");
+				this.statusEl?.addClass("valid");
 				this.showValidTokenInfo(patInfo);
 				return true;
 			}
 
 			this.tokenEl?.inputEl.addClass("invalid-input");
+			this.statusEl?.addClass("invalid");
 			this.showErrorMessage(patInfo.error);
 			return false;
 		} catch (error) {
 			console.error("Token validation error:", error);
 			this.tokenEl?.inputEl.addClass("invalid-input");
 			this.statusEl?.setText("Failed to validate token");
+			this.statusEl?.addClass("invalid");
 			return false;
 		}
 	}
