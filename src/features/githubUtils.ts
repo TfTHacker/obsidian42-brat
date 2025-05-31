@@ -45,6 +45,19 @@ export interface TokenValidationError {
 	};
 }
 
+/**
+ * Scrubs the repository URL to remove the protocol and .git extension
+ */
+export const scrubRepositoryUrl = (address: string): string => {
+	// Case-insensitive replace for github.com
+	let scrubbedAddress = address.replace(/https?:\/\/github\.com\//i, "");
+	// Case-insensitive check and remove for .git extension
+	if (scrubbedAddress.toLowerCase().endsWith(".git")) {
+		scrubbedAddress = scrubbedAddress.slice(0, -4);
+	}
+	return scrubbedAddress;
+}
+
 const TOKEN_PREFIXES = ["ghp_", "github_pat_"];
 const TOKEN_REGEXP = /^(gh[ps]_[a-zA-Z0-9]{36}|github_pat_[a-zA-Z0-9]{22}_[a-zA-Z0-9]{59})$/;
 /**
@@ -52,17 +65,18 @@ const TOKEN_REGEXP = /^(gh[ps]_[a-zA-Z0-9]{36}|github_pat_[a-zA-Z0-9]{22}_[a-zA-
  * and extracting the information from the error headers
  *
  * @param personalAccessToken - GitHub personal access token
- * @param debugLogging - Enable debug logging
+ * @param repository - Optional repository name (to be used when validating private repository access)
  * @returns Token information including scopes, permissions, and rate limits
  */
 export const validateGitHubToken = async (
 	personalAccessToken: string,
-	validScopes: string[] = ["repo", "public_repo", "metadata=read"],
-	debugLogging = false,
+	repository?: string
 ): Promise<GitHubTokenInfo> => {
-	// Check token prefix
+	// Check scopes & token prefix
+	const validScopes: string[] = ["repo", "public_repo", "metadata=read"];
 	const hasValidPrefix = TOKEN_PREFIXES.some((prefix) => personalAccessToken.toLowerCase().startsWith(prefix.toLowerCase()));
 	const hasValidFormat = TOKEN_REGEXP.test(personalAccessToken);
+
 
 	if (!hasValidPrefix || !hasValidFormat) {
 		const error: TokenValidationError = {
@@ -91,9 +105,9 @@ export const validateGitHubToken = async (
 	}
 
 	try {
-		// Create a time-based "hash" that's likely an invalid repo
+		// Create a time-based "hash" that's likely an invalid repo in case no repository is given
 		const timestamp = Date.now() % 1000;
-		const repo = `user${timestamp}/repo${timestamp % 100}`;
+		const repo = repository ? repository : `user${timestamp}/repo${timestamp % 100}`;
 		// Use an invalid URL to force an error response with headers
 		await gitHubRequest({
 			url: `https://api.github.com/repos/${repo}`,
@@ -103,6 +117,28 @@ export const validateGitHubToken = async (
 			},
 		});
 
+		if (repository) {
+			// We have tried to token with a specific repository which means it is valid
+			return {
+				validToken: true,
+				currentScopes: [],
+				acceptedScopes: [],
+				acceptedPermissions: [],
+				expirationDate: null,
+				rateLimit: {
+					limit: 0,
+					remaining: 0,
+					reset: 0,
+					resource: "",
+					used: 0,
+				},
+				error: {
+					type: TokenErrorType.NONE,
+					message: "No error",
+					details: {},
+				},
+			}; 
+		}
 		throw new Error("Expected request to fail");
 	} catch (error) {
 		if (!(error instanceof GitHubResponseError)) {
@@ -112,10 +148,6 @@ export const validateGitHubToken = async (
 		const headers = error.headers;
 		if (!headers) {
 			throw new Error("No headers in GitHub response");
-		}
-
-		if (debugLogging) {
-			console.log("GitHub Headers:", headers);
 		}
 
 		// Parse accepted permissions from header

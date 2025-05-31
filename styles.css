@@ -1,7 +1,17 @@
-.brat-modal .modal-button-container {
+.brat-modal .modal-button-container,
+.brat-modal .modal-token-container {
   margin-top: 5px !important;
 }
 
+.brat-modal .disabled-setting {
+  opacity: 0.5;
+}
+
+.brat-modal .disabled-setting:hover {
+  cursor: not-allowed;
+}
+
+/* Input validation styles */
 .brat-settings .valid-input,
 .brat-modal .valid-repository {
   border-color: var(--color-green) !important;
@@ -15,25 +25,37 @@
   border-color: var(--color-orange) !important;
 }
 
-.brat-modal .disabled-setting {
-  opacity: 0.5;
-}
-.brat-modal .disabled-setting:hover {
-  cursor: not-allowed;
-}
-
+/* Version selector */
 .brat-version-selector {
   width: 100%;
   max-width: 400px;
   justify-content: left;
 }
 
-.brat-token-info {
+/* Token info container styles */
+.brat-token-info,
+.token-validation-status {
   margin-top: 8px;
+  font-size: 0.8em;
+}
+
+.brat-token-info {
   padding: 8px;
   border-radius: 4px;
   background-color: var(--background-secondary);
-  font-size: 0.8em;
+}
+
+/* Token status indicators */
+.brat-token-info.valid,
+.brat-token-status.valid,
+.token-status.valid {
+  color: var(--color-green);
+}
+
+.brat-token-info.invalid,
+.brat-token-status.invalid,
+.token-error {
+  color: var(--color-red);
 }
 
 .brat-token-info.valid {
@@ -44,24 +66,27 @@
   border-left: 3px solid var(--color-red);
 }
 
+/* Token details and status */
 .brat-token-status {
   margin-bottom: 4px;
 }
 
-.brat-token-status.valid {
-  color: var(--color-green);
-}
-
-.brat-token-status.invalid {
-  color: var(--color-red);
-}
-
-.brat-token-details {
-  color: var(--text-muted);
+.brat-token-details,
+.token-details {
   margin-top: 4px;
+  color: var(--text-muted);
 }
 
-.brat-token-warning {
+/* Token warnings */
+.brat-token-warning,
+.token-warning {
   color: var(--color-orange);
   margin-top: 4px;
+}
+
+/* Token additional info */
+.token-scopes,
+.token-rate {
+  color: var(--text-muted);
+  margin-top: 2px;
 }

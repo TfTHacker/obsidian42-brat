@@ -1,6 +1,7 @@
-import { type App, ButtonComponent, type TextComponent, type ToggleComponent } from "obsidian";
-import { Modal, PluginSettingTab, Setting } from "obsidian";
+import type { App, ButtonComponent, TextComponent, ToggleComponent } from "obsidian";
+import { PluginSettingTab, Setting } from "obsidian";
 import { type GitHubTokenInfo, TokenErrorType, validateGitHubToken } from "src/features/githubUtils";
+import { TokenValidator } from "src/utils/TokenValidator";
 import { themeDelete } from "../features/themes";
 import type BratPlugin from "../main";
 import { createGitHubResourceLink, createLink } from "../utils/utils";
@@ -12,6 +13,7 @@ export class BratSettingsTab extends PluginSettingTab {
 	accessTokenSetting: TextComponent | null = null;
 	accessTokenButton: ButtonComponent | null = null;
 	tokenInfo: HTMLElement | null = null;
+	validator: TokenValidator | null = null;
 
 	constructor(app: App, plugin: BratPlugin) {
 		super(app, plugin);
@@ -239,24 +241,23 @@ export class BratSettingsTab extends PluginSettingTab {
 						if (value === "") {
 							// Save / reset token
 							this.plugin.settings.personalAccessToken = "";
-							this.plugin.saveSettings(); 
+							this.plugin.saveSettings();
 							this.accessTokenButton?.setDisabled(true);
 							this.updateTokenInfo(this.tokenInfo, null);
 						} else {
 							this.accessTokenButton?.setDisabled(false);
 						}
-
 					});
 
 				// Show initial token info if token exists
 				validateGitHubToken(this.plugin.settings.personalAccessToken ?? "").then((patInfo) => {
 					if (patInfo.validToken) {
-						this.accessTokenButton?.setDisabled(true); 
-					} 
+						this.accessTokenButton?.setDisabled(true);
+					}
 					this.updateTokenInfo(this.tokenInfo, this.plugin.settings.personalAccessToken ? patInfo : null);
 				});
 			})
-			.addButton((btn: ButtonComponent) => { 
+			.addButton((btn: ButtonComponent) => {
 				this.accessTokenButton = btn;
 
 				btn
@@ -264,22 +265,23 @@ export class BratSettingsTab extends PluginSettingTab {
 					.setCta()
 					.onClick(async () => {
 						const value = this.accessTokenSetting?.inputEl.value;
+
 						if (value) {
-							const patInfo = await validateGitHubToken(value);
-							await this.updateTokenInfo(this.tokenInfo, patInfo);
-							if (patInfo.validToken) {
+							const valid = await this.validator?.validateToken(value);
+
+							if (valid) {
 								this.plugin.settings.personalAccessToken = value;
-								this.plugin.saveSettings(); 
+								this.plugin.saveSettings();
 								this.accessTokenButton?.setDisabled(true);
-							} 
+							}
 						}
 					});
+			})
+			.then(() => {
+				this.tokenInfo = this.createTokenInfoElement(containerEl);
+				this.validator = new TokenValidator(this.accessTokenSetting, this.tokenInfo);
 			});
-
-		this.tokenInfo = this.createTokenInfoElement(containerEl);
 	}
-
-	// ...existing code...
 
 	private createTokenInfoElement(containerEl: HTMLElement): HTMLElement {
 		const tokenInfo = containerEl.createDiv({ cls: "brat-token-info" });
@@ -310,14 +312,14 @@ export class BratSettingsTab extends PluginSettingTab {
 			tokenInfo.addClass("invalid");
 			if (patInfo.error.type === TokenErrorType.INVALID_FORMAT) {
 				statusEl.setText("⚠️ Invalid token format. Please verify your token.");
-			}  else if (patInfo.error.type === TokenErrorType.INVALID_PREFIX) {
+			} else if (patInfo.error.type === TokenErrorType.INVALID_PREFIX) {
 				statusEl.setText("⚠️ Invalid token prefix. Valid tokens for BRAT start with `ghp_` or `github_pat_`.");
-			}  else {
+			} else {
 				statusEl.setText("⚠️ Invalid token. Please verify that the token has the right permissions / scope and is not expired.");
 			}
 			return;
 		}
- 
+
 		if (patInfo.validToken) {
 			tokenInfo.addClass("valid");
 			statusEl.setText("✓ Valid token");
@@ -343,5 +345,4 @@ export class BratSettingsTab extends PluginSettingTab {
 			}
 		}
 	}
-
 }
