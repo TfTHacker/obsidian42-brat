@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.1.7-beta.3](https://github.com/TfTHacker/obsidian42-brat/compare/1.1.7-beta.2...1.1.7-beta.3) (2025-05-31)
+
+### Bug Fixes
+
+* 🐛 fix `minAppVersion` check when adding or updating plugins ([92eee3b](https://github.com/TfTHacker/obsidian42-brat/commit/92eee3b668851b64f641f6926d18254320e96ac0)), closes [#112](https://github.com/TfTHacker/obsidian42-brat/issues/112)
+
 ## [1.1.6](https://github.com/TfTHacker/obsidian42-brat/releases/1.1.6)
 
 ### Features
