@@ -365,7 +365,7 @@ export default class BetaPlugins {
 			}
 
 			// Check manifest minAppVersion and current version of Obisidan, don't load plugin if not compatible
-			if (!Object.hasOwn(primaryManifest, "minAppVersion")) {
+			if (Object.hasOwn(primaryManifest, "minAppVersion")) {
 				if (!requireApiVersion(primaryManifest.minAppVersion)) {
 					const msg = `Plugin: ${repositoryPath}\n\nThe manifest.json for this plugin indicates that the Obsidian version of the app needs to be ${primaryManifest.minAppVersion}, but this installation of Obsidian is ${apiVersion}. \n\nYou will need to update your Obsidian to use this plugin or contact the plugin developer for more information.`;
 					await this.plugin.log(msg, true);
