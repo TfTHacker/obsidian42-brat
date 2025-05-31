@@ -243,19 +243,13 @@ export class BratSettingsTab extends PluginSettingTab {
 							this.plugin.settings.personalAccessToken = "";
 							this.plugin.saveSettings();
 							this.accessTokenButton?.setDisabled(true);
-							this.updateTokenInfo(this.tokenInfo, null);
+							this.validator?.validateToken("");
 						} else {
 							this.accessTokenButton?.setDisabled(false);
 						}
 					});
 
-				// Show initial token info if token exists
-				validateGitHubToken(this.plugin.settings.personalAccessToken ?? "").then((patInfo) => {
-					if (patInfo.validToken) {
-						this.accessTokenButton?.setDisabled(true);
-					}
-					this.updateTokenInfo(this.tokenInfo, this.plugin.settings.personalAccessToken ? patInfo : null);
-				});
+				text.inputEl.addClass("brat-token-input");
 			})
 			.addButton((btn: ButtonComponent) => {
 				this.accessTokenButton = btn;
@@ -268,7 +262,6 @@ export class BratSettingsTab extends PluginSettingTab {
 
 						if (value) {
 							const valid = await this.validator?.validateToken(value);
-
 							if (valid) {
 								this.plugin.settings.personalAccessToken = value;
 								this.plugin.saveSettings();
@@ -280,6 +273,9 @@ export class BratSettingsTab extends PluginSettingTab {
 			.then(() => {
 				this.tokenInfo = this.createTokenInfoElement(containerEl);
 				this.validator = new TokenValidator(this.accessTokenSetting, this.tokenInfo);
+				this.validator?.validateToken(this.plugin.settings.personalAccessToken ?? "").then((valid) => {
+					this.accessTokenButton?.setDisabled(valid || this.plugin.settings.personalAccessToken === "");
+				});
 			});
 	}
 
@@ -288,61 +284,5 @@ export class BratSettingsTab extends PluginSettingTab {
 		tokenInfo.createDiv({ cls: "brat-token-status" });
 		tokenInfo.createDiv({ cls: "brat-token-details" });
 		return tokenInfo;
-	}
-
-	private async updateTokenInfo(tokenInfo: HTMLElement | null, patInfo: GitHubTokenInfo | null): Promise<void> {
-		if (!tokenInfo) return;
-
-		const statusEl = tokenInfo.querySelector(".brat-token-status");
-		const detailsEl = tokenInfo.querySelector(".brat-token-details");
-
-		if (!statusEl || !detailsEl) return;
-
-		tokenInfo.removeClass("valid", "invalid");
-		statusEl.empty();
-		detailsEl.empty();
-
-		if (!patInfo) {
-			tokenInfo.addClass("invalid");
-			statusEl.setText("No token provided");
-			return;
-		}
-
-		if (!patInfo.validToken) {
-			tokenInfo.addClass("invalid");
-			if (patInfo.error.type === TokenErrorType.INVALID_FORMAT) {
-				statusEl.setText("⚠️ Invalid token format. Please verify your token.");
-			} else if (patInfo.error.type === TokenErrorType.INVALID_PREFIX) {
-				statusEl.setText("⚠️ Invalid token prefix. Valid tokens for BRAT start with `ghp_` or `github_pat_`.");
-			} else {
-				statusEl.setText("⚠️ Invalid token. Please verify that the token has the right permissions / scope and is not expired.");
-			}
-			return;
-		}
-
-		if (patInfo.validToken) {
-			tokenInfo.addClass("valid");
-			statusEl.setText("✓ Valid token");
-
-			// Show rate limit
-			if (patInfo.rateLimit) {
-				detailsEl.createDiv({
-					text: `API Rate Limit: ${patInfo.rateLimit.remaining}/${patInfo.rateLimit.limit}`,
-				});
-			}
-
-			// Show expiration warning if less than 7 days
-			if (patInfo.expirationDate) {
-				const expires = new Date(patInfo.expirationDate);
-				const daysLeft = Math.ceil((expires.getTime() - Date.now()) / (1000 * 60 * 60 * 24));
-
-				if (daysLeft < 7) {
-					detailsEl.createDiv({
-						text: `⚠️ Token expires in ${daysLeft} days`,
-						cls: "brat-token-warning",
-					});
-				}
-			}
-		}
 	}
 }
