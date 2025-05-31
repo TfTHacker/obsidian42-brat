@@ -278,7 +278,7 @@ export default class AddNewPluginModal extends Modal {
 				);
 
 				this.tokenInputEl = new TextComponent(buttonContainerEl)
-					.setPlaceholder("GitHub API key for private repository (optional)")
+					.setPlaceholder("GitHub API key for private repository")
 					.setValue(this.privateApiKey)
 					.setDisabled(!this.usePrivateApiKey)
 					.onChange(async (value) => {
