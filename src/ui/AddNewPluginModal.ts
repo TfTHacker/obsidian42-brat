@@ -22,10 +22,14 @@ export default class AddNewPluginModal extends Modal {
 	version: string;
 	versionSetting: Setting | null = null;
 
+	// Repository Setting
+	repositoryAddressEl: TextComponent | null = null;
+
 	// Token Validation
 	usePrivateApiKey: boolean;
 	privateApiKey: string;
 	validToken: boolean | undefined;
+	tokenInputEl: TextComponent | null = null;
 	validateButton: ButtonComponent | null = null;
 	validator: TokenValidator | null = null;
 
@@ -62,11 +66,6 @@ export default class AddNewPluginModal extends Modal {
 		// If it's an existing frozen version plugin, update it instead of checking for duplicates
 		const existingFrozenPlugin = this.plugin.settings.pluginSubListFrozenVersion.find((p) => p.repo === scrubbedAddress);
 		if (existingFrozenPlugin) {
-			// Update version and token (also clear token if empty or if "usePrivateApiKey is not set")
-			existingFrozenPlugin.version = this.version;
-			existingFrozenPlugin.token = this.usePrivateApiKey ? this.privateApiKey || "" : undefined;
-
-			await this.plugin.saveSettings();
 			const result = await this.betaPlugins.addPlugin(
 				scrubbedAddress,
 				false,
@@ -78,8 +77,19 @@ export default class AddNewPluginModal extends Modal {
 				this.usePrivateApiKey ? this.privateApiKey : undefined,
 			);
 			if (result) {
+				// Update version and token (also clear token if empty or if "usePrivateApiKey is not set") only if successfully added
+				existingFrozenPlugin.version = this.version;
+				existingFrozenPlugin.token = this.usePrivateApiKey ? this.privateApiKey || "" : undefined;
+				await this.plugin.saveSettings();
 				this.close();
 			}
+
+			// Reset modal if we don't close (i.e. because plugin could not be installed)
+			this.cancelButton?.setDisabled(false);
+			this.addPluginButton?.setDisabled(false);
+			this.addPluginButton?.setButtonText("Add Plugin");
+			this.versionSetting?.setDisabled(false);
+
 			return;
 		}
 
@@ -101,6 +111,12 @@ export default class AddNewPluginModal extends Modal {
 		if (result) {
 			this.close();
 		}
+
+		// Reset modal if we don't close (i.e. because plugin could not be installed)
+		this.cancelButton?.setDisabled(false);
+		this.addPluginButton?.setDisabled(false);
+		this.addPluginButton?.setButtonText("Add Plugin");
+		this.versionSetting?.setDisabled(false);
 	}
 
 	private updateVersionDropdown(settingEl: Setting, versions: ReleaseVersion[], selected = ""): void {
@@ -173,18 +189,14 @@ export default class AddNewPluginModal extends Modal {
 			if (!this.address || !this.updateVersion) {
 				const repoSetting = new Setting(formEl).setClass("repository-setting");
 
-				// Add validation status element
-				const validationStatusEl = repoSetting.settingEl.createDiv("validation-status");
-				validationStatusEl.style.color = "var(--text-error)";
-				validationStatusEl.style.marginTop = "6px";
-				validationStatusEl.style.fontSize = "0.8em";
-
 				repoSetting.then((setting) => {
 					// Show as input field for new plugins
-					setting.addText((repositoryAddressEl) => {
-						repositoryAddressEl.setPlaceholder("Repository (example: https://github.com/GitubUserName/repository-name)");
-						repositoryAddressEl.setValue(this.address);
-						repositoryAddressEl.onChange((value) => {
+					setting.addText((addressEl) => {
+						this.repositoryAddressEl = addressEl;
+
+						addressEl.setPlaceholder("Repository (example: https://github.com/GitubUserName/repository-name)");
+						addressEl.setValue(this.address);
+						addressEl.onChange((value) => {
 							this.address = scrubRepositoryUrl(value.trim());
 							if (this.version !== "" && (!this.address || !this.isGitHubRepositoryMatch(this.address))) {
 								// Disable version dropdown if version is set and address is empty
@@ -192,8 +204,8 @@ export default class AddNewPluginModal extends Modal {
 									this.updateVersionDropdown(this.versionSetting, []);
 									this.versionSetting.settingEl.classList.add("disabled-setting");
 									this.versionSetting.setDisabled(true);
-									repositoryAddressEl.inputEl.classList.remove("valid-repository");
-									repositoryAddressEl.inputEl.classList.remove("invalid-repository");
+									addressEl.inputEl.classList.remove("valid-repository");
+									addressEl.inputEl.classList.remove("invalid-repository");
 								}
 							}
 
@@ -204,7 +216,7 @@ export default class AddNewPluginModal extends Modal {
 							}
 						});
 
-						repositoryAddressEl.inputEl.addEventListener("keydown", async (e: KeyboardEvent) => {
+						addressEl.inputEl.addEventListener("keydown", async (e: KeyboardEvent) => {
 							if (e.key === "Enter") {
 								if (this.address && ((this.updateVersion && this.version !== "") || !this.updateVersion)) {
 									e.preventDefault();
@@ -215,21 +227,27 @@ export default class AddNewPluginModal extends Modal {
 								}
 
 								// Populate version dropdown
-								await this.updateRepositoryVersionInfo(this.version, repositoryAddressEl);
+								await this.updateRepositoryVersionInfo(this.version, validationStatusEl);
 							}
 						});
 
 						// Update version dropdown when input loses focus
 						if (this.updateVersion) {
-							repositoryAddressEl.inputEl.addEventListener("blur", async () => {
-								await this.updateRepositoryVersionInfo(this.version, repositoryAddressEl, validationStatusEl);
+							addressEl.inputEl.addEventListener("blur", async () => {
+								await this.updateRepositoryVersionInfo(this.version, validationStatusEl);
 							});
 						}
-						repositoryAddressEl.inputEl.style.width = "100%";
+
+						// FIXME
+						setting.setDesc("Repository");
+						addressEl.inputEl.style.width = "100%";
 					});
 				});
 			}
-			// Add private repo key
+			// Add validation status element (as a separate element)
+			// TODO: Find better way to build the modal
+			const validationStatusEl = formEl.createDiv("validation-status");
+			if (!this.address) validationStatusEl.setText("Enter a GitHub repository address to validate it.");
 
 			// Then add version dropdown
 			this.versionSetting = new Setting(formEl).setClass("version-setting").setClass("disabled-setting");
@@ -251,15 +269,18 @@ export default class AddNewPluginModal extends Modal {
 						checkboxEl.addEventListener("click", () => {
 							this.usePrivateApiKey = checkboxEl.checked;
 							this.validateButton?.setDisabled(!this.usePrivateApiKey || !this.validToken);
-							if (this.usePrivateApiKey) this.updateRepositoryVersionInfo(this.version);
+							this.tokenInputEl?.setDisabled(!this.usePrivateApiKey);
+							if (!this.usePrivateApiKey || (this.validToken && this.usePrivateApiKey))
+								this.updateRepositoryVersionInfo(this.version, validationStatusEl);
 						});
 						labelEl.appendText("Use token for this repository");
 					},
 				);
 
-				const textEl = new TextComponent(buttonContainerEl)
+				this.tokenInputEl = new TextComponent(buttonContainerEl)
 					.setPlaceholder("GitHub API key for private repository (optional)")
 					.setValue(this.privateApiKey)
+					.setDisabled(!this.usePrivateApiKey)
 					.onChange(async (value) => {
 						this.privateApiKey = value.trim();
 						if (this.privateApiKey) {
@@ -270,15 +291,15 @@ export default class AddNewPluginModal extends Modal {
 						}
 					});
 
-				textEl.inputEl.type = "password";
+				this.tokenInputEl.inputEl.type = "password";
 
 				// Add validation status element
-				const statusEl = formEl.createDiv("token-validation-status");
+				const statusEl = formEl.createDiv("brat-token-validation-status");
 				if (!statusEl) return;
 
 				// Add validate button
-				if (textEl.inputEl.parentElement) {
-					this.validateButton = new ButtonComponent(textEl.inputEl.parentElement)
+				if (this.tokenInputEl.inputEl.parentElement) {
+					this.validateButton = new ButtonComponent(this.tokenInputEl.inputEl.parentElement)
 						.setButtonText("Validate")
 						.setDisabled(this.privateApiKey === "")
 						.onClick(async (e: Event) => {
@@ -294,12 +315,12 @@ export default class AddNewPluginModal extends Modal {
 
 								// Update version dropdown when API key changes
 								if (this.address) {
-									await this.updateRepositoryVersionInfo(this.version);
+									await this.updateRepositoryVersionInfo(this.version, validationStatusEl);
 								}
 							}
 						})
 						.then(async () => {
-							this.validator = new TokenValidator(textEl);
+							this.validator = new TokenValidator(this.tokenInputEl);
 							this.validToken = await this.validator?.validateToken(this.privateApiKey, this.address);
 							if (this.validToken && this.usePrivateApiKey) {
 								this.validateButton?.setButtonText("Valid");
@@ -399,17 +420,21 @@ export default class AddNewPluginModal extends Modal {
 	 * @param validationStatusEl - The error element (used for errors, incl. GitHub Rate limit)
 	 * @returns {Promise<void>}
 	 */
-	private async updateRepositoryVersionInfo(selectedVersion = "", validateInputEl?: TextComponent, validationStatusEl?: HTMLElement) {
+	private async updateRepositoryVersionInfo(selectedVersion = "", validationStatusEl?: HTMLElement) {
+		const validateInputEl = this.repositoryAddressEl;
 		if (this.plugin.settings.debuggingMode) {
 			console.log(`[BRAT] Updating version dropdown for ${this.address} with selected version ${selectedVersion}`);
 		}
 
 		if (!this.address) {
-			if (validationStatusEl) {
-				validationStatusEl.setText("Repository address is required.");
-			}
+			validationStatusEl?.setText("Repository address is required.");
+			validationStatusEl?.addClass("validation-status-error");
 			return;
 		}
+
+		validationStatusEl?.setText("Validating repository address...");
+		validationStatusEl?.removeClass("validation-status-error");
+
 		if (this.versionSetting && this.updateVersion) {
 			// Clear the version dropdown
 			this.updateVersionDropdown(this.versionSetting, [], selectedVersion);
@@ -475,7 +500,7 @@ export default class AddNewPluginModal extends Modal {
 				const gitHubError = error as GitHubResponseError;
 				switch (gitHubError.status) {
 					case 404:
-						validationStatusEl?.setText("Repository not found.");
+						validationStatusEl?.setText("Repository not found. Check the address or provide a private token.");
 						break;
 					case 403:
 						validationStatusEl?.setText("Access denied. Check your personal access token.");
@@ -484,6 +509,12 @@ export default class AddNewPluginModal extends Modal {
 						validationStatusEl?.setText(`Error: ${gitHubError.message}`);
 						break;
 				}
+
+				// Disable relevant settings
+				validationStatusEl?.addClass("validation-status-error");
+				this.versionSetting?.setDisabled(true);
+				this.addPluginButton?.setDisabled(true);
+
 				toastMessage(this.plugin, `${gitHubError.message} `, 20);
 			}
 		}
