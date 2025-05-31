@@ -41,26 +41,26 @@ export class TokenValidator {
 	}
 
 	private showValidTokenInfo(patInfo: GitHubTokenInfo): void {
-		const details = this.statusEl?.createDiv({ cls: "token-details" });
+		const details = this.statusEl?.createDiv({ cls: "brat-token-details" });
 
 		if (!details) return;
 
 		details.createDiv({
 			text: "✓ Valid token",
-			cls: "token-status valid",
+			cls: "brat-token-status valid",
 		});
 
 		if (patInfo.currentScopes?.length) {
 			details.createDiv({
 				text: `Scopes: ${patInfo.currentScopes.join(", ")}`,
-				cls: "token-scopes",
+				cls: "brat-token-scopes",
 			});
 		}
 
 		if (patInfo.rateLimit) {
 			details.createDiv({
 				text: `Rate Limit: ${patInfo.rateLimit.remaining}/${patInfo.rateLimit.limit}`,
-				cls: "token-rate",
+				cls: "brat-token-rate",
 			});
 		}
 
@@ -71,14 +71,14 @@ export class TokenValidator {
 			if (daysLeft < 7) {
 				details.createDiv({
 					text: `⚠️ Token expires in ${daysLeft} days`,
-					cls: "token-warning",
+					cls: "brat-token-warning",
 				});
 			}
 		}
 	}
 
 	private showErrorMessage(error: TokenValidationError): void {
-		const details = this.statusEl?.createDiv({ cls: "token-error" });
+		const details = this.statusEl?.createDiv({ cls: "brat-token-error" });
 		if (!details) return;
 
 		details.createDiv({ text: error.message });
