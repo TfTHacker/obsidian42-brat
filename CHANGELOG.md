@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.1.7-beta.4](https://github.com/TfTHacker/obsidian42-brat/compare/1.1.7-beta.3...1.1.7-beta.4) (2025-05-31)
+
+### Features
+
+* ✨ comprehensive per-repository token validation ([61eae40](https://github.com/TfTHacker/obsidian42-brat/commit/61eae40396ac5eab7b9007dc98ab4020a2ab9996))
+
 ## [1.1.7-beta.3](https://github.com/TfTHacker/obsidian42-brat/compare/1.1.7-beta.2...1.1.7-beta.3) (2025-05-31)
 
 ### Bug Fixes
