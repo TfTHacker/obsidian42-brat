@@ -2,22 +2,14 @@
 
 ## [1.1.7](https://github.com/TfTHacker/obsidian42-brat/compare/1.1.7-beta.5...1.1.7) (2025-06-13)
 
-## [1.1.7-beta.5](https://github.com/TfTHacker/obsidian42-brat/compare/1.1.7-beta.4...1.1.7-beta.5) (2025-05-31)
+### Features
+
+* ✨ extend protocol handler with a version parameter
+* ✨ comprehensive per-repository token validation ([61eae40](https://github.com/TfTHacker/obsidian42-brat/commit/61eae40396ac5eab7b9007dc98ab4020a2ab9996))
 
 ### Bug Fixes
 
 * ♻️ consolidate token validation code ([1473a5d](https://github.com/TfTHacker/obsidian42-brat/commit/1473a5d370a33ae25d2f4faf0a8efc4c287010c6))
-
-## [1.1.7-beta.4](https://github.com/TfTHacker/obsidian42-brat/compare/1.1.7-beta.3...1.1.7-beta.4) (2025-05-31)
-
-### Features
-
-* ✨ comprehensive per-repository token validation ([61eae40](https://github.com/TfTHacker/obsidian42-brat/commit/61eae40396ac5eab7b9007dc98ab4020a2ab9996))
-
-## [1.1.7-beta.3](https://github.com/TfTHacker/obsidian42-brat/compare/1.1.7-beta.2...1.1.7-beta.3) (2025-05-31)
-
-### Bug Fixes
-
 * 🐛 fix `minAppVersion` check when adding or updating plugins ([92eee3b](https://github.com/TfTHacker/obsidian42-brat/commit/92eee3b668851b64f641f6926d18254320e96ac0)), closes [#112](https://github.com/TfTHacker/obsidian42-brat/issues/112)
 
 ## [1.1.6](https://github.com/TfTHacker/obsidian42-brat/releases/1.1.6)
