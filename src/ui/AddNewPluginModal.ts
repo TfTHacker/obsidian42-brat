@@ -194,7 +194,7 @@ export default class AddNewPluginModal extends Modal {
 					setting.addText((addressEl) => {
 						this.repositoryAddressEl = addressEl;
 
-						addressEl.setPlaceholder("Repository (example: https://github.com/GitubUserName/repository-name)");
+						addressEl.setPlaceholder("Repository (example: https://github.com/GitHubUserName/repository-name)");
 						addressEl.setValue(this.address);
 						addressEl.onChange((value) => {
 							this.address = scrubRepositoryUrl(value.trim());

@@ -40,7 +40,7 @@ export default class AddNewTheme extends Modal {
 		this.contentEl.createEl("form", {}, (formEl) => {
 			formEl.addClass("brat-modal");
 			new Setting(formEl).addText((textEl) => {
-				textEl.setPlaceholder("Repository (example: https://github.com/GitubUserName/repository-name");
+				textEl.setPlaceholder("Repository (example: https://github.com/GitHubUserName/repository-name");
 				textEl.setValue(this.address);
 				textEl.onChange((value) => {
 					this.address = value.trim();
