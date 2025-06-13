@@ -1,5 +1,7 @@
 # Changelog
 
+## [1.1.7](https://github.com/TfTHacker/obsidian42-brat/compare/1.1.7-beta.5...1.1.7) (2025-06-13)
+
 ## [1.1.7-beta.5](https://github.com/TfTHacker/obsidian42-brat/compare/1.1.7-beta.4...1.1.7-beta.5) (2025-05-31)
 
 ### Bug Fixes
