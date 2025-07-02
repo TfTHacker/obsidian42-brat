@@ -320,16 +320,34 @@ export default class PluginCommands {
 
 	constructor(plugin: BratPlugin) {
 		this.plugin = plugin;
+		this.registerCommands();
+	}
 
-		for (const item of this.bratCommands) {
-			this.plugin.addCommand({
-				id: item.id,
-				name: item.name,
-				icon: item.icon,
-				callback: () => {
-					item.callback();
-				},
-			});
+	registerCommands(): void {
+		if (this.plugin.settings.showCommandsInRibbon) {
+			for (const item of this.bratCommands) {
+				this.plugin.addCommand({
+					id: item.id,
+					name: item.name,
+					icon: item.icon,
+					callback: () => {
+						item.callback();
+					},
+				});
+			}
 		}
+	}
+
+	unregisterCommands(): void {
+		for (const item of this.bratCommands) {
+			if (this.plugin.app.commands.removeCommand) {
+				this.plugin.app.commands.removeCommand(`${this.plugin.manifest.id}:${item.id}`);
+			}
+		}
+	}
+
+	updateCommandRegistration(): void {
+		this.unregisterCommands();
+		this.registerCommands();
 	}
 }

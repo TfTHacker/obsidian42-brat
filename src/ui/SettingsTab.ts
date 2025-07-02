@@ -59,6 +59,17 @@ export class BratSettingsTab extends PluginSettingTab {
 				});
 			});
 
+		new Setting(containerEl)
+			.setName("Show commands in command palette")
+			.setDesc("If enabled, BRAT commands will be visible in Obsidian's command palette. Disable this to hide BRAT commands from the command palette while keeping ribbon functionality.")
+			.addToggle((cb: ToggleComponent) => {
+				cb.setValue(this.plugin.settings.showCommandsInRibbon).onChange(async (value: boolean) => {
+				this.plugin.settings.showCommandsInRibbon = value;
+				await this.plugin.saveSettings();
+				this.plugin.commands.updateCommandRegistration();
+			});
+			});
+
 		promotionalLinks(containerEl, true);
 		containerEl.createEl("hr");
 		new Setting(containerEl).setName("Beta plugin list").setHeading();
