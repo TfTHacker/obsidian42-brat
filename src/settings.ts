@@ -26,6 +26,7 @@ export interface Settings {
 	debuggingMode: boolean;
 	notificationsEnabled: boolean;
 	personalAccessToken?: string;
+	showCommandsInRibbon: boolean;
 }
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -41,6 +42,7 @@ export const DEFAULT_SETTINGS: Settings = {
 	debuggingMode: false,
 	notificationsEnabled: true,
 	personalAccessToken: "",
+	showCommandsInRibbon: true,
 };
 
 /**
