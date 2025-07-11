@@ -51,6 +51,9 @@ export interface TokenValidationError {
 export const scrubRepositoryUrl = (address: string): string => {
 	// Case-insensitive replace for github.com
 	let scrubbedAddress = address.replace(/https?:\/\/github\.com\//i, "");
+	if (scrubbedAddress.endsWith("/")) {
+		scrubbedAddress = scrubbedAddress.slice(0, -1);
+	}
 	// Case-insensitive check and remove for .git extension
 	if (scrubbedAddress.toLowerCase().endsWith(".git")) {
 		scrubbedAddress = scrubbedAddress.slice(0, -4);
