@@ -1,5 +1,16 @@
 # Changelog
 
+## [1.1.8-beta.0](https://github.com/TfTHacker/obsidian42-brat/compare/1.1.7...1.1.8-beta.0) (2025-07-13)
+
+### Bug Fixes
+
+* 🐛 improve robustness of release asset download logic ([37a5969](https://github.com/TfTHacker/obsidian42-brat/commit/37a596989b44c623f0c026b8ff38387141d7dc9d)), closes [#116](https://github.com/TfTHacker/obsidian42-brat/issues/116)
+* support github urls with trailing slash ([1340f8e](https://github.com/TfTHacker/obsidian42-brat/commit/1340f8ee55276e90cce9bff7778b30bebbb3b0db))
+
+### Performance Improvements
+
+* ⚡️ add user-agent string to GitHub API requests ([ca6ba85](https://github.com/TfTHacker/obsidian42-brat/commit/ca6ba85f2f6d75387fdf81e726c2550c1b33e508))
+
 ## [1.1.7](https://github.com/TfTHacker/obsidian42-brat/compare/1.1.7-beta.5...1.1.7) (2025-06-13)
 
 ### Features
