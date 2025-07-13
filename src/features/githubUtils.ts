@@ -524,6 +524,12 @@ export const gitHubRequest = async (options: RequestUrlParam, debugLogging?: tru
 	let remaining = 0;
 	let reset = 0;
 
+	// Set User-Agent Header
+	options.headers = {
+		...options.headers,
+		"User-Agent": "Obsidian/BRAT-Plugin",
+	};
+
 	try {
 		const response = await request(options);
 		return response;
