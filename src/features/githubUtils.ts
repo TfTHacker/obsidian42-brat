@@ -295,13 +295,15 @@ export const grabReleaseFileFromRepository = async (
 			Accept: "application/octet-stream",
 		};
 
-		// Authenticated requests get a higher rate limit
-		if ((isPrivate && personalAccessToken) || personalAccessToken) {
+		// Authenticated requests get a higher rate limit, only needed for private repositories here
+		if (isPrivate && personalAccessToken) {
 			headers.Authorization = `Token ${personalAccessToken}`;
 		}
 
+		// Download from the asset URL if it's a private repo, otherwise use the browser download URL
+		const downloadUrl = isPrivate ? asset.url : asset.browser_download_url;
 		const download = await request({
-			url: asset.url,
+			url: downloadUrl,
 			headers,
 		});
 		return download === "Not Found" || download === `{"error":"Not Found"}` ? null : download;
