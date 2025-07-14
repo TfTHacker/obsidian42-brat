@@ -121,6 +121,9 @@ export default class AddNewPluginModal extends Modal {
 
 	private updateVersionDropdown(settingEl: Setting, versions: ReleaseVersion[], selected = ""): void {
 		settingEl.clear();
+		if (versions.length > 0 && !selected && this.plugin.settings.selectLatestPluginVersionByDefault) {
+			selected = "latest";
+		}
 
 		const VERSION_THRESHOLD = 20;
 
