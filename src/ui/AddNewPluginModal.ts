@@ -123,7 +123,6 @@ export default class AddNewPluginModal extends Modal {
 		settingEl.clear();
 		if (versions.length > 0 && !selected && this.plugin.settings.selectLatestPluginVersionByDefault) {
 			selected = "latest";
-			this.updateAddButtonState();
 		}
 
 		const VERSION_THRESHOLD = 20;
@@ -137,11 +136,13 @@ export default class AddNewPluginModal extends Modal {
 				for (const version of versions) {
 					dropdown.addOption(version.version, `${version.version} ${version.prerelease ? "(Prerelease)" : ""}`);
 				}
-				dropdown.setValue(selected);
-				dropdown.onChange((value) => {
+				const changeHandler = (value: string) => {
 					this.version = value;
 					this.updateAddButtonState();
-				});
+				};
+				dropdown.onChange(changeHandler);
+				dropdown.setValue(selected);
+				changeHandler(selected);
 
 				dropdown.selectEl.addClass("brat-version-selector");
 				dropdown.selectEl.style.width = "100%";
