@@ -121,6 +121,9 @@ export default class AddNewPluginModal extends Modal {
 
 	private updateVersionDropdown(settingEl: Setting, versions: ReleaseVersion[], selected = ""): void {
 		settingEl.clear();
+		if (versions.length > 0 && !selected) {
+			selected = "latest";
+		}
 
 		const VERSION_THRESHOLD = 20;
 
@@ -133,11 +136,13 @@ export default class AddNewPluginModal extends Modal {
 				for (const version of versions) {
 					dropdown.addOption(version.version, `${version.version} ${version.prerelease ? "(Prerelease)" : ""}`);
 				}
-				dropdown.setValue(selected);
-				dropdown.onChange((value) => {
+				const changeHandler = (value: string) => {
 					this.version = value;
 					this.updateAddButtonState();
-				});
+				};
+				dropdown.onChange(changeHandler);
+				dropdown.setValue(selected);
+				changeHandler(selected);
 
 				dropdown.selectEl.addClass("brat-version-selector");
 				dropdown.selectEl.style.width = "100%";
