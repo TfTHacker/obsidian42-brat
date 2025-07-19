@@ -123,6 +123,7 @@ export default class AddNewPluginModal extends Modal {
 		settingEl.clear();
 		if (versions.length > 0 && !selected) {
 			selected = "latest";
+			this.updateAddButtonState();
 		}
 
 		const VERSION_THRESHOLD = 20;
