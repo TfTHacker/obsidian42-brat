@@ -120,9 +120,13 @@ export default class AddNewPluginModal extends Modal {
 	}
 
 	private updateVersionDropdown(settingEl: Setting, versions: ReleaseVersion[], selected = ""): void {
+		let selectedVersion: string;
+
 		settingEl.clear();
 		if (versions.length > 0 && !selected && this.plugin.settings.selectLatestPluginVersionByDefault) {
-			selected = "latest";
+			selectedVersion = "latest";
+		} else {
+			selectedVersion = selected;
 		}
 
 		const VERSION_THRESHOLD = 20;
@@ -141,8 +145,8 @@ export default class AddNewPluginModal extends Modal {
 					this.updateAddButtonState();
 				};
 				dropdown.onChange(changeHandler);
-				dropdown.setValue(selected);
-				changeHandler(selected);
+				dropdown.setValue(selectedVersion);
+				changeHandler(selectedVersion);
 
 				dropdown.selectEl.addClass("brat-version-selector");
 				dropdown.selectEl.style.width = "100%";
@@ -151,7 +155,7 @@ export default class AddNewPluginModal extends Modal {
 			// Use suggest modal for many versions
 			settingEl.addButton((button) => {
 				button
-					.setButtonText(selected === "latest" ? "Latest version" : selected || "Select a version...")
+					.setButtonText(selectedVersion === "latest" ? "Latest version" : selectedVersion || "Select a version...")
 					.setClass("brat-version-selector")
 					.setClass("button")
 					.onClick((e: Event) => {
@@ -161,7 +165,7 @@ export default class AddNewPluginModal extends Modal {
 							prerelease: false,
 						};
 						const suggestedVersions: ReleaseVersion[] = [latest, ...versions];
-						const modal = new VersionSuggestModal(this.app, this.address, suggestedVersions, selected, (version: string) => {
+						const modal = new VersionSuggestModal(this.app, this.address, suggestedVersions, selectedVersion, (version: string) => {
 							this.version = version;
 							button.setButtonText(version === "latest" ? "Latest version" : version || "Select a version...");
 							this.updateAddButtonState();
