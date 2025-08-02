@@ -1,4 +1,4 @@
-import { type RequestUrlParam, request } from "obsidian";
+import { type RequestUrlParam, type RequestUrlResponse, requestUrl } from "obsidian";
 import { GHRateLimitError, GitHubResponseError } from "../utils/GitHubAPIErrors";
 
 const compareVersions = require("semver/functions/compare");
@@ -59,7 +59,7 @@ export const scrubRepositoryUrl = (address: string): string => {
 		scrubbedAddress = scrubbedAddress.slice(0, -4);
 	}
 	return scrubbedAddress;
-}
+};
 
 const TOKEN_PREFIXES = ["ghp_", "github_pat_"];
 const TOKEN_REGEXP = /^(gh[ps]_[a-zA-Z0-9]{36}|github_pat_[a-zA-Z0-9]{22}_[a-zA-Z0-9]{59})$/;
@@ -71,15 +71,11 @@ const TOKEN_REGEXP = /^(gh[ps]_[a-zA-Z0-9]{36}|github_pat_[a-zA-Z0-9]{22}_[a-zA-
  * @param repository - Optional repository name (to be used when validating private repository access)
  * @returns Token information including scopes, permissions, and rate limits
  */
-export const validateGitHubToken = async (
-	personalAccessToken: string,
-	repository?: string
-): Promise<GitHubTokenInfo> => {
+export const validateGitHubToken = async (personalAccessToken: string, repository?: string): Promise<GitHubTokenInfo> => {
 	// Check scopes & token prefix
 	const validScopes: string[] = ["repo", "public_repo", "metadata=read"];
 	const hasValidPrefix = TOKEN_PREFIXES.some((prefix) => personalAccessToken.toLowerCase().startsWith(prefix.toLowerCase()));
 	const hasValidFormat = TOKEN_REGEXP.test(personalAccessToken);
-
 
 	if (!hasValidPrefix || !hasValidFormat) {
 		const error: TokenValidationError = {
@@ -140,7 +136,7 @@ export const validateGitHubToken = async (
 					message: "No error",
 					details: {},
 				},
-			}; 
+			};
 		}
 		throw new Error("Expected request to fail");
 	} catch (error) {
@@ -214,7 +210,7 @@ export const validateGitHubToken = async (
 export const isPrivateRepo = async (repository: string, debugLogging = true, accessToken = ""): Promise<boolean> => {
 	const URL = `https://api.github.com/repos/${repository}`;
 	try {
-		const response = await gitHubRequest({
+		const response: RequestUrlResponse = await gitHubRequest({
 			url: URL,
 			headers: accessToken
 				? {
@@ -222,7 +218,7 @@ export const isPrivateRepo = async (repository: string, debugLogging = true, acc
 					}
 				: {},
 		});
-		const data = await JSON.parse(response);
+		const data = response.json;
 		return data.private;
 	} catch (error) {
 		// Special handling for rate limit errors
@@ -243,7 +239,7 @@ export const isPrivateRepo = async (repository: string, debugLogging = true, acc
 export const fetchReleaseVersions = async (repository: string, debugLogging = true, accessToken = ""): Promise<ReleaseVersion[] | null> => {
 	const apiUrl = `https://api.github.com/repos/${repository}/releases`;
 	try {
-		const response = await gitHubRequest({
+		const response: RequestUrlResponse = await gitHubRequest({
 			url: `${apiUrl}?per_page=100`,
 			headers: accessToken
 				? {
@@ -251,7 +247,7 @@ export const fetchReleaseVersions = async (repository: string, debugLogging = tr
 					}
 				: {},
 		});
-		const data = await JSON.parse(response);
+		const data = response.json;
 		return data.map((release: { tag_name: string; prerelease: boolean }) => ({
 			version: release.tag_name,
 			prerelease: release.prerelease,
@@ -302,11 +298,11 @@ export const grabReleaseFileFromRepository = async (
 
 		// Download from the asset URL if it's a private repo, otherwise use the browser download URL
 		const downloadUrl = isPrivate ? asset.url : asset.browser_download_url;
-		const download = await request({
+		const response = await requestUrl({
 			url: downloadUrl,
 			headers,
 		});
-		return download === "Not Found" || download === `{"error":"Not Found"}` ? null : download;
+		return response.status !== 200 ? null : response.text;
 	} catch (error) {
 		// Special handling for rate limit errors
 		if (error instanceof GHRateLimitError) {
@@ -328,8 +324,8 @@ export interface CommunityPlugin {
 export const grabCommmunityPluginList = async (debugLogging = true): Promise<CommunityPlugin[] | null> => {
 	const pluginListUrl = "https://raw.githubusercontent.com/obsidianmd/obsidian-releases/HEAD/community-plugins.json";
 	try {
-		const response = await request({ url: pluginListUrl });
-		return response === "404: Not Found" ? null : ((await JSON.parse(response)) as CommunityPlugin[]);
+		const response: RequestUrlResponse = await requestUrl({ url: pluginListUrl });
+		return response.status === 404 ? null : (response.json as CommunityPlugin[]);
 	} catch (error) {
 		if (debugLogging) console.log("error in grabCommmunityPluginList", error);
 		return null;
@@ -345,8 +341,8 @@ export interface CommunityTheme {
 export const grabCommmunityThemesList = async (debugLogging = true): Promise<CommunityTheme[] | null> => {
 	const themesUrl = "https://raw.githubusercontent.com/obsidianmd/obsidian-releases/HEAD/community-css-themes.json";
 	try {
-		const response = await request({ url: themesUrl });
-		return response === "404: Not Found" ? null : ((await JSON.parse(response)) as CommunityTheme[]);
+		const response: RequestUrlResponse = await requestUrl({ url: themesUrl });
+		return response.status === 404 ? null : (response.json as CommunityTheme[]);
 	} catch (error) {
 		if (debugLogging) console.log("error in grabCommmunityThemesList", error);
 		return null;
@@ -360,8 +356,8 @@ export const grabCommmunityThemeCssFile = async (
 ): Promise<string | null> => {
 	const themesUrl = `https://raw.githubusercontent.com/${repositoryPath}/HEAD/theme${betaVersion ? "-beta" : ""}.css`;
 	try {
-		const response = await request({ url: themesUrl });
-		return response === "404: Not Found" ? null : response;
+		const response: RequestUrlResponse = await requestUrl({ url: themesUrl });
+		return response.status === 404 ? null : response.text;
 	} catch (error) {
 		if (debugLogging) console.log("error in grabCommmunityThemeCssFile", error);
 		return null;
@@ -371,8 +367,8 @@ export const grabCommmunityThemeCssFile = async (
 export const grabCommmunityThemeManifestFile = async (repositoryPath: string, debugLogging = true): Promise<string | null> => {
 	const themesUrl = `https://raw.githubusercontent.com/${repositoryPath}/HEAD/manifest.json`;
 	try {
-		const response = await request({ url: themesUrl });
-		return response === "404: Not Found" ? null : response;
+		const response: RequestUrlResponse = await requestUrl({ url: themesUrl });
+		return response.status === 404 ? null : response.text;
 	} catch (error) {
 		if (debugLogging) console.log("error in grabCommmunityThemeManifestFile", error);
 		return null;
@@ -411,8 +407,8 @@ export const grabLastCommitInfoForFile = async (
 ): Promise<CommitInfo[] | null> => {
 	const url = `https://api.github.com/repos/${repositoryPath}/commits?path=${path}&page=1&per_page=1`;
 	try {
-		const response = await request({ url: url });
-		return response === "404: Not Found" ? null : (JSON.parse(response) as CommitInfo[]);
+		const response: RequestUrlResponse = await requestUrl({ url: url });
+		return response.status === 404 ? null : (response.json as CommitInfo[]);
 	} catch (error) {
 		if (debugLogging) console.log("error in grabLastCommitInfoForAFile", error);
 		return null;
@@ -484,15 +480,15 @@ export const grabReleaseFromRepository = async (
 			headers.Authorization = `Token ${personalAccessToken}`;
 		}
 
-		const response = await gitHubRequest({
+		const response: RequestUrlResponse = await gitHubRequest({
 			url: apiUrl,
 			headers,
 		});
 
-		if (response === "404: Not Found") return null;
+		if (response.status === 404) return null;
 
 		// If we fetch a specific version, we get a single release object
-		const releases: Release[] = version && version !== "latest" ? [JSON.parse(response)] : JSON.parse(response);
+		const releases: Release[] = version && version !== "latest" ? [response.json] : response.json;
 
 		if (debugLogging) {
 			console.log(`grabReleaseFromRepository for ${repositoryPath}:`, releases);
@@ -521,7 +517,7 @@ export const grabReleaseFromRepository = async (
  *	@param options - Request options
  *	@param debugLogging - Enable debug logging (default: true)
  */
-export const gitHubRequest = async (options: RequestUrlParam, debugLogging?: true): Promise<string> => {
+export const gitHubRequest = async (options: RequestUrlParam, debugLogging?: true): Promise<RequestUrlResponse> => {
 	let limit = 0;
 	let remaining = 0;
 	let reset = 0;
@@ -533,7 +529,7 @@ export const gitHubRequest = async (options: RequestUrlParam, debugLogging?: tru
 	};
 
 	try {
-		const response = await request(options);
+		const response = await requestUrl(options);
 		return response;
 	} catch (error) {
 		// Update rate limits from response headers
