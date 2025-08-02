@@ -59,6 +59,16 @@ export class BratSettingsTab extends PluginSettingTab {
 				});
 			});
 
+		new Setting(containerEl)
+			.setName("Select latest plugin version by default")
+			.setDesc("If enabled the latest version will be selected by default when adding a new plugin.")
+			.addToggle((cb: ToggleComponent) => {
+				cb.setValue(this.plugin.settings.selectLatestPluginVersionByDefault).onChange(async (value: boolean) => {
+					this.plugin.settings.selectLatestPluginVersionByDefault = value;
+					await this.plugin.saveSettings();
+				});
+			});
+
 		promotionalLinks(containerEl, true);
 		containerEl.createEl("hr");
 		new Setting(containerEl).setName("Beta plugin list").setHeading();
