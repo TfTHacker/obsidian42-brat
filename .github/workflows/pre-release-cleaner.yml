@@ -3,6 +3,7 @@ name: Pre-release Cleaner
 on:
   release:
     types: [published]
+  workflow_dispatch:
 
 # This workflow runs when a new release is published.
 # It deletes old pre-release versions, keeping at least 10.
