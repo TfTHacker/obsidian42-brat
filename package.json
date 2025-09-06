@@ -17,21 +17,21 @@
     "url": "git://github.com/TfTHacker/obsidian42-brat.git"
   },
   "devDependencies": {
-    "@biomejs/biome": "1.9.4",
-    "@types/node": "^22.10.1",
-    "@types/semver": "^7.7.0",
-    "builtin-modules": "4.0.0",
-    "esbuild": "0.25.0",
+    "@biomejs/biome": "2.2.3",
+    "@types/node": "^24.3.1",
+    "@types/semver": "^7.7.1",
+    "builtin-modules": "5.0.0",
+    "esbuild": "0.25.9",
     "esbuild-copy-static-files": "^0.1.0",
-    "jsdom": "^25.0.1",
-    "obsidian": "1.7.2",
+    "jsdom": "^26.1.0",
+    "obsidian": "1.8.7",
     "ts-node": "^10.9.2",
     "tslib": "^2.8.1",
-    "typedoc": "^0.27.1",
-    "typescript": "5.7.2"
+    "typedoc": "^0.28.12",
+    "typescript": "5.9.2"
   },
   "dependencies": {
     "obsidian-daily-notes-interface": "^0.9.4",
-    "semver": "^7.7.1"
+    "semver": "^7.7.2"
   }
 }
