@@ -592,6 +592,10 @@ export default class AddNewPluginModal extends Modal {
 				// Add invalid-repository class
 				validateInputEl?.inputEl.classList.remove("valid-repository");
 				validateInputEl?.inputEl.classList.add("invalid-repository");
+				validationStatusEl?.setText(
+					"Error: No releases found in this repository.",
+				);
+				validationStatusEl?.addClass("validation-status-error");
 
 				if (this.versionSetting) {
 					this.versionSetting.settingEl.classList.add("disabled-setting");
