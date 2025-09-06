@@ -103,8 +103,9 @@ export default class AddNewTheme extends Modal {
 
 	onClose(): void {
 		if (this.openSettingsTabAfterwards) {
-			// @ts-ignore
+			// @ts-expect-error
 			this.plugin.app.setting.openTab();
+			// @ts-expect-error
 			this.plugin.app.setting.openTabById(this.plugin.APP_ID);
 		}
 	}
