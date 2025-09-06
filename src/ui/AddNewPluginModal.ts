@@ -1,6 +1,19 @@
-import { ButtonComponent, Modal, Platform, Setting, TextComponent } from "obsidian";
-import { type ReleaseVersion, fetchReleaseVersions, scrubRepositoryUrl } from "src/features/githubUtils";
-import { GHRateLimitError, GitHubResponseError } from "src/utils/GitHubAPIErrors";
+import {
+	ButtonComponent,
+	Modal,
+	Platform,
+	Setting,
+	TextComponent,
+} from "obsidian";
+import {
+	fetchReleaseVersions,
+	type ReleaseVersion,
+	scrubRepositoryUrl,
+} from "src/features/githubUtils";
+import {
+	GHRateLimitError,
+	GitHubResponseError,
+} from "src/utils/GitHubAPIErrors";
 import { TokenValidator } from "src/utils/TokenValidator";
 import { createGitHubResourceLink } from "src/utils/utils";
 import type BetaPlugins from "../features/BetaPlugins";
@@ -53,7 +66,9 @@ export default class AddNewPluginModal extends Modal {
 		this.address = prefillRepo;
 		this.version = prefillVersion;
 		this.privateApiKey = prefillPrivateApiKey;
-		this.usePrivateApiKey = !(prefillPrivateApiKey === "" || prefillPrivateApiKey === undefined);
+		this.usePrivateApiKey = !(
+			prefillPrivateApiKey === "" || prefillPrivateApiKey === undefined
+		);
 		this.openSettingsTabAfterwards = openSettingsTabAfterwards;
 		this.updateVersion = updateVersion;
 		this.enableAfterInstall = plugin.settings.enableAfterInstall;
@@ -64,7 +79,10 @@ export default class AddNewPluginModal extends Modal {
 		const scrubbedAddress = scrubRepositoryUrl(this.address);
 
 		// If it's an existing frozen version plugin, update it instead of checking for duplicates
-		const existingFrozenPlugin = this.plugin.settings.pluginSubListFrozenVersion.find((p) => p.repo === scrubbedAddress);
+		const existingFrozenPlugin =
+			this.plugin.settings.pluginSubListFrozenVersion.find(
+				(p) => p.repo === scrubbedAddress,
+			);
 		if (existingFrozenPlugin) {
 			const result = await this.betaPlugins.addPlugin(
 				scrubbedAddress,
@@ -79,7 +97,9 @@ export default class AddNewPluginModal extends Modal {
 			if (result) {
 				// Update version and token (also clear token if empty or if "usePrivateApiKey is not set") only if successfully added
 				existingFrozenPlugin.version = this.version;
-				existingFrozenPlugin.token = this.usePrivateApiKey ? this.privateApiKey || "" : undefined;
+				existingFrozenPlugin.token = this.usePrivateApiKey
+					? this.privateApiKey || ""
+					: undefined;
 				await this.plugin.saveSettings();
 				this.close();
 			}
@@ -94,7 +114,11 @@ export default class AddNewPluginModal extends Modal {
 		}
 
 		if (!this.version && existBetaPluginInList(this.plugin, scrubbedAddress)) {
-			toastMessage(this.plugin, "This plugin is already in the list for beta testing", 10);
+			toastMessage(
+				this.plugin,
+				"This plugin is already in the list for beta testing",
+				10,
+			);
 			return;
 		}
 
@@ -119,11 +143,19 @@ export default class AddNewPluginModal extends Modal {
 		this.versionSetting?.setDisabled(false);
 	}
 
-	private updateVersionDropdown(settingEl: Setting, versions: ReleaseVersion[], selected = ""): void {
+	private updateVersionDropdown(
+		settingEl: Setting,
+		versions: ReleaseVersion[],
+		selected = "",
+	): void {
 		let selectedVersion: string;
 
 		settingEl.clear();
-		if (versions.length > 0 && !selected && this.plugin.settings.selectLatestPluginVersionByDefault) {
+		if (
+			versions.length > 0 &&
+			!selected &&
+			this.plugin.settings.selectLatestPluginVersionByDefault
+		) {
 			selectedVersion = "latest";
 		} else {
 			selectedVersion = selected;
@@ -138,7 +170,10 @@ export default class AddNewPluginModal extends Modal {
 				dropdown.addOption("", "Select a version");
 				dropdown.addOption("latest", "Latest version");
 				for (const version of versions) {
-					dropdown.addOption(version.version, `${version.version} ${version.prerelease ? "(Prerelease)" : ""}`);
+					dropdown.addOption(
+						version.version,
+						`${version.version} ${version.prerelease ? "(Prerelease)" : ""}`,
+					);
 				}
 				const changeHandler = (value: string) => {
 					this.version = value;
@@ -155,7 +190,11 @@ export default class AddNewPluginModal extends Modal {
 			// Use suggest modal for many versions
 			settingEl.addButton((button) => {
 				button
-					.setButtonText(selectedVersion === "latest" ? "Latest version" : selectedVersion || "Select a version...")
+					.setButtonText(
+						selectedVersion === "latest"
+							? "Latest version"
+							: selectedVersion || "Select a version...",
+					)
 					.setClass("brat-version-selector")
 					.setClass("button")
 					.onClick((e: Event) => {
@@ -165,11 +204,21 @@ export default class AddNewPluginModal extends Modal {
 							prerelease: false,
 						};
 						const suggestedVersions: ReleaseVersion[] = [latest, ...versions];
-						const modal = new VersionSuggestModal(this.app, this.address, suggestedVersions, selectedVersion, (version: string) => {
-							this.version = version;
-							button.setButtonText(version === "latest" ? "Latest version" : version || "Select a version...");
-							this.updateAddButtonState();
-						});
+						const modal = new VersionSuggestModal(
+							this.app,
+							this.address,
+							suggestedVersions,
+							selectedVersion,
+							(version: string) => {
+								this.version = version;
+								button.setButtonText(
+									version === "latest"
+										? "Latest version"
+										: version || "Select a version...",
+								);
+								this.updateAddButtonState();
+							},
+						);
 						modal.open();
 					});
 			});
@@ -203,15 +252,22 @@ export default class AddNewPluginModal extends Modal {
 					setting.addText((addressEl) => {
 						this.repositoryAddressEl = addressEl;
 
-						addressEl.setPlaceholder("Repository (example: https://github.com/GitHubUserName/repository-name)");
+						addressEl.setPlaceholder(
+							"Repository (example: https://github.com/GitHubUserName/repository-name)",
+						);
 						addressEl.setValue(this.address);
 						addressEl.onChange((value) => {
 							this.address = scrubRepositoryUrl(value.trim());
-							if (this.version !== "" && (!this.address || !this.isGitHubRepositoryMatch(this.address))) {
+							if (
+								this.version !== "" &&
+								(!this.address || !this.isGitHubRepositoryMatch(this.address))
+							) {
 								// Disable version dropdown if version is set and address is empty
 								if (this.versionSetting) {
 									this.updateVersionDropdown(this.versionSetting, []);
-									this.versionSetting.settingEl.classList.add("disabled-setting");
+									this.versionSetting.settingEl.classList.add(
+										"disabled-setting",
+									);
 									this.versionSetting.setDisabled(true);
 									addressEl.inputEl.classList.remove("valid-repository");
 									addressEl.inputEl.classList.remove("invalid-repository");
@@ -220,30 +276,44 @@ export default class AddNewPluginModal extends Modal {
 
 							// If the GitHub Repository matches the GitHub pattern, enable the "Add Plugin"
 							if (!this.version) {
-								if (this.isGitHubRepositoryMatch(this.address)) this.addPluginButton?.setDisabled(false);
+								if (this.isGitHubRepositoryMatch(this.address))
+									this.addPluginButton?.setDisabled(false);
 								else this.addPluginButton?.setDisabled(true);
 							}
 						});
 
-						addressEl.inputEl.addEventListener("keydown", async (e: KeyboardEvent) => {
-							if (e.key === "Enter") {
-								if (this.address && ((this.updateVersion && this.version !== "") || !this.updateVersion)) {
-									e.preventDefault();
-									this.addPluginButton?.setDisabled(true);
-									this.cancelButton?.setDisabled(true);
-									this.versionSetting?.setDisabled(true);
-									void this.submitForm();
-								}
+						addressEl.inputEl.addEventListener(
+							"keydown",
+							async (e: KeyboardEvent) => {
+								if (e.key === "Enter") {
+									if (
+										this.address &&
+										((this.updateVersion && this.version !== "") ||
+											!this.updateVersion)
+									) {
+										e.preventDefault();
+										this.addPluginButton?.setDisabled(true);
+										this.cancelButton?.setDisabled(true);
+										this.versionSetting?.setDisabled(true);
+										void this.submitForm();
+									}
 
-								// Populate version dropdown
-								await this.updateRepositoryVersionInfo(this.version, validationStatusEl);
-							}
-						});
+									// Populate version dropdown
+									await this.updateRepositoryVersionInfo(
+										this.version,
+										validationStatusEl,
+									);
+								}
+							},
+						);
 
 						// Update version dropdown when input loses focus
 						if (this.updateVersion) {
 							addressEl.inputEl.addEventListener("blur", async () => {
-								await this.updateRepositoryVersionInfo(this.version, validationStatusEl);
+								await this.updateRepositoryVersionInfo(
+									this.version,
+									validationStatusEl,
+								);
 							});
 						}
 
@@ -256,10 +326,15 @@ export default class AddNewPluginModal extends Modal {
 			// Add validation status element (as a separate element)
 			// TODO: Find better way to build the modal
 			const validationStatusEl = formEl.createDiv("validation-status");
-			if (!this.address) validationStatusEl.setText("Enter a GitHub repository address to validate it.");
+			if (!this.address)
+				validationStatusEl.setText(
+					"Enter a GitHub repository address to validate it.",
+				);
 
 			// Then add version dropdown
-			this.versionSetting = new Setting(formEl).setClass("version-setting").setClass("disabled-setting");
+			this.versionSetting = new Setting(formEl)
+				.setClass("version-setting")
+				.setClass("disabled-setting");
 			this.updateVersionDropdown(this.versionSetting, [], this.version);
 			this.versionSetting.setDisabled(true);
 
@@ -277,10 +352,18 @@ export default class AddNewPluginModal extends Modal {
 						checkboxEl.checked = this.usePrivateApiKey;
 						checkboxEl.addEventListener("click", () => {
 							this.usePrivateApiKey = checkboxEl.checked;
-							this.validateButton?.setDisabled(!this.usePrivateApiKey || !this.validToken);
+							this.validateButton?.setDisabled(
+								!this.usePrivateApiKey || !this.validToken,
+							);
 							this.tokenInputEl?.setDisabled(!this.usePrivateApiKey);
-							if (!this.usePrivateApiKey || (this.validToken && this.usePrivateApiKey))
-								this.updateRepositoryVersionInfo(this.version, validationStatusEl);
+							if (
+								!this.usePrivateApiKey ||
+								(this.validToken && this.usePrivateApiKey)
+							)
+								this.updateRepositoryVersionInfo(
+									this.version,
+									validationStatusEl,
+								);
 						});
 						labelEl.appendText("Use token for this repository");
 					},
@@ -308,13 +391,18 @@ export default class AddNewPluginModal extends Modal {
 
 				// Add validate button
 				if (this.tokenInputEl.inputEl.parentElement) {
-					this.validateButton = new ButtonComponent(this.tokenInputEl.inputEl.parentElement)
+					this.validateButton = new ButtonComponent(
+						this.tokenInputEl.inputEl.parentElement,
+					)
 						.setButtonText("Validate")
 						.setDisabled(this.privateApiKey === "")
 						.onClick(async (e: Event) => {
 							e.preventDefault();
 
-							this.validToken = await this.validator?.validateToken(this.privateApiKey, this.address);
+							this.validToken = await this.validator?.validateToken(
+								this.privateApiKey,
+								this.address,
+							);
 							if (!this.validToken) {
 								this.validateButton?.setButtonText("Invalid");
 								this.validateButton?.setDisabled(false);
@@ -324,13 +412,19 @@ export default class AddNewPluginModal extends Modal {
 
 								// Update version dropdown when API key changes
 								if (this.address) {
-									await this.updateRepositoryVersionInfo(this.version, validationStatusEl);
+									await this.updateRepositoryVersionInfo(
+										this.version,
+										validationStatusEl,
+									);
 								}
 							}
 						})
 						.then(async () => {
 							this.validator = new TokenValidator(this.tokenInputEl);
-							this.validToken = await this.validator?.validateToken(this.privateApiKey, this.address);
+							this.validToken = await this.validator?.validateToken(
+								this.privateApiKey,
+								this.address,
+							);
 							if (this.validToken && this.usePrivateApiKey) {
 								this.validateButton?.setButtonText("Valid");
 								this.validateButton?.setDisabled(true);
@@ -361,17 +455,26 @@ export default class AddNewPluginModal extends Modal {
 				this.cancelButton = new ButtonComponent(buttonContainerEl)
 					.setButtonText("Never mind")
 					.setClass("mod-cancel")
-					.onClick((e: Event) => {
+					.onClick(() => {
 						this.close();
 					});
 
 				this.addPluginButton = new ButtonComponent(buttonContainerEl)
-					.setButtonText(this.updateVersion ? (this.address ? "Change version" : "Add plugin") : "Add plugin")
+					.setButtonText(
+						this.updateVersion
+							? this.address
+								? "Change version"
+								: "Add plugin"
+							: "Add plugin",
+					)
 					.setCta()
 					.onClick((e: Event) => {
 						e.preventDefault();
 						if (this.address !== "") {
-							if ((this.updateVersion && this.version !== "") || !this.updateVersion) {
+							if (
+								(this.updateVersion && this.version !== "") ||
+								!this.updateVersion
+							) {
 								// Submit the form
 								this.addPluginButton?.setDisabled(true);
 								this.addPluginButton?.setButtonText("Installing …");
@@ -383,14 +486,16 @@ export default class AddNewPluginModal extends Modal {
 					});
 
 				// Disable "Add Plugin" if adding a frozen version only
-				if (this.updateVersion || this.address === "") this.addPluginButton?.setDisabled(true);
+				if (this.updateVersion || this.address === "")
+					this.addPluginButton?.setDisabled(true);
 			});
 
 			const newDiv = formEl.createDiv();
 			newDiv.style.borderTop = "1px solid #ccc";
 			newDiv.style.marginTop = "30px";
 			const byTfThacker = newDiv.createSpan();
-			byTfThacker.innerHTML = "BRAT by <a href='https://bit.ly/o42-twitter'>TFTHacker</a>";
+			byTfThacker.innerHTML =
+				"BRAT by <a href='https://bit.ly/o42-twitter'>TFTHacker</a>";
 			byTfThacker.style.fontStyle = "italic";
 			newDiv.appendChild(byTfThacker);
 			promotionalLinks(newDiv, false);
@@ -406,7 +511,10 @@ export default class AddNewPluginModal extends Modal {
 			formEl.addEventListener("submit", (e: Event) => {
 				e.preventDefault();
 				if (this.address !== "") {
-					if ((this.updateVersion && this.version !== "") || !this.updateVersion) {
+					if (
+						(this.updateVersion && this.version !== "") ||
+						!this.updateVersion
+					) {
 						this.addPluginButton?.setDisabled(true);
 						void this.submitForm();
 					}
@@ -429,10 +537,15 @@ export default class AddNewPluginModal extends Modal {
 	 * @param validationStatusEl - The error element (used for errors, incl. GitHub Rate limit)
 	 * @returns {Promise<void>}
 	 */
-	private async updateRepositoryVersionInfo(selectedVersion = "", validationStatusEl?: HTMLElement) {
+	private async updateRepositoryVersionInfo(
+		selectedVersion = "",
+		validationStatusEl?: HTMLElement,
+	) {
 		const validateInputEl = this.repositoryAddressEl;
 		if (this.plugin.settings.debuggingMode) {
-			console.log(`[BRAT] Updating version dropdown for ${this.address} with selected version ${selectedVersion}`);
+			console.log(
+				`[BRAT] Updating version dropdown for ${this.address} with selected version ${selectedVersion}`,
+			);
 		}
 
 		if (!this.address) {
@@ -454,7 +567,9 @@ export default class AddNewPluginModal extends Modal {
 			const versions = await fetchReleaseVersions(
 				scrubbedAddress,
 				this.plugin.settings.debuggingMode,
-				this.usePrivateApiKey ? this.privateApiKey : this.plugin.settings.personalAccessToken,
+				this.usePrivateApiKey
+					? this.privateApiKey
+					: this.plugin.settings.personalAccessToken,
 			);
 
 			if (versions && versions.length > 0) {
@@ -467,7 +582,11 @@ export default class AddNewPluginModal extends Modal {
 					this.versionSetting.settingEl.classList.remove("disabled-setting");
 					this.versionSetting.setDisabled(false);
 					// Add new dropdown to existing version setting
-					this.updateVersionDropdown(this.versionSetting, versions, selectedVersion);
+					this.updateVersionDropdown(
+						this.versionSetting,
+						versions,
+						selectedVersion,
+					);
 				}
 			} else {
 				// Add invalid-repository class
@@ -485,7 +604,9 @@ export default class AddNewPluginModal extends Modal {
 				// Add invalid-repository class
 				validateInputEl?.inputEl.classList.remove("valid-repository");
 				validateInputEl?.inputEl.classList.add("validation-error");
-				validationStatusEl?.setText(`GitHub API rate limit exceeded. Try again in ${error.getMinutesToReset()} minutes.`);
+				validationStatusEl?.setText(
+					`GitHub API rate limit exceeded. Try again in ${error.getMinutesToReset()} minutes.`,
+				);
 
 				if (this.versionSetting) {
 					this.versionSetting.settingEl.classList.add("disabled-setting");
@@ -498,7 +619,9 @@ export default class AddNewPluginModal extends Modal {
 					`${error.message} Consider adding a personal access token in BRAT settings for higher limits. See documentation for details.`,
 					20,
 					(): void => {
-						window.open("https://github.com/TfTHacker/obsidian42-brat/blob/main/BRAT-DEVELOPER-GUIDE.md#github-api-rate-limits");
+						window.open(
+							"https://github.com/TfTHacker/obsidian42-brat/blob/main/BRAT-DEVELOPER-GUIDE.md#github-api-rate-limits",
+						);
 					},
 				);
 
@@ -514,7 +637,9 @@ export default class AddNewPluginModal extends Modal {
 						);
 						break;
 					case 403:
-						validationStatusEl?.setText("Access denied. Check your personal access token.");
+						validationStatusEl?.setText(
+							"Access denied. Check your personal access token.",
+						);
 						break;
 					default:
 						validationStatusEl?.setText(`Error: ${gitHubError.message}`);
@@ -533,9 +658,7 @@ export default class AddNewPluginModal extends Modal {
 
 	onClose(): void {
 		if (this.openSettingsTabAfterwards) {
-			// @ts-ignore
 			this.plugin.app.setting.open();
-			// @ts-ignore
 			this.plugin.app.setting.openTabById(this.plugin.APP_ID);
 		}
 	}
@@ -550,7 +673,8 @@ export default class AddNewPluginModal extends Modal {
 		// Match either format:
 		// 1. user/repo
 		// 2. https://github.com/user/repo
-		const githubPattern = /^(?:https?:\/\/github\.com\/)?([a-zA-Z0-9._-]+)\/([a-zA-Z0-9._-]+)$/i;
+		const githubPattern =
+			/^(?:https?:\/\/github\.com\/)?([a-zA-Z0-9._-]+)\/([a-zA-Z0-9._-]+)$/i;
 
 		return githubPattern.test(cleanAddress);
 	}

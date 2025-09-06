@@ -1,6 +1,10 @@
-import type { App, ButtonComponent, TextComponent, ToggleComponent } from "obsidian";
+import type {
+	App,
+	ButtonComponent,
+	TextComponent,
+	ToggleComponent,
+} from "obsidian";
 import { PluginSettingTab, Setting } from "obsidian";
-import { type GitHubTokenInfo, TokenErrorType, validateGitHubToken } from "src/features/githubUtils";
 import { TokenValidator } from "src/utils/TokenValidator";
 import { themeDelete } from "../features/themes";
 import type BratPlugin from "../main";
@@ -31,10 +35,12 @@ export class BratSettingsTab extends PluginSettingTab {
 				'If enabled beta plugins will be automatically enabled after installtion by default. Note: you can toggle this on and off for each plugin in the "Add Plugin" form.',
 			)
 			.addToggle((cb: ToggleComponent) => {
-				cb.setValue(this.plugin.settings.enableAfterInstall).onChange(async (value: boolean) => {
-					this.plugin.settings.enableAfterInstall = value;
-					await this.plugin.saveSettings();
-				});
+				cb.setValue(this.plugin.settings.enableAfterInstall).onChange(
+					async (value: boolean) => {
+						this.plugin.settings.enableAfterInstall = value;
+						await this.plugin.saveSettings();
+					},
+				);
 			});
 
 		new Setting(containerEl)
@@ -43,27 +49,37 @@ export class BratSettingsTab extends PluginSettingTab {
 				"If enabled all beta plugins will be checked for updates each time Obsidian starts. Note: this does not update frozen version plugins.",
 			)
 			.addToggle((cb: ToggleComponent) => {
-				cb.setValue(this.plugin.settings.updateAtStartup).onChange(async (value: boolean) => {
-					this.plugin.settings.updateAtStartup = value;
-					await this.plugin.saveSettings();
-				});
+				cb.setValue(this.plugin.settings.updateAtStartup).onChange(
+					async (value: boolean) => {
+						this.plugin.settings.updateAtStartup = value;
+						await this.plugin.saveSettings();
+					},
+				);
 			});
 
 		new Setting(containerEl)
 			.setName("Auto-update themes at startup")
-			.setDesc("If enabled all beta themes will be checked for updates each time Obsidian starts.")
+			.setDesc(
+				"If enabled all beta themes will be checked for updates each time Obsidian starts.",
+			)
 			.addToggle((cb: ToggleComponent) => {
-				cb.setValue(this.plugin.settings.updateThemesAtStartup).onChange(async (value: boolean) => {
-					this.plugin.settings.updateThemesAtStartup = value;
-					await this.plugin.saveSettings();
-				});
+				cb.setValue(this.plugin.settings.updateThemesAtStartup).onChange(
+					async (value: boolean) => {
+						this.plugin.settings.updateThemesAtStartup = value;
+						await this.plugin.saveSettings();
+					},
+				);
 			});
 
 		new Setting(containerEl)
 			.setName("Select latest plugin version by default")
-			.setDesc("If enabled the latest version will be selected by default when adding a new plugin.")
+			.setDesc(
+				"If enabled the latest version will be selected by default when adding a new plugin.",
+			)
 			.addToggle((cb: ToggleComponent) => {
-				cb.setValue(this.plugin.settings.selectLatestPluginVersionByDefault).onChange(async (value: boolean) => {
+				cb.setValue(
+					this.plugin.settings.selectLatestPluginVersionByDefault,
+				).onChange(async (value: boolean) => {
 					this.plugin.settings.selectLatestPluginVersionByDefault = value;
 					await this.plugin.saveSettings();
 				});
@@ -71,12 +87,16 @@ export class BratSettingsTab extends PluginSettingTab {
 
 		new Setting(containerEl)
 			.setName("Allow incompatible plugins")
-			.setDesc("If enabled, plugins with higher app versions will be allowed to be installed. Also it allows desktop-only plugins to be installed on mobile devices.")
+			.setDesc(
+				"If enabled, plugins with higher app versions will be allowed to be installed. Also it allows desktop-only plugins to be installed on mobile devices.",
+			)
 			.addToggle((cb: ToggleComponent) => {
-				cb.setValue(this.plugin.settings.allowIncompatiblePlugins).onChange(async (value: boolean) => {
-					this.plugin.settings.allowIncompatiblePlugins = value;
-					await this.plugin.saveSettings();
-				});
+				cb.setValue(this.plugin.settings.allowIncompatiblePlugins).onChange(
+					async (value: boolean) => {
+						this.plugin.settings.allowIncompatiblePlugins = value;
+						await this.plugin.saveSettings();
+					},
+				);
 			});
 
 		promotionalLinks(containerEl, true);
@@ -110,7 +130,11 @@ export class BratSettingsTab extends PluginSettingTab {
 			const bp = frozenVersions.get(p);
 			const pluginSettingContainer = new Setting(containerEl)
 				.setName(createGitHubResourceLink(p))
-				.setDesc((bp?.version ? ` Tracked version: ${bp.version} ${bp.version === "latest" ? "" : "(frozen)"}` : "") + (bp?.isIncompatible ? " (incompatible)" : ""));
+				.setDesc(
+					(bp?.version
+						? ` Tracked version: ${bp.version} ${bp.version === "latest" ? "" : "(frozen)"}`
+						: "") + (bp?.isIncompatible ? " (incompatible)" : ""),
+				);
 
 			if (!bp?.version || bp.version === "latest") {
 				// Only show update button for plugins tracking latest version
@@ -119,7 +143,13 @@ export class BratSettingsTab extends PluginSettingTab {
 						.setIcon("sync")
 						.setTooltip("Check and update plugin")
 						.onClick(async () => {
-							await this.plugin.betaPlugins.updatePlugin(p, false, true, false, bp?.token);
+							await this.plugin.betaPlugins.updatePlugin(
+								p,
+								false,
+								true,
+								false,
+								bp?.token,
+							);
 						});
 				});
 			}
@@ -131,7 +161,14 @@ export class BratSettingsTab extends PluginSettingTab {
 						.setIcon("edit")
 						.setTooltip("Change version")
 						.onClick(() => {
-							this.plugin.betaPlugins.displayAddNewPluginModal(true, true, p, bp?.version, bp?.token);
+							this.plugin.betaPlugins.displayAddNewPluginModal(
+								true,
+								true,
+								p,
+								bp?.version,
+								bp?.token,
+							);
+							// @ts-expect-error
 							this.plugin.app.setting.updatePluginSection();
 						});
 				})
@@ -161,35 +198,41 @@ export class BratSettingsTab extends PluginSettingTab {
 			cb.setButtonText("Add beta theme")
 				.setCta()
 				.onClick(() => {
+					// @ts-expect-error
 					this.plugin.app.setting.close();
 					new AddNewTheme(this.plugin).open();
 				});
 		});
 
 		for (const bp of this.plugin.settings.themesList) {
-			new Setting(containerEl).setName(createGitHubResourceLink(bp.repo)).addButton((btn: ButtonComponent) => {
-				btn
-					.setIcon("cross")
-					.setTooltip("Delete this beta theme")
-					.onClick(() => {
-						if (btn.buttonEl.textContent === "") btn.setButtonText("Click once more to confirm removal");
-						else {
-							const { buttonEl } = btn;
-							const { parentElement } = buttonEl;
-							if (parentElement?.parentElement) {
-								parentElement.parentElement.remove();
-								themeDelete(this.plugin, bp.repo);
+			new Setting(containerEl)
+				.setName(createGitHubResourceLink(bp.repo))
+				.addButton((btn: ButtonComponent) => {
+					btn
+						.setIcon("cross")
+						.setTooltip("Delete this beta theme")
+						.onClick(() => {
+							if (btn.buttonEl.textContent === "")
+								btn.setButtonText("Click once more to confirm removal");
+							else {
+								const { buttonEl } = btn;
+								const { parentElement } = buttonEl;
+								if (parentElement?.parentElement) {
+									parentElement.parentElement.remove();
+									themeDelete(this.plugin, bp.repo);
+								}
 							}
-						}
-					});
-			});
+						});
+				});
 		}
 
 		new Setting(containerEl).setName("Monitoring").setHeading();
 
 		new Setting(containerEl)
 			.setName("Enable notifications")
-			.setDesc("BRAT will provide popup notifications for its various activities. Turn this off means  no notifications from BRAT.")
+			.setDesc(
+				"BRAT will provide popup notifications for its various activities. Turn this off means  no notifications from BRAT.",
+			)
 			.addToggle((cb: ToggleComponent) => {
 				cb.setValue(this.plugin.settings.notificationsEnabled);
 				cb.onChange(async (value: boolean) => {
@@ -202,15 +245,19 @@ export class BratSettingsTab extends PluginSettingTab {
 			.setName("Enable logging")
 			.setDesc("Plugin updates will be logged to a file in the log file.")
 			.addToggle((cb: ToggleComponent) => {
-				cb.setValue(this.plugin.settings.loggingEnabled).onChange(async (value: boolean) => {
-					this.plugin.settings.loggingEnabled = value;
-					await this.plugin.saveSettings();
-				});
+				cb.setValue(this.plugin.settings.loggingEnabled).onChange(
+					async (value: boolean) => {
+						this.plugin.settings.loggingEnabled = value;
+						await this.plugin.saveSettings();
+					},
+				);
 			});
 
 		new Setting(this.containerEl)
 			.setName("BRAT log file location")
-			.setDesc("Logs will be saved to this file. Don't add .md to the file name.")
+			.setDesc(
+				"Logs will be saved to this file. Don't add .md to the file name.",
+			)
 			.addSearch((cb) => {
 				cb.setPlaceholder("Example: BRAT-log")
 					.setValue(this.plugin.settings.loggingPath)
@@ -224,20 +271,26 @@ export class BratSettingsTab extends PluginSettingTab {
 			.setName("Enable verbose logging")
 			.setDesc("Get a lot  more information in  the log.")
 			.addToggle((cb: ToggleComponent) => {
-				cb.setValue(this.plugin.settings.loggingVerboseEnabled).onChange(async (value: boolean) => {
-					this.plugin.settings.loggingVerboseEnabled = value;
-					await this.plugin.saveSettings();
-				});
+				cb.setValue(this.plugin.settings.loggingVerboseEnabled).onChange(
+					async (value: boolean) => {
+						this.plugin.settings.loggingVerboseEnabled = value;
+						await this.plugin.saveSettings();
+					},
+				);
 			});
 
 		new Setting(containerEl)
 			.setName("Debugging mode")
-			.setDesc("Atomic Bomb level console logging. Can be used for troubleshoting and development.")
+			.setDesc(
+				"Atomic Bomb level console logging. Can be used for troubleshoting and development.",
+			)
 			.addToggle((cb: ToggleComponent) => {
-				cb.setValue(this.plugin.settings.debuggingMode).onChange(async (value: boolean) => {
-					this.plugin.settings.debuggingMode = value;
-					await this.plugin.saveSettings();
-				});
+				cb.setValue(this.plugin.settings.debuggingMode).onChange(
+					async (value: boolean) => {
+						this.plugin.settings.debuggingMode = value;
+						await this.plugin.saveSettings();
+					},
+				);
 			});
 
 		// Modify the existing token setting
@@ -245,10 +298,12 @@ export class BratSettingsTab extends PluginSettingTab {
 			.setName("Personal access token")
 			.setDesc(
 				createLink({
-					prependText: "Set a personal access token to increase rate limits for public repositories on GitHub. You can create one in ",
+					prependText:
+						"Set a personal access token to increase rate limits for public repositories on GitHub. You can create one in ",
 					url: "https://github.com/settings/tokens/new?scopes=public_repo",
 					text: "your GitHub account settings",
-					appendText: " and then add it here. Please consult the documetation for more details.",
+					appendText:
+						" and then add it here. Please consult the documetation for more details.",
 				}),
 			)
 			.addText((text) => {
@@ -292,10 +347,17 @@ export class BratSettingsTab extends PluginSettingTab {
 			})
 			.then(() => {
 				this.tokenInfo = this.createTokenInfoElement(containerEl);
-				this.validator = new TokenValidator(this.accessTokenSetting, this.tokenInfo);
-				this.validator?.validateToken(this.plugin.settings.personalAccessToken ?? "").then((valid) => {
-					this.accessTokenButton?.setDisabled(valid || this.plugin.settings.personalAccessToken === "");
-				});
+				this.validator = new TokenValidator(
+					this.accessTokenSetting,
+					this.tokenInfo,
+				);
+				this.validator
+					?.validateToken(this.plugin.settings.personalAccessToken ?? "")
+					.then((valid) => {
+						this.accessTokenButton?.setDisabled(
+							valid || this.plugin.settings.personalAccessToken === "",
+						);
+					});
 			});
 	}
 
