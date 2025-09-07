@@ -95,12 +95,6 @@ export default class AddNewPluginModal extends Modal {
 				this.usePrivateApiKey ? this.privateApiKey : undefined,
 			);
 			if (result) {
-				// Update version and token (also clear token if empty or if "usePrivateApiKey is not set") only if successfully added
-				existingFrozenPlugin.version = this.version;
-				existingFrozenPlugin.token = this.usePrivateApiKey
-					? this.privateApiKey || ""
-					: undefined;
-				await this.plugin.saveSettings();
 				this.close();
 			}
 
