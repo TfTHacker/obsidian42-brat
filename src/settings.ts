@@ -61,7 +61,20 @@ export function addBetaPluginToList(plugin: BratPlugin, repositoryPath: string, 
 		plugin.settings.pluginList.unshift(repositoryPath);
 		save = true;
 	}
-	if (plugin.settings.pluginSubListFrozenVersion.filter((x) => x.repo === repositoryPath).length === 0) {
+
+		// If it's an existing frozen version plugin, update it instead of checking for duplicates
+	const existingFrozenPlugin =
+		plugin.settings.pluginSubListFrozenVersion.find(
+			(p) => p.repo === repositoryPath,
+		);
+	if (existingFrozenPlugin) {
+		Object.assign(existingFrozenPlugin, {
+			repo: repositoryPath,
+			version: specifyVersion,
+			token: privateApiKey ? privateApiKey : undefined,
+		});
+		save = true;
+	} else {
 		plugin.settings.pluginSubListFrozenVersion.unshift({
 			repo: repositoryPath,
 			version: specifyVersion,
