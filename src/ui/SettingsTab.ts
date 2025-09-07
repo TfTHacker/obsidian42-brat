@@ -1,6 +1,7 @@
 import type {
 	App,
 	ButtonComponent,
+	ExtraButtonComponent,
 	TextComponent,
 	ToggleComponent,
 } from "obsidian";
@@ -325,6 +326,16 @@ export class BratSettingsTab extends PluginSettingTab {
 					});
 
 				text.inputEl.addClass("brat-token-input");
+			})
+			.addExtraButton((cb: ExtraButtonComponent) => {
+				cb.setIcon("cross")
+					.setTooltip("Clear personal access token")
+					.onClick(async () => {
+						this.plugin.settings.personalAccessToken = "";
+						this.accessTokenSetting?.setValue("");
+						await this.validator?.validateToken("");
+						this.plugin.saveSettings();
+					});
 			})
 			.addButton((btn: ButtonComponent) => {
 				this.accessTokenButton = btn;
