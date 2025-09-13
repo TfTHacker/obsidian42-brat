@@ -69,6 +69,16 @@ export class BratSettingsTab extends PluginSettingTab {
 				});
 			});
 
+		new Setting(containerEl)
+			.setName("Allow incompatible plugins")
+			.setDesc("If enabled, plugins with higher app versions will be allowed to be installed. Also it allows desktop-only plugins to be installed on mobile devices.")
+			.addToggle((cb: ToggleComponent) => {
+				cb.setValue(this.plugin.settings.allowIncompatiblePlugins).onChange(async (value: boolean) => {
+					this.plugin.settings.allowIncompatiblePlugins = value;
+					await this.plugin.saveSettings();
+				});
+			});
+
 		promotionalLinks(containerEl, true);
 		containerEl.createEl("hr");
 		new Setting(containerEl).setName("Beta plugin list").setHeading();
@@ -94,13 +104,13 @@ export class BratSettingsTab extends PluginSettingTab {
 		});
 
 		const frozenVersions = new Map(
-			this.plugin.settings.pluginSubListFrozenVersion.map((f) => [f.repo, { version: f.version, token: f.token }]),
+			this.plugin.settings.pluginSubListFrozenVersion.map((f) => [f.repo, f]),
 		);
 		for (const p of this.plugin.settings.pluginList) {
 			const bp = frozenVersions.get(p);
 			const pluginSettingContainer = new Setting(containerEl)
 				.setName(createGitHubResourceLink(p))
-				.setDesc(bp?.version ? ` Tracked version: ${bp.version} ${bp.version === "latest" ? "" : "(frozen)"}` : "");
+				.setDesc((bp?.version ? ` Tracked version: ${bp.version} ${bp.version === "latest" ? "" : "(frozen)"}` : "") + (bp?.isIncompatible ? " (incompatible)" : ""));
 
 			if (!bp?.version || bp.version === "latest") {
 				// Only show update button for plugins tracking latest version

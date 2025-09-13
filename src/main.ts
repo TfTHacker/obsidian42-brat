@@ -36,6 +36,8 @@ export default class BratPlugin extends Plugin {
 
 					this.registerObsidianProtocolHandler("brat", this.obsidianProtocolHandler);
 
+					void this.betaPlugins.checkIncompatiblePlugins();
+
 					if (this.settings.updateAtStartup) {
 						setTimeout(() => {
 							void this.betaPlugins.checkForPluginUpdatesAndInstallUpdates(false);

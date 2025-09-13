@@ -11,6 +11,7 @@ export interface PluginVersion {
 	repo: string; // path to the GitHub repository
 	version: "latest" | string; // version of the plugin (semver or latest)
 	token?: string; // optional private API key
+	isIncompatible?: boolean; // if the plugin is incompatible
 }
 
 export interface Settings {
@@ -27,6 +28,7 @@ export interface Settings {
 	notificationsEnabled: boolean;
 	personalAccessToken?: string;
 	selectLatestPluginVersionByDefault: boolean;
+	allowIncompatiblePlugins: boolean;
 }
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -43,6 +45,7 @@ export const DEFAULT_SETTINGS: Settings = {
 	notificationsEnabled: true,
 	personalAccessToken: "",
 	selectLatestPluginVersionByDefault: false,
+	allowIncompatiblePlugins: false,
 };
 
 /**
@@ -52,7 +55,7 @@ export const DEFAULT_SETTINGS: Settings = {
  * @param  repositoryPath - path to the GitHub repository
  * @param  specifyVersion  - if the plugin needs to stay at the frozen version, we need to also record the version
  */
-export function addBetaPluginToList(plugin: BratPlugin, repositoryPath: string, specifyVersion = "latest", privateApiKey = ""): void {
+export function addBetaPluginToList(plugin: BratPlugin, repositoryPath: string, specifyVersion = "latest", privateApiKey = "", isIncompatible = false): void {
 	let save = false;
 	if (!plugin.settings.pluginList.contains(repositoryPath)) {
 		plugin.settings.pluginList.unshift(repositoryPath);
@@ -63,6 +66,7 @@ export function addBetaPluginToList(plugin: BratPlugin, repositoryPath: string, 
 			repo: repositoryPath,
 			version: specifyVersion,
 			token: privateApiKey ? privateApiKey : undefined,
+			isIncompatible: isIncompatible || undefined,
 		});
 		save = true;
 	}

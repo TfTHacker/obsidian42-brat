@@ -1,5 +1,5 @@
 import type { PluginManifest } from "obsidian";
-import { Notice, apiVersion, normalizePath, requireApiVersion } from "obsidian";
+import { Notice, Platform, apiVersion, normalizePath, requireApiVersion } from "obsidian";
 import { GHRateLimitError, GitHubResponseError } from "src/utils/GitHubAPIErrors";
 import type BratPlugin from "../main";
 import { addBetaPluginToList } from "../settings";
@@ -7,6 +7,7 @@ import AddNewPluginModal from "../ui/AddNewPluginModal";
 import { isConnectedToInternet } from "../utils/internetconnection";
 import { toastMessage } from "../utils/notifications";
 import { type Release, grabReleaseFileFromRepository, grabReleaseFromRepository, isPrivateRepo } from "./githubUtils";
+import { confirm } from "src/ui/ConfirmModal";
 
 const compareVersions = require("semver/functions/compare");
 const semverCoerce = require("semver/functions/coerce");
@@ -17,6 +18,14 @@ interface ReleaseFiles {
 	mainJs: string | null;
 	manifest: string | null;
 	styles: string | null;
+}
+
+interface PluginManifestEx extends PluginManifest {
+	brat: {
+		isIncompatible?: boolean;
+		isDesktopOnlyOriginal?: boolean;
+		minAppVersionOriginal?: string;
+	}
 }
 
 /**
@@ -364,13 +373,43 @@ export default class BetaPlugins {
 				return false;
 			}
 
+			let isIncompatible = false;
+
 			// Check manifest minAppVersion and current version of Obisidan, don't load plugin if not compatible
 			if (Object.hasOwn(primaryManifest, "minAppVersion")) {
 				if (!requireApiVersion(primaryManifest.minAppVersion)) {
-					const msg = `Plugin: ${repositoryPath}\n\nThe manifest.json for this plugin indicates that the Obsidian version of the app needs to be ${primaryManifest.minAppVersion}, but this installation of Obsidian is ${apiVersion}. \n\nYou will need to update your Obsidian to use this plugin or contact the plugin developer for more information.`;
-					await this.plugin.log(msg, true);
-					toastMessage(this.plugin, msg, 30);
-					return false;
+					if (specifyVersion === "" || specifyVersion === "latest" || !this.plugin.settings.allowIncompatiblePlugins) {
+						const msg = `Plugin: ${repositoryPath}\n\nThe manifest.json for this plugin indicates that the Obsidian version of the app needs to be ${primaryManifest.minAppVersion}, but this installation of Obsidian is ${apiVersion}. \n\nYou will need to update your Obsidian to use this plugin or contact the plugin developer for more information.`;
+						await this.plugin.log(msg, true);
+						toastMessage(this.plugin, msg, 30);
+						return false;
+					}
+
+					const confirmResult = await confirm({
+						app: this.plugin.app,
+						message: createFragment((f) => {
+							f.appendText('Plugin: ');
+							f.createEl('code', { text: repositoryPath });
+							f.createEl('br');
+							f.appendText('The ');
+							f.createEl('code', { text: 'manifest.json' });
+							f.appendText(' for this plugin indicates that the Obsidian version of the app needs to be ');
+							f.createEl('code', { text: primaryManifest.minAppVersion });
+							f.appendText(', but this installation of Obsidian is ');
+							f.createEl('code', { text: apiVersion });
+							f.appendText('.');
+							f.createEl('br');
+							f.appendText('Using this plugin is not recommended and may not work as expected. Use at your own risk.');
+							f.createEl('br');
+							f.appendText('Do you want to install it anyways?');
+						})
+					});
+
+					if (!confirmResult) {
+						return false;
+					}
+
+					isIncompatible = true;
 				}
 			}
 
@@ -387,6 +426,28 @@ export default class BetaPlugins {
 				// if beta, use that manifest, or if there is no manifest in release, use the primaryManifest
 				if (usingBetaManifest || rFiles.manifest === "") rFiles.manifest = JSON.stringify(primaryManifest);
 
+				const manifestObj = JSON.parse(rFiles.manifest ?? "") as PluginManifestEx;
+
+				if (isIncompatible) {
+					manifestObj.brat = {
+						isIncompatible: true,
+						minAppVersionOriginal: manifestObj.minAppVersion,
+					};
+					manifestObj.minAppVersion = apiVersion;
+				}
+
+				if (this.plugin.settings.allowIncompatiblePlugins && Platform.isMobile && manifestObj.isDesktopOnly) {
+					manifestObj.isDesktopOnly = false;
+					manifestObj.brat ??= {};
+					manifestObj.brat.isDesktopOnlyOriginal = true;
+					manifestObj.brat.isIncompatible = true;
+					isIncompatible = true;
+				}
+
+				if (isIncompatible) {
+					rFiles.manifest = JSON.stringify(manifestObj);
+				}
+
 				if (this.plugin.settings.debuggingMode) console.log("BRAT: rFiles.manifest", usingBetaManifest, rFiles);
 
 				if (rFiles.mainJs === null) {
@@ -402,7 +463,7 @@ export default class BetaPlugins {
 				const releaseFiles = await getRelease();
 				if (releaseFiles === null) return false;
 				await this.writeReleaseFilesToPluginFolder(primaryManifest.id, releaseFiles);
-				if (!forceReinstall) addBetaPluginToList(this.plugin, repositoryPath, specifyVersion, privateApiKey);
+				if (!forceReinstall) addBetaPluginToList(this.plugin, repositoryPath, specifyVersion, privateApiKey, isIncompatible);
 				if (enableAfterInstall) {
 					// @ts-ignore
 					const { plugins } = this.plugin.app;
@@ -630,5 +691,10 @@ export default class BetaPlugins {
 		return enabled
 			? manifests.filter((manifest) => enabledPlugins.find((pluginName) => manifest.id === pluginName.id))
 			: manifests.filter((manifest) => !enabledPlugins.find((pluginName) => manifest.id === pluginName.id));
+	}
+
+	async checkIncompatiblePlugins(): Promise<void> {
+		const incompatiblePluginIds = this.plugin.settings.pluginSubListFrozenVersion.filter((p) => p.isIncompatible).map((p) => p.repo);
+		toastMessage(this.plugin, `The following incompatible plugins were forcefully installed by BRAT and may not work as expected:\n${incompatiblePluginIds.join("\n")}`, 30);
 	}
 }
