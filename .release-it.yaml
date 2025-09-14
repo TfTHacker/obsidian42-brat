@@ -1,0 +1,35 @@
+# This file is used to configure release-it
+# Run `npx -p @release-it/bumper -p @release-it/conventional-changelog release-it --preRelease=beta` to start a pre-release
+# Run `npx -p @release-it/bumper -p @release-it/conventional-changelog release-it` to release a regular release
+hooks:
+  # This bump the manifest.json file with the new version before building
+  "before:init": npm run build
+  "before:bump": "npm_package_version=${version} node version-bump.mjs"
+npm: false
+skipUnstable: true
+git:
+  getLatestTagFromAllRefs: true
+  # Remove the [no ci] if you want to github actions to run on commit
+  commitMessage: "chore: release ${version} [no ci]"
+github:
+  # This will create a github release by opening the browser with a prefilled window
+  # Set this to 'false' if you don't want to pre-fill the release
+  release: true
+  web: true
+  releaseNotes:
+    commit: "* ${commit.subject} (${sha}){ - thanks @${author.login}!}"
+    excludeMatches:
+      [
+        "tfthacker",
+        "johannrichard",
+        "dependabot[bot]",
+        "dependabot-preview[bot]",
+      ]
+plugins:
+  "@release-it/bumper":
+    out: build/manifest.json
+#  "@release-it/conventional-changelog":
+#    preset:
+#      name: "conventionalcommits"
+#    infile: "CHANGELOG.md"
+#    ignoreRecommendedBump: false
