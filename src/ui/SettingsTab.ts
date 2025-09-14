@@ -120,7 +120,7 @@ export class BratSettingsTab extends PluginSettingTab {
 			cb.setButtonText("Add beta plugin")
 				.setCta()
 				.onClick(() => {
-					this.plugin.betaPlugins.displayAddNewPluginModal(true, true);
+					this.plugin.betaPlugins.displayAddNewPluginModal(true);
 				});
 		});
 
