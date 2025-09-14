@@ -8,6 +8,8 @@ hooks:
 npm: false
 skipUnstable: true
 git:
+  requireCommits: true
+  requireBranch: "beta"
   getLatestTagFromAllRefs: true
   # Remove the [no ci] if you want to github actions to run on commit
   commitMessage: "chore: release ${version} [no ci]"
