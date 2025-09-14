@@ -209,19 +209,12 @@ export default class AddNewPluginModal extends Modal {
 										? "Latest version"
 										: version || "Select a version...",
 								);
-								this.updateAddButtonState();
+								this.addPluginButton?.setDisabled(this.version === "");
 							},
 						);
 						modal.open();
 					});
 			});
-		}
-	}
-
-	// Helper method to update add button state
-	private updateAddButtonState(): void {
-		if (this.addPluginButton) {
-			this.addPluginButton.setDisabled(this.version === "");
 		}
 	}
 
@@ -550,7 +543,7 @@ export default class AddNewPluginModal extends Modal {
 
 		if (this.versionSetting && this.updateVersion) {
 			// Clear the version dropdown
-			this.updateVersionDropdown(this.versionSetting, [], selectedVersion);
+			this.updateVersionDropdown(this.versionSetting, []);
 		}
 		const scrubbedAddress = scrubRepositoryUrl(this.address);
 
@@ -588,11 +581,9 @@ export default class AddNewPluginModal extends Modal {
 				);
 				validationStatusEl?.addClass("validation-status-error");
 
-				if (this.versionSetting) {
-					this.versionSetting.settingEl.classList.add("disabled-setting");
-					this.versionSetting.setDisabled(true);
-					this.addPluginButton?.setDisabled(true);
-				}
+				this.versionSetting?.settingEl.classList.add("disabled-setting");
+				this.versionSetting?.setDisabled(true);
+				this.addPluginButton?.setDisabled(true);
 			}
 		} catch (error: unknown) {
 			if (error instanceof GHRateLimitError) {
