@@ -556,14 +556,13 @@ export default class BetaPlugins {
 					primaryManifest.id,
 					releaseFiles,
 				);
-				if (!forceReinstall)
-					addBetaPluginToList(
-						this.plugin,
-						repositoryPath,
-						specifyVersion,
-						privateApiKey,
-						isIncompatible,
-					);
+				addBetaPluginToList(
+					this.plugin,
+					repositoryPath,
+					specifyVersion,
+					privateApiKey,
+					isIncompatible,
+				);
 				if (enableAfterInstall) {
 					// @ts-expect-error
 					const { plugins } = this.plugin.app;
