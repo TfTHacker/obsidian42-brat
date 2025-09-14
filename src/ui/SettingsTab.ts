@@ -283,7 +283,7 @@ export class BratSettingsTab extends PluginSettingTab {
 		new Setting(containerEl)
 			.setName("Debugging mode")
 			.setDesc(
-				"Atomic Bomb level console logging. Can be used for troubleshoting and development.",
+				"Atomic Bomb level console logging. Can be used for troubleshooting and development.",
 			)
 			.addToggle((cb: ToggleComponent) => {
 				cb.setValue(this.plugin.settings.debuggingMode).onChange(
