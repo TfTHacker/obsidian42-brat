@@ -15,7 +15,7 @@ github:
   # This will create a github release by opening the browser with a prefilled window
   # Set this to 'false' if you don't want to pre-fill the release
   release: true
-  web: true
+  assets: ["build/main.js", "build/manifest.json", "build/styles.css"]
   releaseNotes:
     commit: "* ${commit.subject} (${sha}){ - thanks @${author.login}!}"
     excludeMatches:
@@ -28,8 +28,7 @@ github:
 plugins:
   "@release-it/bumper":
     out: build/manifest.json
-#  "@release-it/conventional-changelog":
-#    preset:
-#      name: "conventionalcommits"
-#    infile: "CHANGELOG.md"
-#    ignoreRecommendedBump: false
+  "@release-it/conventional-changelog":
+    preset:
+      name: "conventionalcommits"
+    ignoreRecommendedBump: false
