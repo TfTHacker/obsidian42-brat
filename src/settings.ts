@@ -71,7 +71,7 @@ export function addBetaPluginToList(plugin: BratPlugin, repositoryPath: string, 
 		Object.assign(existingFrozenPlugin, {
 			repo: repositoryPath,
 			version: specifyVersion,
-			token: privateApiKey ? privateApiKey : undefined,
+			token: privateApiKey.trim() !== "" ? privateApiKey : undefined,
 		});
 		save = true;
 	} else {
