@@ -103,3 +103,8 @@
   font-size: 0.8em;
   text-align: left;
 }
+
+.confirm-modal .ok-button {
+  margin-right: 10px;
+  margin-top: 20px;
+}
