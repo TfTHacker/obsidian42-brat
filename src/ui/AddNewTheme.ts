@@ -1,4 +1,4 @@
-import { Modal, Setting } from "obsidian";
+import { ButtonComponent, Modal, Setting } from "obsidian";
 import { themeSave } from "../features/themes";
 import type BratPlugin from "../main";
 import { existBetaThemeinInList } from "../settings";
@@ -24,7 +24,11 @@ export default class AddNewTheme extends Modal {
 		if (this.address === "") return;
 		const scrubbedAddress = this.address.replace("https://github.com/", "");
 		if (existBetaThemeinInList(this.plugin, scrubbedAddress)) {
-			toastMessage(this.plugin, "This theme is already in the list for beta testing", 10);
+			toastMessage(
+				this.plugin,
+				"This theme is already in the list for beta testing",
+				10,
+			);
 			return;
 		}
 
@@ -40,7 +44,9 @@ export default class AddNewTheme extends Modal {
 		this.contentEl.createEl("form", {}, (formEl) => {
 			formEl.addClass("brat-modal");
 			new Setting(formEl).addText((textEl) => {
-				textEl.setPlaceholder("Repository (example: https://github.com/GitubUserName/repository-name");
+				textEl.setPlaceholder(
+					"Repository (example: https://github.com/GitHubUserName/repository-name",
+				);
 				textEl.setValue(this.address);
 				textEl.onChange((value) => {
 					this.address = value.trim();
@@ -60,21 +66,28 @@ export default class AddNewTheme extends Modal {
 			});
 
 			formEl.createDiv("modal-button-container", (buttonContainerEl) => {
-				buttonContainerEl.createEl("button", { attr: { type: "button" }, text: "Never mind" }).addEventListener("click", () => {
-					this.close();
-				});
-				buttonContainerEl.createEl("button", {
-					attr: { type: "submit" },
-					cls: "mod-cta",
-					text: "Add theme",
-				});
+				new ButtonComponent(buttonContainerEl)
+					.setButtonText("Never mind")
+					.onClick(() => {
+						this.close();
+					});
+
+				new ButtonComponent(buttonContainerEl)
+					.setButtonText("Add theme")
+					.setCta()
+					.onClick((e: Event) => {
+						e.preventDefault();
+						console.log("Add theme button clicked");
+						if (this.address !== "") void this.submitForm();
+					});
 			});
 
 			const newDiv = formEl.createDiv();
 			newDiv.style.borderTop = "1px solid #ccc";
 			newDiv.style.marginTop = "30px";
 			const byTfThacker = newDiv.createSpan();
-			byTfThacker.innerHTML = "BRAT by <a href='https://bit.ly/o42-twitter'>TFTHacker</a>";
+			byTfThacker.innerHTML =
+				"BRAT by <a href='https://bit.ly/o42-twitter'>TFTHacker</a>";
 			byTfThacker.style.fontStyle = "italic";
 			newDiv.appendChild(byTfThacker);
 			promotionalLinks(newDiv, false);
@@ -85,20 +98,14 @@ export default class AddNewTheme extends Modal {
 					titleEl.remove();
 				}
 			}, 50);
-
-			// invoked when button is clicked.
-			formEl.addEventListener("submit", (e: Event) => {
-				e.preventDefault();
-				if (this.address !== "") void this.submitForm();
-			});
 		});
 	}
 
 	onClose(): void {
 		if (this.openSettingsTabAfterwards) {
-			// @ts-ignore
+			// @ts-expect-error
 			this.plugin.app.setting.openTab();
-			// @ts-ignore
+			// @ts-expect-error
 			this.plugin.app.setting.openTabById(this.plugin.APP_ID);
 		}
 	}

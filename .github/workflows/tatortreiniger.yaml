@@ -1,0 +1,24 @@
+# If you wonder: https://en.wikipedia.org/wiki/Crime_Scene_Cleaner_(TV_series)
+name: Tatortreiniger
+
+on:
+  release:
+    types: [published, released]
+  workflow_dispatch:
+
+# This workflow runs when a new release is published.
+# It deletes old pre-release versions, keeping maximum 10.
+jobs:
+  tatort-reinigen:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # to be able to publish a GitHub release
+    steps:
+      - uses: sgpublic/delete-release-action@v1.2
+        with:
+          # Keep up to 5 pre-releases (plus the latest)
+          pre-release-drop: true
+          pre-release-keep-count: 5
+          draft-drop: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

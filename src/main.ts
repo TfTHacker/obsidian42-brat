@@ -36,6 +36,8 @@ export default class BratPlugin extends Plugin {
 
 					this.registerObsidianProtocolHandler("brat", this.obsidianProtocolHandler);
 
+					void this.betaPlugins.checkIncompatiblePlugins();
+
 					if (this.settings.updateAtStartup) {
 						setTimeout(() => {
 							void this.betaPlugins.checkForPluginUpdatesAndInstallUpdates(false);
@@ -80,9 +82,19 @@ export default class BratPlugin extends Plugin {
 
 		for (const which of ["plugin", "theme"]) {
 			if (params[which]) {
-				const modal = which === "plugin" ? new AddNewPluginModal(this, this.betaPlugins) : new AddNewTheme(this);
-				modal.address = params[which];
-				modal.open();
+				let modal: AddNewPluginModal | AddNewTheme;
+				switch (which) {
+					case "plugin":
+						modal = new AddNewPluginModal(this, this.betaPlugins, true, false, params[which], params.version ? params.version : undefined);
+						modal.open();
+						break;
+					case "theme":
+						modal = new AddNewTheme(this);
+						modal.address = params[which];
+						modal.open();
+						break;
+				}
+
 				return;
 			}
 		}
