@@ -506,8 +506,6 @@ export default class BetaPlugins {
 				// if beta, use that manifest, or if there is no manifest in release, use the primaryManifest
 				if (usingBetaManifest || rFiles.manifest === "")
 					rFiles.manifest = JSON.stringify(primaryManifest);
-				if (usingBetaManifest || rFiles.manifest === "")
-					rFiles.manifest = JSON.stringify(primaryManifest);
 
 				const manifestObj = JSON.parse(
 					rFiles.manifest ?? "",
