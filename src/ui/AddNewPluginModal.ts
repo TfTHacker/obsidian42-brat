@@ -96,8 +96,6 @@ export default class AddNewPluginModal extends Modal {
 			);
 			if (result) {
 				this.close();
-				// @ts-expect-error
-				this.plugin.app.setting.close();
 			}
 
 			// Reset modal if we don't close (i.e. because plugin could not be installed)
