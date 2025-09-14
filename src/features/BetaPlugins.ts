@@ -539,7 +539,7 @@ export default class BetaPlugins {
 					console.log("BRAT: rFiles.manifest", usingBetaManifest, rFiles);
 
 				if (rFiles.mainJs === null) {
-					const msg = `${repositoryPath}\nThe release is not complete and cannot be download. main.js is missing from the Release`;
+					const msg = `${repositoryPath}\nThe release is not complete and cannot be downloaded. main.js is missing from the Release`;
 					await this.plugin.log(msg, true);
 					toastMessage(this.plugin, msg, noticeTimeout);
 					return null;
