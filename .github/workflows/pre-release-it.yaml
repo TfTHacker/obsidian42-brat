@@ -1,4 +1,5 @@
-name: Pre-Release It
+# Automated release management using release-it and conventional commits. Run this manually to create a (pre-)release or push to the main and beta branch to create a dry-run.
+name: Release It
 
 on:
   push:
@@ -18,6 +19,23 @@ jobs:
           git config user.name "${GITHUB_ACTOR}"
           git config user.email "${GITHUB_ACTOR}@users.noreply.github.com"
       - run: npm install
+      - run: npx -p @release-it/bumper -p @release-it/conventional-changelog release-it --git.requireBranch="main" --ci --dry-run
+        name: Release (DRY RUN)
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - run: npx -p @release-it/bumper -p @release-it/conventional-changelog release-it --git.requireBranch="main" --ci
+        name: Release
+        if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - run: npx -p @release-it/bumper -p @release-it/conventional-changelog release-it --preRelease=beta --ci --dry-run
+        name: Pre-Release (DRY RUN)
+        if: github.event_name == 'push' && github.ref == 'refs/heads/beta'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - run: npx -p @release-it/bumper -p @release-it/conventional-changelog release-it --preRelease=beta --ci
+        name: Pre-Release
+        if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/beta'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
