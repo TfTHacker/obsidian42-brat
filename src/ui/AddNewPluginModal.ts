@@ -151,6 +151,7 @@ export default class AddNewPluginModal extends Modal {
 			this.plugin.settings.selectLatestPluginVersionByDefault
 		) {
 			selectedVersion = "latest";
+			this.version = "latest";
 		} else {
 			selectedVersion = selected;
 		}
@@ -169,13 +170,11 @@ export default class AddNewPluginModal extends Modal {
 						`${version.version} ${version.prerelease ? "(Prerelease)" : ""}`,
 					);
 				}
-				const changeHandler = (value: string) => {
+				dropdown.onChange((value: string) => {
 					this.version = value;
-					this.updateAddButtonState();
-				};
-				dropdown.onChange(changeHandler);
+					this.addPluginButton?.setDisabled(this.version === "");
+				});
 				dropdown.setValue(selectedVersion);
-				changeHandler(selectedVersion);
 
 				dropdown.selectEl.addClass("brat-version-selector");
 				dropdown.selectEl.style.width = "100%";
@@ -302,14 +301,12 @@ export default class AddNewPluginModal extends Modal {
 						);
 
 						// Update version dropdown when input loses focus
-						if (this.updateVersion) {
-							addressEl.inputEl.addEventListener("blur", async () => {
-								await this.updateRepositoryVersionInfo(
-									this.version,
-									validationStatusEl,
-								);
-							});
-						}
+						addressEl.inputEl.addEventListener("blur", async () => {
+							await this.updateRepositoryVersionInfo(
+								this.version,
+								validationStatusEl,
+							);
+						});
 
 						// FIXME
 						setting.setDesc("Repository");
