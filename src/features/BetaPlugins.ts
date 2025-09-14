@@ -898,7 +898,7 @@ export default class BetaPlugins {
 				);
 	}
 
-	async checkIncompatiblePlugins(): Promise<void> {
+	checkIncompatiblePlugins(): void {
 		const incompatiblePluginIds =
 			this.plugin.settings.pluginSubListFrozenVersion
 				.filter((p) => p.isIncompatible)
