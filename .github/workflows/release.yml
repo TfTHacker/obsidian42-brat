@@ -3,7 +3,7 @@ name: Release Obsidian plugin
 on:
   push:
     tags:
-      - "![*]-[*]"
+      - "!*-*"
 
 jobs:
   build:
