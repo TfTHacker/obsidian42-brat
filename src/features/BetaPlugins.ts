@@ -868,15 +868,20 @@ export default class BetaPlugins {
 				);
 	}
 
+	/**
+	 * Checks if there are any incompatible plugins installed and notifies the user
+	 */
 	async checkIncompatiblePlugins(): Promise<void> {
 		const incompatiblePluginIds =
 			this.plugin.settings.pluginSubListFrozenVersion
 				.filter((p) => p.isIncompatible)
 				.map((p) => p.repo);
-		toastMessage(
-			this.plugin,
-			`The following incompatible plugins were forcefully installed by BRAT and may not work as expected:\n${incompatiblePluginIds.join("\n")}`,
-			30,
-		);
+		if (incompatiblePluginIds.length > 0) {
+			toastMessage(
+				this.plugin,
+				`The following incompatible plugins were forcefully installed by BRAT and may not work as expected:\n${incompatiblePluginIds.join("\n")}`,
+				30,
+			);
+		}
 	}
 }
