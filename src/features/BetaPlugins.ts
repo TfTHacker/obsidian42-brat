@@ -898,6 +898,9 @@ export default class BetaPlugins {
 				);
 	}
 
+	/**
+	 * Checks if there are any incompatible plugins installed and notifies the user
+	 */
 	checkIncompatiblePlugins(): void {
 		const incompatiblePluginIds =
 			this.plugin.settings.pluginSubListFrozenVersion

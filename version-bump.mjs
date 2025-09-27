@@ -1,4 +1,5 @@
 import { readFileSync, writeFileSync } from "node:fs";
+
 const semver = await import("semver");
 
 const targetVersion = process.env.npm_package_version;
