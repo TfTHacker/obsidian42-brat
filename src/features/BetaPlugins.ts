@@ -520,15 +520,45 @@ export default class BetaPlugins {
 				}
 
 				if (
-					this.plugin.settings.allowIncompatiblePlugins &&
 					Platform.isMobile &&
 					manifestObj.isDesktopOnly
 				) {
-					manifestObj.isDesktopOnly = false;
-					manifestObj.brat ??= {};
-					manifestObj.brat.isDesktopOnlyOriginal = true;
-					manifestObj.brat.isIncompatible = true;
-					isIncompatible = true;
+					if (this.plugin.settings.allowIncompatiblePlugins) {
+						const confirmResult = await confirm({
+							app: this.plugin.app,
+							message: createFragment((f) => {
+								f.appendText("Plugin: ");
+								f.createEl("code", { text: repositoryPath });
+								f.createEl("br");
+								f.appendText("The ");
+								f.createEl("code", { text: "manifest.json" });
+								f.appendText(
+									" for this plugin indicates that the plugin has ",
+								);
+								f.createEl("code", { text: "isDesktopOnly: true" });
+								f.appendText(", but you are using a mobile device.");
+								f.createEl("br");
+								f.appendText(
+									"Using this plugin is not recommended and may not work as expected. Use at your own risk.",
+								);
+								f.createEl("br");
+								f.appendText("Do you want to forcefully run it on mobile anyways?");
+							}),
+						});
+						if (!confirmResult) {
+							return null;
+						}
+						manifestObj.isDesktopOnly = false;
+						manifestObj.brat ??= {};
+						manifestObj.brat.isDesktopOnlyOriginal = true;
+						manifestObj.brat.isIncompatible = true;
+						isIncompatible = true;
+					} else {
+						const msg = `Plugin: ${repositoryPath}\n\nThe manifest.json for this plugin indicates that the plugin has isDesktopOnly: true, but you are using a mobile device.\n\nThe plugin will not be installed.`;
+						await this.plugin.log(msg, true);
+						toastMessage(this.plugin, msg, 30);
+						return null;
+					}
 				}
 
 				if (isIncompatible) {
@@ -868,15 +898,20 @@ export default class BetaPlugins {
 				);
 	}
 
-	async checkIncompatiblePlugins(): Promise<void> {
+	/**
+	 * Checks if there are any incompatible plugins installed and notifies the user
+	 */
+	checkIncompatiblePlugins(): void {
 		const incompatiblePluginIds =
 			this.plugin.settings.pluginSubListFrozenVersion
 				.filter((p) => p.isIncompatible)
 				.map((p) => p.repo);
-		toastMessage(
-			this.plugin,
-			`The following incompatible plugins were forcefully installed by BRAT and may not work as expected:\n${incompatiblePluginIds.join("\n")}`,
-			30,
-		);
+		if (incompatiblePluginIds.length > 0) {
+			toastMessage(
+				this.plugin,
+				`The following incompatible plugins were forcefully installed by BRAT and may not work as expected:\n${incompatiblePluginIds.join("\n")}`,
+				30,
+			);
+		}
 	}
 }
