@@ -353,7 +353,7 @@ export const grabReleaseFileFromRepository = async (
 			throw error;
 		}
 		if (debugLogging)
-			console.log("error in grabReleaseFileFromRepository", URL, error);
+			console.log("error in grabReleaseFileFromRepository", release, error);
 		return null;
 	}
 };
