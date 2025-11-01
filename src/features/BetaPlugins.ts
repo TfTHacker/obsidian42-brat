@@ -1,11 +1,12 @@
 import type { PluginManifest } from "obsidian";
 import {
-	Platform,
 	apiVersion,
 	Notice,
 	normalizePath,
+	Platform,
 	requireApiVersion,
 } from "obsidian";
+import { confirm } from "src/ui/ConfirmModal";
 import {
 	GHRateLimitError,
 	GitHubResponseError,
@@ -21,7 +22,6 @@ import {
 	isPrivateRepo,
 	type Release,
 } from "./githubUtils";
-import { confirm } from "src/ui/ConfirmModal";
 
 const compareVersions = require("semver/functions/compare");
 const semverCoerce = require("semver/functions/coerce");
