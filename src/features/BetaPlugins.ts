@@ -113,7 +113,7 @@ export default class BetaPlugins {
 			const isPrivate = await isPrivateRepo(
 				repositoryPath,
 				this.plugin.settings.debuggingMode,
-				privateApiKey || this.plugin.settings.personalAccessToken,
+				privateApiKey,
 			);
 
 			// Grab the manifest.json for the latest release from the repository
@@ -123,7 +123,7 @@ export default class BetaPlugins {
 				getBetaManifest,
 				this.plugin.settings.debuggingMode,
 				isPrivate,
-				privateApiKey || this.plugin.settings.personalAccessToken,
+				privateApiKey,
 			);
 
 			if (!release) {
@@ -148,7 +148,7 @@ export default class BetaPlugins {
 				"manifest.json",
 				this.plugin.settings.debuggingMode,
 				isPrivate,
-				privateApiKey || this.plugin.settings.personalAccessToken,
+				privateApiKey,
 			);
 
 			if (!rawManifest) {
@@ -295,7 +295,7 @@ export default class BetaPlugins {
 			getManifest,
 			this.plugin.settings.debuggingMode,
 			isPrivate,
-			privateApiKey || this.plugin.settings.personalAccessToken,
+			privateApiKey,
 		);
 
 		if (!release) {
@@ -313,7 +313,7 @@ export default class BetaPlugins {
 				"main.js",
 				this.plugin.settings.debuggingMode,
 				isPrivate,
-				privateApiKey || this.plugin.settings.personalAccessToken,
+				privateApiKey,
 			),
 			manifest: reallyGetManifestOrNot
 				? await grabReleaseFileFromRepository(
@@ -321,7 +321,7 @@ export default class BetaPlugins {
 						"manifest.json",
 						this.plugin.settings.debuggingMode,
 						isPrivate,
-						privateApiKey || this.plugin.settings.personalAccessToken,
+						privateApiKey,
 					)
 				: "",
 			styles: await grabReleaseFileFromRepository(
@@ -329,7 +329,7 @@ export default class BetaPlugins {
 				"styles.css",
 				this.plugin.settings.debuggingMode,
 				isPrivate,
-				privateApiKey || this.plugin.settings.personalAccessToken,
+				privateApiKey,
 			),
 		};
 	}
@@ -376,7 +376,7 @@ export default class BetaPlugins {
 	 * @param specifyVersion    - if not empty, need to install a specified version instead of the value in manifest-beta.json
 	 * @param forceReinstall    - if true, will force a reinstall of the plugin, even if it is already installed
 	 * @param enableAfterInstall - if true, will enable the plugin after install
-	 * @param privateApiKey     - if not empty, will use the private API key to access the repository
+	 * @param privateApiKey     - if not empty, will use the private API key to access the repository, otherwise a PAT from settings will be used if available
 	 *
 	 * @returns true if succeeds
 	 */
@@ -412,7 +412,7 @@ export default class BetaPlugins {
 				true,
 				true,
 				specifyVersion,
-				privateApiKey,
+				privateApiKey || this.plugin.settings.personalAccessToken,
 			);
 			const usingBetaManifest: boolean = !!primaryManifest;
 			// attempt to get manifest.json
@@ -422,7 +422,7 @@ export default class BetaPlugins {
 					false,
 					true,
 					specifyVersion,
-					privateApiKey,
+					privateApiKey || this.plugin.settings.personalAccessToken,
 				);
 
 			if (primaryManifest === null) {
@@ -499,7 +499,7 @@ export default class BetaPlugins {
 					primaryManifest,
 					usingBetaManifest,
 					specifyVersion,
-					privateApiKey,
+					privateApiKey || this.plugin.settings.personalAccessToken,
 				);
 
 				console.log("rFiles", rFiles);
@@ -519,10 +519,7 @@ export default class BetaPlugins {
 					manifestObj.minAppVersion = apiVersion;
 				}
 
-				if (
-					Platform.isMobile &&
-					manifestObj.isDesktopOnly
-				) {
+				if (Platform.isMobile && manifestObj.isDesktopOnly) {
 					if (this.plugin.settings.allowIncompatiblePlugins) {
 						const confirmResult = await confirm({
 							app: this.plugin.app,
@@ -532,9 +529,7 @@ export default class BetaPlugins {
 								f.createEl("br");
 								f.appendText("The ");
 								f.createEl("code", { text: "manifest.json" });
-								f.appendText(
-									" for this plugin indicates that the plugin has ",
-								);
+								f.appendText(" for this plugin indicates that the plugin has ");
 								f.createEl("code", { text: "isDesktopOnly: true" });
 								f.appendText(", but you are using a mobile device.");
 								f.createEl("br");
@@ -542,7 +537,9 @@ export default class BetaPlugins {
 									"Using this plugin is not recommended and may not work as expected. Use at your own risk.",
 								);
 								f.createEl("br");
-								f.appendText("Do you want to forcefully run it on mobile anyways?");
+								f.appendText(
+									"Do you want to forcefully run it on mobile anyways?",
+								);
 							}),
 						});
 						if (!confirmResult) {
