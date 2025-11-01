@@ -268,15 +268,14 @@ export default class BetaPlugins {
 	 * Gets all the release files based on the version number in the manifest
 	 *
 	 * @param repositoryPath - path to the GitHub repository
-	 * @param manifest       - manifest file
 	 * @param getManifest    - grab the remote manifest file
 	 * @param specifyVersion - grab the specified version if set
+	 * @param privateApiKey  - private API key if needed
 	 *
-	 * @returns all relase files as strings based on the ReleaseFiles interaface
+	 * @returns all release files as strings based on the ReleaseFiles interface
 	 */
 	async getAllReleaseFiles(
 		repositoryPath: string,
-		manifest: PluginManifest,
 		getManifest: boolean,
 		specifyVersion = "",
 		privateApiKey = "",
@@ -496,7 +495,6 @@ export default class BetaPlugins {
 			const getRelease = async () => {
 				const rFiles = await this.getAllReleaseFiles(
 					repositoryPath,
-					primaryManifest,
 					usingBetaManifest,
 					specifyVersion,
 					privateApiKey || this.plugin.settings.personalAccessToken,
