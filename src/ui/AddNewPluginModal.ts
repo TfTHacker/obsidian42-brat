@@ -478,8 +478,15 @@ export default class AddNewPluginModal extends Modal {
 			newDiv.style.borderTop = "1px solid #ccc";
 			newDiv.style.marginTop = "30px";
 			const byTfThacker = newDiv.createSpan();
-			byTfThacker.innerHTML =
-				"BRAT by <a href='https://bit.ly/o42-twitter'>TFTHacker</a>";
+			byTfThacker.createEl("a", {
+				href: "https://bit.ly/o42-twitter",
+				text: "TFTHacker",
+			});
+			byTfThacker.appendText(" and ");
+			byTfThacker.createEl("a", {
+				href: "https://github.com/johannrichard",
+				text: "johannrichard",
+			});
 			byTfThacker.style.fontStyle = "italic";
 			newDiv.appendChild(byTfThacker);
 			promotionalLinks(newDiv, false);
