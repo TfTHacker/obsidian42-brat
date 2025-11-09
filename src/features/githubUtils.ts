@@ -499,6 +499,8 @@ export const grabLastCommitDateForFile = async (
 export type Release = {
 	url: string;
 	tag_name: string;
+	name: string;
+	published_at: string;
 	prerelease: boolean;
 	assets: {
 		name: string;
@@ -570,16 +572,26 @@ export const grabReleaseFromRepository = async (
 		return (
 			releases
 				.sort((a, b) => {
-					// FIX for issue #105: Not all developers use semver compliant version tags
-					const aVersion = semverCoerce(a.tag_name, {
-						includePrerelease: true,
-						loose: true,
-					});
-					const bVersion = semverCoerce(b.tag_name, {
-						includePrerelease: true,
-						loose: true,
-					});
-					return compareVersions(bVersion, aVersion);
+					try {
+						// FIX for issue #105: Not all developers use semver compliant version tags
+						// FIX for issue #114: Cannot handle releases with non-version names
+						const aVersion = semverCoerce(a.tag_name, {
+							includePrerelease: true,
+							loose: true,
+						});
+						const bVersion = semverCoerce(b.tag_name, {
+							includePrerelease: true,
+							loose: true,
+						});
+						// Fallback to semverCoerce if compareVersions fails
+						return compareVersions(bVersion, aVersion);
+					} catch {
+						const aDate = new Date(a.published_at).getTime();
+						const bDate = new Date(b.published_at).getTime();
+						if (aDate < bDate) return 1;
+						if (aDate > bDate) return -1;
+						return 0;
+					}
 				})
 				.filter((release) => includePrereleases || !release.prerelease)[0] ??
 			null
