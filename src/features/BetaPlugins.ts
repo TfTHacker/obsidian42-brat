@@ -192,26 +192,28 @@ export default class BetaPlugins {
 				return null;
 			}
 
-			const expectedVersion = semverCoerce(release.tag_name, {
-				includePrerelease: true,
-				loose: true,
-			});
-			const manifestVersion = semverCoerce(manifestJson.version, {
-				includePrerelease: true,
-				loose: true,
-			});
+			try {
+				// Improve robustness: if we can't compare versions, fallback to manifest version
+				const expectedVersion = semverCoerce(release.tag_name, {
+					includePrerelease: true,
+					loose: true,
+				});
+				const manifestVersion = semverCoerce(manifestJson.version, {
+					includePrerelease: true,
+					loose: true,
+				});
+				if (compareVersions(expectedVersion, manifestVersion) !== 0) {
+					if (reportIssues)
+						toastMessage(
+							this.plugin,
+							`${repositoryPath}\nVersion mismatch detected:\nRelease tag version: ${release.tag_name}\nManifest version: ${manifestJson.version}\n\nThe release tag version will be used to ensure consistency.`,
+							noticeTimeout,
+						);
 
-			if (compareVersions(expectedVersion, manifestVersion) !== 0) {
-				if (reportIssues)
-					toastMessage(
-						this.plugin,
-						`${repositoryPath}\nVersion mismatch detected:\nRelease tag version: ${release.tag_name}\nManifest version: ${manifestJson.version}\n\nThe release tag version will be used to ensure consistency.`,
-						noticeTimeout,
-					);
-
-				// Overwrite the manifest version with the release version
-				manifestJson.version = expectedVersion.version;
-			}
+					// Overwrite the manifest version with the release version
+					manifestJson.version = expectedVersion.version;
+				}
+			} catch {}
 			return manifestJson;
 		} catch (error) {
 			if (error instanceof GHRateLimitError) {
