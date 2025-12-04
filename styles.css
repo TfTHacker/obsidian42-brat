@@ -108,3 +108,45 @@
   margin-right: 10px;
   margin-top: 20px;
 }
+
+/* Hide filtered plugin items */
+.brat-plugin-item[hidden] {
+  display: none !important;
+}
+
+/* Hide filtered theme items */
+.brat-theme-item[hidden] {
+  display: none !important;
+}
+
+/* Filter and button layout */
+.brat-filter-and-button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin: 0.75em 0;
+}
+
+.brat-filter-input {
+  max-width: 300px;
+  padding: 4px 8px;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 4px;
+  background-color: var(--background-secondary);
+  color: var(--text-normal);
+}
+
+.brat-filter-input:focus {
+  outline: none;
+  border-color: var(--interactive-accent);
+}
+
+.brat-filter-and-button .setting-item {
+  border: none;
+  padding: 0;
+}
+
+.brat-filter-and-button .setting-item-control {
+  justify-content: flex-end;
+}
