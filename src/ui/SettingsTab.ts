@@ -304,7 +304,7 @@ export class BratSettingsTab extends PluginSettingTab {
 					url: "https://github.com/settings/tokens/new?scopes=public_repo",
 					text: "your GitHub account settings",
 					appendText:
-						" and then add it here. Please consult the documetation for more details.",
+						" and then add it here. Please consult the documentation for more details.",
 				}),
 			)
 			.addText((text) => {
