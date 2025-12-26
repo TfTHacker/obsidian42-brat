@@ -106,6 +106,7 @@ export class BratSettingsTab extends PluginSettingTab {
 		containerEl.createEl("div", {
 			text: `The following is a list of beta plugins added via the command "Add a beta plugin for testing". You can chose to add the latest version or a frozen version. A frozen version is a specific release of a plugin based on its release tag.`,
 		});
+
 		containerEl.createEl("p");
 		containerEl.createEl("div", {
 			text: "Click the 'Edit' button next to a plugin to change the installed version and the x button next to a plugin to remove it from the list.",
@@ -116,7 +117,21 @@ export class BratSettingsTab extends PluginSettingTab {
 			text: "Removing from the list does not delete the plugin, this should be done from the Community Plugins tab in Settings.",
 		});
 
-		new Setting(containerEl).addButton((cb: ButtonComponent) => {
+		const filterAndButtonContainer = containerEl.createDiv(
+			"brat-filter-and-button",
+		);
+
+		const filterInput = filterAndButtonContainer.createEl("input", {
+			type: "text",
+			placeholder: "Filter plugins",
+			cls: "brat-filter-input",
+		});
+
+		filterInput.setAttribute("auotocorrect", "off");
+		filterInput.setAttribute("autocapitalize", "off");
+		filterInput.setAttribute("spellcheck", "false");
+
+		new Setting(filterAndButtonContainer).addButton((cb: ButtonComponent) => {
 			cb.setButtonText("Add beta plugin")
 				.setCta()
 				.onClick(() => {
@@ -127,6 +142,12 @@ export class BratSettingsTab extends PluginSettingTab {
 		const frozenVersions = new Map(
 			this.plugin.settings.pluginSubListFrozenVersion.map((f) => [f.repo, f]),
 		);
+
+		const pluginContainers = new Map<
+			string,
+			{ container: HTMLElement; pluginName: string }
+		>();
+
 		for (const p of this.plugin.settings.pluginList) {
 			const bp = frozenVersions.get(p);
 			const pluginSettingContainer = new Setting(containerEl)
@@ -136,6 +157,13 @@ export class BratSettingsTab extends PluginSettingTab {
 						? ` Tracked version: ${bp.version} ${bp.version === "latest" ? "" : "(frozen)"}`
 						: "") + (bp?.isIncompatible ? " (incompatible)" : ""),
 				);
+
+			const containerElement = pluginSettingContainer.settingEl;
+			containerElement.addClass("brat-plugin-item");
+			pluginContainers.set(p, {
+				container: containerElement,
+				pluginName: p.toLowerCase(),
+			});
 
 			if (!bp?.version || bp.version === "latest") {
 				// Only show update button for plugins tracking latest version
@@ -193,39 +221,103 @@ export class BratSettingsTab extends PluginSettingTab {
 				});
 		}
 
-		new Setting(containerEl).setName("Beta themes list").setHeading();
-
-		new Setting(containerEl).addButton((cb: ButtonComponent) => {
-			cb.setButtonText("Add beta theme")
-				.setCta()
-				.onClick(() => {
-					// @ts-expect-error
-					this.plugin.app.setting.close();
-					new AddNewTheme(this.plugin).open();
-				});
+		filterInput.addEventListener("input", (event: Event) => {
+			const filterValue = (event.target as HTMLInputElement).value
+				.toLowerCase()
+				.trim();
+			pluginContainers.forEach(({ container, pluginName }) => {
+				if (filterValue === "") {
+					container.removeAttribute("hidden");
+				} else {
+					if (pluginName.includes(filterValue)) {
+						container.removeAttribute("hidden");
+					} else {
+						container.setAttribute("hidden", "true");
+					}
+				}
+			});
 		});
 
+		new Setting(containerEl).setName("Beta themes list").setHeading();
+
+		const themeFilterAndButtonContainer = containerEl.createDiv(
+			"brat-filter-and-button",
+		);
+
+		const themeFilterInput = themeFilterAndButtonContainer.createEl("input", {
+			type: "text",
+			placeholder: "Filter themes",
+			cls: "brat-filter-input",
+		});
+
+		themeFilterInput.setAttribute("auotocorrect", "off");
+		themeFilterInput.setAttribute("autocapitalize", "off");
+		themeFilterInput.setAttribute("spellcheck", "false");
+
+		new Setting(themeFilterAndButtonContainer).addButton(
+			(cb: ButtonComponent) => {
+				cb.setButtonText("Add beta theme")
+					.setCta()
+					.onClick(() => {
+						// @ts-expect-error
+						this.plugin.app.setting.close();
+						new AddNewTheme(this.plugin).open();
+					});
+			},
+		);
+
+		const themeContainers = new Map<
+			string,
+			{ container: HTMLElement; themeName: string }
+		>();
+
 		for (const bp of this.plugin.settings.themesList) {
-			new Setting(containerEl)
-				.setName(createGitHubResourceLink(bp.repo))
-				.addButton((btn: ButtonComponent) => {
-					btn
-						.setIcon("cross")
-						.setTooltip("Delete this beta theme")
-						.onClick(() => {
-							if (btn.buttonEl.textContent === "")
-								btn.setButtonText("Click once more to confirm removal");
-							else {
-								const { buttonEl } = btn;
-								const { parentElement } = buttonEl;
-								if (parentElement?.parentElement) {
-									parentElement.parentElement.remove();
-									themeDelete(this.plugin, bp.repo);
-								}
+			const themeSettingContainer = new Setting(containerEl).setName(
+				createGitHubResourceLink(bp.repo),
+			);
+
+			const containerElement = themeSettingContainer.settingEl;
+			containerElement.addClass("brat-theme-item");
+			themeContainers.set(bp.repo, {
+				container: containerElement,
+				themeName: bp.repo.toLowerCase(),
+			});
+
+			themeSettingContainer.addButton((btn: ButtonComponent) => {
+				btn
+					.setIcon("cross")
+					.setTooltip("Delete this beta theme")
+					.onClick(() => {
+						if (btn.buttonEl.textContent === "")
+							btn.setButtonText("Click once more to confirm removal");
+						else {
+							const { buttonEl } = btn;
+							const { parentElement } = buttonEl;
+							if (parentElement?.parentElement) {
+								parentElement.parentElement.remove();
+								themeDelete(this.plugin, bp.repo);
 							}
-						});
-				});
+						}
+					});
+			});
 		}
+
+		themeFilterInput.addEventListener("input", (event: Event) => {
+			const filterValue = (event.target as HTMLInputElement).value
+				.toLowerCase()
+				.trim();
+			themeContainers.forEach(({ container, themeName }) => {
+				if (filterValue === "") {
+					container.removeAttribute("hidden");
+				} else {
+					if (themeName.includes(filterValue)) {
+						container.removeAttribute("hidden");
+					} else {
+						container.setAttribute("hidden", "true");
+					}
+				}
+			});
+		});
 
 		new Setting(containerEl).setName("Monitoring").setHeading();
 
@@ -304,7 +396,7 @@ export class BratSettingsTab extends PluginSettingTab {
 					url: "https://github.com/settings/tokens/new?scopes=public_repo",
 					text: "your GitHub account settings",
 					appendText:
-						" and then add it here. Please consult the documetation for more details.",
+						" and then add it here. Please consult the documentation for more details.",
 				}),
 			)
 			.addText((text) => {
