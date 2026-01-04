@@ -92,7 +92,7 @@ export default class AddNewPluginModal extends Modal {
 				this.version,
 				true, // Force reinstall
 				this.enableAfterInstall,
-				this.usePrivateApiKey ? this.privateApiKey : undefined,
+				this.usePrivateApiKey ? this.privateApiKey : "",
 			);
 			if (result) {
 				this.close();
@@ -124,7 +124,7 @@ export default class AddNewPluginModal extends Modal {
 			this.version,
 			false,
 			this.enableAfterInstall,
-			this.usePrivateApiKey ? this.privateApiKey : undefined,
+			this.usePrivateApiKey ? this.privateApiKey : "",
 		);
 		if (result) {
 			this.close();
