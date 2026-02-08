@@ -40,7 +40,6 @@ export default class AddNewPluginModal extends Modal {
 	repositoryAddressEl: TextComponent | null = null;
 
 	// Token Validation
-	usePrivateApiKey: boolean;
 	secretName: string;
 	validToken: boolean | undefined;
 	tokenInputEl: SecretComponent | null = null;
@@ -67,7 +66,6 @@ export default class AddNewPluginModal extends Modal {
 		this.address = prefillRepo;
 		this.version = prefillVersion;
 		this.secretName = prefillSecretName;
-		this.usePrivateApiKey = !prefillSecretName;
 		this.openSettingsTabAfterwards = openSettingsTabAfterwards;
 		this.updateVersion = updateVersion;
 		this.enableAfterInstall = plugin.settings.enableAfterInstall;
@@ -91,7 +89,7 @@ export default class AddNewPluginModal extends Modal {
 				this.version,
 				true, // Force reinstall
 				this.enableAfterInstall,
-				this.usePrivateApiKey ? this.secretName : "",
+				this.secretName,
 			);
 			if (result) {
 				this.close();
@@ -123,7 +121,7 @@ export default class AddNewPluginModal extends Modal {
 			this.version,
 			false,
 			this.enableAfterInstall,
-			this.usePrivateApiKey ? this.secretName : "",
+			this.secretName,
 		);
 		if (result) {
 			this.close();
@@ -320,105 +318,97 @@ export default class AddNewPluginModal extends Modal {
 			this.updateVersionDropdown(this.versionSetting, [], this.version);
 			this.versionSetting.setDisabled(true);
 
-			formEl.createDiv("modal-button-container", (buttonContainerEl) => {
-				buttonContainerEl.createEl(
-					"label",
-					{
-						cls: "mod-checkbox",
-					},
-					(labelEl) => {
-						const checkboxEl = labelEl.createEl("input", {
-							attr: { tabindex: -1 },
-							type: "checkbox",
-						});
-						checkboxEl.checked = this.usePrivateApiKey;
-						checkboxEl.addEventListener("click", () => {
-							this.usePrivateApiKey = checkboxEl.checked;
-							if (
-								!this.usePrivateApiKey ||
-								(this.validToken && this.usePrivateApiKey)
-							)
+			// Token setting section
+			const tokenElement = formEl.createDiv("token-setting");
+			new Setting(tokenElement)
+				.setName("GitHub Token")
+				.setDesc("Select a secret as token for this repository (optional)")
+				.addComponent((el) =>
+					new SecretComponent(this.plugin.app, el)
+						.setValue(this.secretName)
+						.onChange(async (selectedSecretName: string | null) => {
+							// User selected a different secret name (can be null when cleared)
+							this.secretName = selectedSecretName?.trim() || "";
+							if (!this.secretName) {
+								if (
+									this.address &&
+									existBetaPluginInList(this.plugin, this.address)
+								) {
+									updatePluginTokenName(this.plugin, this.address, "");
+									toastMessage(
+										this.plugin,
+										`Token setting cleared for ${this.address}`,
+										3,
+									);
+								}
 								void this.updateRepositoryVersionInfo(
 									this.version,
 									validationStatusEl,
 								);
-						});
-						labelEl.appendText("Use token for this repository");
-					},
-				);
+								return;
+							}
+							const tokenValue = this.secretName
+								? this.plugin.app.secretStorage.getSecret(this.secretName)
+								: null;
+							if (tokenValue) {
+								this.validToken = await this.validator?.validateToken(
+									tokenValue,
+									this.address,
+								);
+								if (!this.validToken) {
+									this.validateButton?.setButtonText("Invalid");
+									this.validateButton?.setDisabled(false);
+								} else {
+									this.validateButton?.setButtonText("Valid");
+									this.validateButton?.setDisabled(true);
 
-				// Create SecretComponent - it works with secret NAMES, not values
-				this.tokenInputEl = new SecretComponent(
-					this.plugin.app,
-					buttonContainerEl,
-				);
-				this.tokenInputEl
-					.setValue(this.secretName)
-					.onChange(async (selectedSecretName: string | null) => {
-						// User selected a different secret name (can be null when cleared)
-						this.secretName = selectedSecretName?.trim() || "";
-						const tokenValue = this.secretName
-							? this.plugin.app.secretStorage.getSecret(this.secretName)
-							: null;
-						if (tokenValue) {
-							this.validToken = await this.validator?.validateToken(
-								tokenValue,
-								this.address,
-							);
-							if (!this.validToken) {
-								this.validateButton?.setButtonText("Invalid");
-								this.validateButton?.setDisabled(false);
-							} else {
-								this.validateButton?.setButtonText("Valid");
-								this.validateButton?.setDisabled(true);
-
-								// Update version dropdown when API key changes
-								if (this.address) {
-									await this.updateRepositoryVersionInfo(
-										this.version,
-										validationStatusEl,
-									);
-
-									// Update the secret name for this plugin in the settings if it already exists there
-									if (existBetaPluginInList(this.plugin, this.address)) {
-										updatePluginTokenName(
-											this.plugin,
-											this.address,
-											this.secretName,
+									// Update version dropdown when API key changes
+									if (this.address) {
+										await this.updateRepositoryVersionInfo(
+											this.version,
+											validationStatusEl,
 										);
-										toastMessage(
-											this.plugin,
-											`Token setting updated for ${this.address}`,
-											3,
-										);
+
+										// Update the secret name for this plugin in the settings if it already exists there
+										if (existBetaPluginInList(this.plugin, this.address)) {
+											updatePluginTokenName(
+												this.plugin,
+												this.address,
+												this.secretName,
+											);
+											toastMessage(
+												this.plugin,
+												`Token setting updated for ${this.address}`,
+												3,
+											);
+										}
 									}
 								}
 							}
-						}
-					});
+						}),
+				);
 
-				// Initialize validator
-				this.validator = new TokenValidator();
+			// Initialize validator
+			this.validator = new TokenValidator();
 
-				// Validate the current token if we have a secret name
-				if (this.secretName) {
-					const tokenValue = this.plugin.app.secretStorage.getSecret(
-						this.secretName,
-					);
-					if (tokenValue) {
-						// Validate asynchronously on initial load
-						void this.validator
-							?.validateToken(tokenValue, this.address)
-							.then((isValid) => {
-								this.validToken = isValid;
-								if (this.validToken && this.usePrivateApiKey) {
-									this.validateButton?.setButtonText("Valid");
-									this.validateButton?.setDisabled(true);
-								}
-							});
-					}
+			// Validate the current token if we have a secret name
+			if (this.secretName) {
+				const tokenValue = this.plugin.app.secretStorage.getSecret(
+					this.secretName,
+				);
+				if (tokenValue) {
+					// Validate asynchronously on initial load
+					void this.validator
+						?.validateToken(tokenValue, this.address)
+						.then((isValid) => {
+							this.validToken = isValid;
+							if (this.validToken) {
+								this.validateButton?.setButtonText("Valid");
+								this.validateButton?.setDisabled(true);
+							}
+						});
 				}
-			});
+			}
 
 			formEl.createDiv("modal-button-container", (buttonContainerEl) => {
 				buttonContainerEl.createEl(
@@ -493,13 +483,6 @@ export default class AddNewPluginModal extends Modal {
 			newDiv.appendChild(byTfThacker);
 			promotionalLinks(newDiv, false);
 
-			window.setTimeout(() => {
-				const title = formEl.querySelectorAll(".brat-modal .setting-item-info");
-				for (const titleEl of Array.from(title)) {
-					titleEl.remove();
-				}
-			}, 50);
-
 			// Prevent default form submission on Enter key and button clicks, and ensure buttons don't trigger form submission
 			const buttons = formEl.querySelectorAll("button");
 			for (const button of Array.from(buttons)) {
@@ -566,7 +549,7 @@ export default class AddNewPluginModal extends Modal {
 		try {
 			// Get the actual token value from SecretStorage
 			let tokenToUse = "";
-			if (this.usePrivateApiKey && this.secretName) {
+			if (this.secretName) {
 				const tokenValue = this.plugin.app.secretStorage.getSecret(
 					this.secretName,
 				);
