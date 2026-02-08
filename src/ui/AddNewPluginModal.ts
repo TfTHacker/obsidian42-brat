@@ -507,15 +507,6 @@ export default class AddNewPluginModal extends Modal {
 			for (const button of Array.from(buttons)) {
 				// Set type to prevent form submission
 				button.setAttribute("type", "button");
-
-				// Optional: Add click handler with preventDefault
-				button.addEventListener(
-					"click",
-					(e: MouseEvent) => {
-						e.preventDefault();
-					},
-					true,
-				); // Use capture phase
 			}
 
 			// Invoked when "Submit" button is clicked.
