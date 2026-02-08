@@ -2,10 +2,14 @@ import type {
 	App,
 	ButtonComponent,
 	ExtraButtonComponent,
-	TextComponent,
+	SecretComponent,
 	ToggleComponent,
 } from "obsidian";
-import { PluginSettingTab, Setting } from "obsidian";
+import {
+	PluginSettingTab,
+	SecretComponent as SecretComponentClass,
+	Setting,
+} from "obsidian";
 import { TokenValidator } from "src/utils/TokenValidator";
 import { themeDelete } from "../features/themes";
 import type BratPlugin from "../main";
@@ -15,7 +19,7 @@ import { promotionalLinks } from "./Promotional";
 
 export class BratSettingsTab extends PluginSettingTab {
 	plugin: BratPlugin;
-	accessTokenSetting: TextComponent | null = null;
+	accessTokenSetting: SecretComponent | null = null;
 	accessTokenButton: ButtonComponent | null = null;
 	tokenInfo: HTMLElement | null = null;
 	validator: TokenValidator | null = null;
@@ -177,7 +181,7 @@ export class BratSettingsTab extends PluginSettingTab {
 								false,
 								true,
 								false,
-								bp?.token,
+								bp?.tokenName || "",
 							);
 						});
 				});
@@ -195,7 +199,7 @@ export class BratSettingsTab extends PluginSettingTab {
 								true,
 								p,
 								bp?.version,
-								bp?.token,
+								bp?.tokenName || "", // Pass secret name, not token value
 							);
 							// @ts-expect-error
 							this.plugin.app.setting.updatePluginSection();
@@ -386,8 +390,9 @@ export class BratSettingsTab extends PluginSettingTab {
 				);
 			});
 
-		// Modify the existing token setting
-		new Setting(containerEl)
+		// Personal access token setting
+		let currentTokenValue = "";
+		const tokenSetting = new Setting(containerEl)
 			.setName("Personal access token")
 			.setDesc(
 				createLink({
@@ -398,35 +403,53 @@ export class BratSettingsTab extends PluginSettingTab {
 					appendText:
 						" and then add it here. Please consult the documentation for more details.",
 				}),
-			)
-			.addText((text) => {
-				this.accessTokenSetting = text;
+			);
 
-				text
-					.setPlaceholder("Enter your personal access token")
-					.setValue(this.plugin.settings.personalAccessToken ?? "")
-					.onChange(async (value: string) => {
-						if (value === "") {
-							// Save / reset token
-							this.plugin.settings.personalAccessToken = "";
-							this.plugin.saveSettings();
-							this.accessTokenButton?.setDisabled(true);
-							this.validator?.validateToken("");
-						} else {
-							this.accessTokenButton?.setDisabled(false);
-						}
-					});
+		// Create SecretComponent - displays secret NAME selector
+		this.accessTokenSetting = new SecretComponentClass(
+			this.plugin.app,
+			tokenSetting.controlEl,
+		);
 
-				text.inputEl.addClass("brat-token-input");
-			})
+		// Set the component to show the current secret name from settings
+		this.accessTokenSetting
+			.setValue(this.plugin.settings.globalTokenName || "")
+			.onChange(async (secretName: string | null) => {
+				// secretName is the NAME of the secret, not the value (can be null when cleared)
+				const normalizedName = secretName?.trim() || "";
+				this.plugin.settings.globalTokenName = normalizedName;
+				await this.plugin.saveSettings();
+
+				// Get the actual token value for validation
+				if (normalizedName) {
+					currentTokenValue =
+						this.plugin.app.secretStorage.getSecret(normalizedName) || "";
+					this.accessTokenButton?.setDisabled(false);
+				} else {
+					currentTokenValue = "";
+					this.accessTokenButton?.setDisabled(true);
+					await this.validator?.validateToken("");
+				}
+			});
+
+		// Get initial token value for validation
+		if (this.plugin.settings.globalTokenName) {
+			currentTokenValue =
+				this.plugin.app.secretStorage.getSecret(
+					this.plugin.settings.globalTokenName,
+				) || "";
+		}
+
+		tokenSetting
 			.addExtraButton((cb: ExtraButtonComponent) => {
 				cb.setIcon("cross")
 					.setTooltip("Clear personal access token")
 					.onClick(async () => {
-						this.plugin.settings.personalAccessToken = "";
+						this.plugin.settings.globalTokenName = "";
+						await this.plugin.saveSettings();
 						this.accessTokenSetting?.setValue("");
+						currentTokenValue = "";
 						await this.validator?.validateToken("");
-						this.plugin.saveSettings();
 					});
 			})
 			.addButton((btn: ButtonComponent) => {
@@ -436,31 +459,21 @@ export class BratSettingsTab extends PluginSettingTab {
 					.setButtonText("Validate")
 					.setCta()
 					.onClick(async () => {
-						const value = this.accessTokenSetting?.inputEl.value;
-
-						if (value) {
-							const valid = await this.validator?.validateToken(value);
-							if (valid) {
-								this.plugin.settings.personalAccessToken = value;
-								this.plugin.saveSettings();
-								this.accessTokenButton?.setDisabled(true);
-							}
+						if (currentTokenValue) {
+							await this.validator?.validateToken(currentTokenValue);
 						}
 					});
 			})
 			.then(() => {
 				this.tokenInfo = this.createTokenInfoElement(containerEl);
-				this.validator = new TokenValidator(
-					this.accessTokenSetting,
-					this.tokenInfo,
-				);
-				this.validator
-					?.validateToken(this.plugin.settings.personalAccessToken ?? "")
-					.then((valid) => {
-						this.accessTokenButton?.setDisabled(
-							valid || this.plugin.settings.personalAccessToken === "",
-						);
-					});
+				this.validator = new TokenValidator(this.tokenInfo);
+
+				// Validate the current token on load
+				this.validator?.validateToken(currentTokenValue).then((valid) => {
+					this.accessTokenButton?.setDisabled(
+						valid || !this.plugin.settings.globalTokenName,
+					);
+				});
 			});
 	}
 
