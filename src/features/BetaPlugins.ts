@@ -415,12 +415,13 @@ export default class BetaPlugins {
 			// Retrieve actual token value from SecretStorage
 			let tokenValue = "";
 			if (secretName && secretName.trim() !== "") {
-				tokenValue = this.plugin.app.secretStorage.getSecret(secretName) || "";
+				tokenValue =
+					(await this.plugin.app.secretStorage.getSecret(secretName)) || "";
 			} else if (this.plugin.settings.globalTokenName) {
 				tokenValue =
-					this.plugin.app.secretStorage.getSecret(
+					(await this.plugin.app.secretStorage.getSecret(
 						this.plugin.settings.globalTokenName,
-					) || "";
+					)) || "";
 			}
 
 			const noticeTimeout = 10;
