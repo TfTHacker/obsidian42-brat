@@ -67,9 +67,7 @@ export default class AddNewPluginModal extends Modal {
 		this.address = prefillRepo;
 		this.version = prefillVersion;
 		this.secretName = prefillSecretName;
-		this.usePrivateApiKey = !(
-			prefillSecretName === "" || prefillSecretName === undefined
-		);
+		this.usePrivateApiKey = !prefillSecretName;
 		this.openSettingsTabAfterwards = openSettingsTabAfterwards;
 		this.updateVersion = updateVersion;
 		this.enableAfterInstall = plugin.settings.enableAfterInstall;
