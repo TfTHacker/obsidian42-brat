@@ -388,6 +388,11 @@ export default class AddNewPluginModal extends Modal {
 											this.address,
 											this.secretName,
 										);
+										toastMessage(
+											this.plugin,
+											`Token setting updated for ${this.address}`,
+											3,
+										);
 									}
 								}
 							}
