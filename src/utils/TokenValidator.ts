@@ -1,19 +1,18 @@
-import type { TextComponent } from "obsidian";
-import { type GitHubTokenInfo, TokenErrorType, type TokenValidationError, validateGitHubToken } from "../features/githubUtils";
+import {
+	type GitHubTokenInfo,
+	TokenErrorType,
+	type TokenValidationError,
+	validateGitHubToken,
+} from "../features/githubUtils";
 
 export class TokenValidator {
-	private tokenEl: TextComponent | null;
 	private statusEl?: HTMLElement | null;
 
-	constructor(tokenEl: TextComponent | null, statusEl?: HTMLElement | null) {
-		this.tokenEl = tokenEl;
+	constructor(statusEl?: HTMLElement | null) {
 		this.statusEl = statusEl;
 	}
 
 	async validateToken(token: string, repository?: string): Promise<boolean> {
-		// Remove valid/invalid classes from the input element
-		this.tokenEl?.inputEl.removeClass("valid-input", "invalid-input");
-
 		// No token provided
 		if (!token) {
 			this.statusEl?.setText("No token provided");
@@ -28,19 +27,16 @@ export class TokenValidator {
 			this.statusEl?.empty();
 
 			if (patInfo.validToken) {
-				this.tokenEl?.inputEl.addClass("valid-input");
 				this.statusEl?.addClass("valid");
 				this.showValidTokenInfo(patInfo);
 				return true;
 			}
 
-			this.tokenEl?.inputEl.addClass("invalid-input");
 			this.statusEl?.addClass("invalid");
 			this.showErrorMessage(patInfo.error);
 			return false;
 		} catch (error) {
 			console.error("Token validation error:", error);
-			this.tokenEl?.inputEl.addClass("invalid-input");
 			this.statusEl?.setText("Failed to validate token");
 			this.statusEl?.addClass("invalid");
 			return false;
@@ -73,7 +69,9 @@ export class TokenValidator {
 
 		if (patInfo.expirationDate) {
 			const expires = new Date(patInfo.expirationDate);
-			const daysLeft = Math.ceil((expires.getTime() - Date.now()) / (1000 * 60 * 60 * 24));
+			const daysLeft = Math.ceil(
+				(expires.getTime() - Date.now()) / (1000 * 60 * 60 * 24),
+			);
 
 			if (daysLeft < 7) {
 				details.createDiv({
