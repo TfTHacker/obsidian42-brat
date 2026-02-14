@@ -17,7 +17,7 @@
     "url": "git://github.com/TfTHacker/obsidian42-brat.git"
   },
   "devDependencies": {
-    "@biomejs/biome": "2.2.3",
+    "@biomejs/biome": "^2.3.15",
     "@types/node": "^24.3.1",
     "@types/semver": "^7.7.1",
     "builtin-modules": "5.0.0",
