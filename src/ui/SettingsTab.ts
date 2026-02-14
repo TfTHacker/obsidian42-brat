@@ -185,18 +185,34 @@ export class BratSettingsTab extends PluginSettingTab {
 				if (!bp?.version || bp.version === "latest") {
 					// Only show update button for plugins tracking latest version
 					pluginSettingContainer.addButton((btn: ButtonComponent) => {
-						btn
-							.setIcon("sync")
-							.setTooltip("Check and update plugin")
-							.onClick(async () => {
-								await this.plugin.betaPlugins.updatePlugin(
-									p,
-									false,
-									true,
-									false,
-									bp?.tokenName || "",
-								);
-							});
+						const secretName = bp?.tokenName || "";
+						const secretValue = secretName
+							? this.plugin.app.secretStorage.getSecret(secretName)
+							: "";
+
+						if (secretName && !secretValue) {
+							// Token name configured but secret missing: make button red, disabled, and show informative tooltip
+							btn
+								.setIcon("sync")
+								.setTooltip(
+									`Secret missing: ${secretName}. Please add the secret or update the plugin configuration.`,
+								)
+								.setWarning();
+							// 								.setDisabled(true);
+						} else {
+							btn
+								.setIcon("sync")
+								.setTooltip("Check and update plugin")
+								.onClick(async () => {
+									await this.plugin.betaPlugins.updatePlugin(
+										p,
+										false,
+										true,
+										false,
+										bp?.tokenName || "",
+									);
+								});
+						}
 					});
 				}
 

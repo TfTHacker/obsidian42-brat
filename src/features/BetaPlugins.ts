@@ -417,6 +417,13 @@ export default class BetaPlugins {
 			if (secretName && secretName.trim() !== "") {
 				tokenValue =
 					(await this.plugin.app.secretStorage.getSecret(secretName)) || "";
+				if (!tokenValue) {
+					toastMessage(
+						this.plugin,
+						`Secret not found for token name: ${secretName}. Please add it to SecretStorage or clear the token name for this plugin.`,
+						10,
+					);
+				}
 			} else if (this.plugin.settings.globalTokenName) {
 				tokenValue =
 					(await this.plugin.app.secretStorage.getSecret(
