@@ -198,7 +198,6 @@ export class BratSettingsTab extends PluginSettingTab {
 									`Secret missing: ${secretName}. Please add the secret or update the plugin configuration.`,
 								)
 								.setWarning();
-							// 								.setDisabled(true);
 						} else {
 							btn
 								.setIcon("sync")
