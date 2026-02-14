@@ -1,14 +1,15 @@
-import { Plugin } from "obsidian";
 import type { ObsidianProtocolData } from "obsidian";
+import { Plugin } from "obsidian";
 import BetaPlugins from "./features/BetaPlugins";
 import { themesCheckAndUpdates } from "./features/themes";
+import { migrateTokensToSecretStorage } from "./migrations";
 import type { Settings } from "./settings";
 import { DEFAULT_SETTINGS } from "./settings";
 import AddNewPluginModal from "./ui/AddNewPluginModal";
 import AddNewTheme from "./ui/AddNewTheme";
+import { addIcons } from "./ui/icons";
 import PluginCommands from "./ui/PluginCommands";
 import { BratSettingsTab } from "./ui/SettingsTab";
-import { addIcons } from "./ui/icons";
 import BratAPI from "./utils/BratAPI";
 import { logger } from "./utils/logging";
 import { toastMessage } from "./utils/notifications";
@@ -30,17 +31,27 @@ export default class BratPlugin extends Plugin {
 		});
 
 		this.loadSettings()
-			.then(() => {
+			.then(async () => {
+				// Migrate tokens to SecretStorage (Obsidian 1.11.4+)
+				await migrateTokensToSecretStorage(this.app, this.settings, () =>
+					this.saveSettings(),
+				);
+
 				this.app.workspace.onLayoutReady(() => {
 					this.addSettingTab(new BratSettingsTab(this.app, this));
 
-					this.registerObsidianProtocolHandler("brat", this.obsidianProtocolHandler);
+					this.registerObsidianProtocolHandler(
+						"brat",
+						this.obsidianProtocolHandler,
+					);
 
 					this.betaPlugins.checkIncompatiblePlugins();
 
 					if (this.settings.updateAtStartup) {
 						setTimeout(() => {
-							void this.betaPlugins.checkForPluginUpdatesAndInstallUpdates(false);
+							void this.betaPlugins.checkForPluginUpdatesAndInstallUpdates(
+								false,
+							);
 						}, 60000);
 					}
 					if (this.settings.updateThemesAtStartup) {
@@ -85,7 +96,14 @@ export default class BratPlugin extends Plugin {
 				let modal: AddNewPluginModal | AddNewTheme;
 				switch (which) {
 					case "plugin":
-						modal = new AddNewPluginModal(this, this.betaPlugins, true, false, params[which], params.version ? params.version : undefined);
+						modal = new AddNewPluginModal(
+							this,
+							this.betaPlugins,
+							true,
+							false,
+							params[which],
+							params.version ? params.version : undefined,
+						);
 						modal.open();
 						break;
 					case "theme":

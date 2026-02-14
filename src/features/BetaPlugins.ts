@@ -58,14 +58,14 @@ export default class BetaPlugins {
 	 * @param useFrozenVersion - install the plugin using frozen version.
 	 * @param prefillRepo - prefill the repository field in the modal.
 	 * @param prefillVersion - prefill the version field in the modal.
-	 * @param prefillPrivateApiKey - prefill the private API key field in the modal.
+	 * @param prefillSecretName - prefill the secret name field in the modal (name of secret in SecretStorage).
 	 */
 	displayAddNewPluginModal(
 		openSettingsTabAfterwards = false,
 		useFrozenVersion = false,
 		prefillRepo = "",
 		prefillVersion = "",
-		prefillPrivateApiKey = "",
+		prefillSecretName = "",
 	): void {
 		const newPlugin = new AddNewPluginModal(
 			this.plugin,
@@ -74,7 +74,7 @@ export default class BetaPlugins {
 			useFrozenVersion,
 			prefillRepo,
 			prefillVersion,
-			prefillPrivateApiKey,
+			prefillSecretName,
 		);
 		newPlugin.open();
 	}
@@ -107,13 +107,16 @@ export default class BetaPlugins {
 	): Promise<PluginManifest | null> {
 		const noticeTimeout = 15;
 
+		// Use the provided token for validation
+		const token = privateApiKey;
+
 		// GitHub API access might throw a rate limit
 		try {
 			// check if the repository is private
 			const isPrivate = await isPrivateRepo(
 				repositoryPath,
 				this.plugin.settings.debuggingMode,
-				privateApiKey,
+				token,
 			);
 
 			// Grab the manifest.json for the latest release from the repository
@@ -123,7 +126,7 @@ export default class BetaPlugins {
 				getBetaManifest,
 				this.plugin.settings.debuggingMode,
 				isPrivate,
-				privateApiKey,
+				token,
 			);
 
 			if (!release) {
@@ -148,7 +151,7 @@ export default class BetaPlugins {
 				"manifest.json",
 				this.plugin.settings.debuggingMode,
 				isPrivate,
-				privateApiKey,
+				token,
 			);
 
 			if (!rawManifest) {
@@ -272,7 +275,7 @@ export default class BetaPlugins {
 	 * @param repositoryPath - path to the GitHub repository
 	 * @param getManifest    - grab the remote manifest file
 	 * @param specifyVersion - grab the specified version if set
-	 * @param privateApiKey  - private API key if needed
+	 * @param tokenValue  - token value from SecretStorage
 	 *
 	 * @returns all release files as strings based on the ReleaseFiles interface
 	 */
@@ -280,13 +283,16 @@ export default class BetaPlugins {
 		repositoryPath: string,
 		getManifest: boolean,
 		specifyVersion = "",
-		privateApiKey = "",
+		tokenValue = "",
 	): Promise<ReleaseFiles> {
+		// Use provided token for API calls
+		const token = tokenValue;
+
 		// check if the repository is private
 		const isPrivate = await isPrivateRepo(
 			repositoryPath,
 			this.plugin.settings.debuggingMode,
-			privateApiKey,
+			token,
 		);
 
 		// Get the latest release from the repository
@@ -296,7 +302,7 @@ export default class BetaPlugins {
 			getManifest,
 			this.plugin.settings.debuggingMode,
 			isPrivate,
-			privateApiKey,
+			token,
 		);
 
 		if (!release) {
@@ -314,7 +320,7 @@ export default class BetaPlugins {
 				"main.js",
 				this.plugin.settings.debuggingMode,
 				isPrivate,
-				privateApiKey,
+				token,
 			),
 			manifest: reallyGetManifestOrNot
 				? await grabReleaseFileFromRepository(
@@ -322,7 +328,7 @@ export default class BetaPlugins {
 						"manifest.json",
 						this.plugin.settings.debuggingMode,
 						isPrivate,
-						privateApiKey,
+						token,
 					)
 				: "",
 			styles: await grabReleaseFileFromRepository(
@@ -330,7 +336,7 @@ export default class BetaPlugins {
 				"styles.css",
 				this.plugin.settings.debuggingMode,
 				isPrivate,
-				privateApiKey,
+				token,
 			),
 		};
 	}
@@ -389,7 +395,7 @@ export default class BetaPlugins {
 		specifyVersion = "",
 		forceReinstall = false,
 		enableAfterInstall = this.plugin.settings.enableAfterInstall,
-		privateApiKey = "",
+		secretName = "", // Name of secret in SecretStorage
 	): Promise<boolean> {
 		try {
 			if (this.plugin.settings.debuggingMode) {
@@ -402,8 +408,27 @@ export default class BetaPlugins {
 					specifyVersion,
 					forceReinstall,
 					enableAfterInstall,
-					privateApiKey ? "private" : "public",
+					secretName ? "with secret" : "public",
 				);
+			}
+
+			// Retrieve actual token value from SecretStorage
+			let tokenValue = "";
+			if (secretName && secretName.trim() !== "") {
+				tokenValue =
+					(await this.plugin.app.secretStorage.getSecret(secretName)) || "";
+				if (!tokenValue) {
+					toastMessage(
+						this.plugin,
+						`Secret not found for token name: ${secretName}. Please add it to SecretStorage or clear the token name for this plugin.`,
+						10,
+					);
+				}
+			} else if (this.plugin.settings.globalTokenName) {
+				tokenValue =
+					(await this.plugin.app.secretStorage.getSecret(
+						this.plugin.settings.globalTokenName,
+					)) || "";
 			}
 
 			const noticeTimeout = 10;
@@ -413,7 +438,7 @@ export default class BetaPlugins {
 				true,
 				true,
 				specifyVersion,
-				privateApiKey || this.plugin.settings.personalAccessToken,
+				tokenValue,
 			);
 			const usingBetaManifest: boolean = !!primaryManifest;
 			// attempt to get manifest.json
@@ -423,7 +448,7 @@ export default class BetaPlugins {
 					false,
 					true,
 					specifyVersion,
-					privateApiKey || this.plugin.settings.personalAccessToken,
+					tokenValue,
 				);
 
 			if (primaryManifest === null) {
@@ -499,7 +524,7 @@ export default class BetaPlugins {
 					repositoryPath,
 					usingBetaManifest,
 					specifyVersion,
-					privateApiKey || this.plugin.settings.personalAccessToken,
+					tokenValue,
 				);
 
 				console.log("rFiles", rFiles);
@@ -585,8 +610,8 @@ export default class BetaPlugins {
 					this.plugin,
 					repositoryPath,
 					specifyVersion,
-					privateApiKey,
 					isIncompatible,
+					secretName, // Store secret name in settings
 				);
 				if (enableAfterInstall) {
 					// @ts-expect-error
@@ -642,7 +667,7 @@ export default class BetaPlugins {
 							specifyVersion,
 							false,
 							enableAfterInstall,
-							privateApiKey,
+							secretName,
 						);
 						// even though failed, return true since install will be attempted
 						return true;
@@ -782,7 +807,7 @@ export default class BetaPlugins {
 		onlyCheckDontUpdate = false,
 		reportIfNotUpdted = false,
 		forceReinstall = false,
-		privateApiKey = "",
+		secretName = "",
 	): Promise<boolean> {
 		const result = await this.addPlugin(
 			repositoryPath,
@@ -792,7 +817,7 @@ export default class BetaPlugins {
 			"",
 			forceReinstall,
 			false,
-			privateApiKey,
+			secretName,
 		);
 		if (!result && !onlyCheckDontUpdate)
 			toastMessage(this.plugin, `${repositoryPath}\nUpdate of plugin failed.`);
@@ -822,15 +847,20 @@ export default class BetaPlugins {
 		const frozenVersions = new Map(
 			this.plugin.settings.pluginSubListFrozenVersion.map((f) => [
 				f.repo,
-				{ version: f.version, token: f.token },
+				f.version,
+			]),
+		);
+		// Create a map of repo to tokenName for per-repo tokens
+		const repoTokens = new Map(
+			this.plugin.settings.pluginSubListFrozenVersion.map((f) => [
+				f.repo,
+				f.tokenName || "",
 			]),
 		);
 		for (const bp of this.plugin.settings.pluginList) {
 			// Skip if repo is frozen and not set to "latest"
-			if (
-				frozenVersions.has(bp) &&
-				frozenVersions.get(bp)?.version !== "latest"
-			) {
+			const version = frozenVersions.get(bp);
+			if (version && version !== "latest") {
 				continue;
 			}
 			await this.updatePlugin(
@@ -838,7 +868,7 @@ export default class BetaPlugins {
 				onlyCheckDontUpdate,
 				false,
 				false,
-				frozenVersions.get(bp)?.token,
+				repoTokens.get(bp) || "",
 			);
 		}
 		const msg2 = "Checking for plugin updates COMPLETED";

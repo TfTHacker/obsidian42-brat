@@ -1,9 +1,10 @@
+import type { TextComponent } from "obsidian";
 import {
 	ButtonComponent,
 	Modal,
 	Platform,
+	SecretComponent,
 	Setting,
-	TextComponent,
 } from "obsidian";
 import {
 	fetchReleaseVersions,
@@ -18,7 +19,7 @@ import { TokenValidator } from "src/utils/TokenValidator";
 import { createGitHubResourceLink } from "src/utils/utils";
 import type BetaPlugins from "../features/BetaPlugins";
 import type BratPlugin from "../main";
-import { existBetaPluginInList } from "../settings";
+import { existBetaPluginInList, updatePluginTokenName } from "../settings";
 import { toastMessage } from "../utils/notifications";
 import { promotionalLinks } from "./Promotional";
 import { VersionSuggestModal } from "./VersionSuggestModal";
@@ -39,10 +40,9 @@ export default class AddNewPluginModal extends Modal {
 	repositoryAddressEl: TextComponent | null = null;
 
 	// Token Validation
-	usePrivateApiKey: boolean;
-	privateApiKey: string;
+	secretName: string;
 	validToken: boolean | undefined;
-	tokenInputEl: TextComponent | null = null;
+	tokenInputEl: SecretComponent | null = null;
 	validateButton: ButtonComponent | null = null;
 	validator: TokenValidator | null = null;
 
@@ -58,17 +58,14 @@ export default class AddNewPluginModal extends Modal {
 		updateVersion = false,
 		prefillRepo = "",
 		prefillVersion = "",
-		prefillPrivateApiKey = "",
+		prefillSecretName = "",
 	) {
 		super(plugin.app);
 		this.plugin = plugin;
 		this.betaPlugins = betaPlugins;
 		this.address = prefillRepo;
 		this.version = prefillVersion;
-		this.privateApiKey = prefillPrivateApiKey;
-		this.usePrivateApiKey = !(
-			prefillPrivateApiKey === "" || prefillPrivateApiKey === undefined
-		);
+		this.secretName = prefillSecretName;
 		this.openSettingsTabAfterwards = openSettingsTabAfterwards;
 		this.updateVersion = updateVersion;
 		this.enableAfterInstall = plugin.settings.enableAfterInstall;
@@ -92,7 +89,7 @@ export default class AddNewPluginModal extends Modal {
 				this.version,
 				true, // Force reinstall
 				this.enableAfterInstall,
-				this.usePrivateApiKey ? this.privateApiKey : "",
+				this.secretName,
 			);
 			if (result) {
 				this.close();
@@ -124,7 +121,7 @@ export default class AddNewPluginModal extends Modal {
 			this.version,
 			false,
 			this.enableAfterInstall,
-			this.usePrivateApiKey ? this.privateApiKey : "",
+			this.secretName,
 		);
 		if (result) {
 			this.close();
@@ -190,8 +187,7 @@ export default class AddNewPluginModal extends Modal {
 					)
 					.setClass("brat-version-selector")
 					.setClass("button")
-					.onClick((e: Event) => {
-						e.preventDefault();
+					.onClick(() => {
 						const latest: ReleaseVersion = {
 							version: "latest",
 							prerelease: false,
@@ -322,100 +318,97 @@ export default class AddNewPluginModal extends Modal {
 			this.updateVersionDropdown(this.versionSetting, [], this.version);
 			this.versionSetting.setDisabled(true);
 
-			formEl.createDiv("modal-button-container", (buttonContainerEl) => {
-				buttonContainerEl.createEl(
-					"label",
-					{
-						cls: "mod-checkbox",
-					},
-					(labelEl) => {
-						const checkboxEl = labelEl.createEl("input", {
-							attr: { tabindex: -1 },
-							type: "checkbox",
-						});
-						checkboxEl.checked = this.usePrivateApiKey;
-						checkboxEl.addEventListener("click", () => {
-							this.usePrivateApiKey = checkboxEl.checked;
-							this.validateButton?.setDisabled(
-								!this.usePrivateApiKey || !this.validToken,
-							);
-							this.tokenInputEl?.setDisabled(!this.usePrivateApiKey);
-							if (
-								!this.usePrivateApiKey ||
-								(this.validToken && this.usePrivateApiKey)
-							)
-								this.updateRepositoryVersionInfo(
+			// Token setting section
+			const tokenElement = formEl.createDiv("token-setting");
+			new Setting(tokenElement)
+				.setName("GitHub Token")
+				.setDesc("Select a secret as token for this repository (optional)")
+				.addComponent((el) =>
+					new SecretComponent(this.plugin.app, el)
+						.setValue(this.secretName)
+						.onChange(async (selectedSecretName: string | null) => {
+							// User selected a different secret name (can be null when cleared)
+							this.secretName = selectedSecretName?.trim() || "";
+							if (!this.secretName) {
+								if (
+									this.address &&
+									existBetaPluginInList(this.plugin, this.address)
+								) {
+									updatePluginTokenName(this.plugin, this.address, "");
+									toastMessage(
+										this.plugin,
+										`Token setting cleared for ${this.address}`,
+										3,
+									);
+								}
+								void this.updateRepositoryVersionInfo(
 									this.version,
 									validationStatusEl,
 								);
-						});
-						labelEl.appendText("Use token for this repository");
-					},
-				);
+								return;
+							}
+							const tokenValue = this.secretName
+								? this.plugin.app.secretStorage.getSecret(this.secretName)
+								: null;
+							if (tokenValue) {
+								this.validToken = await this.validator?.validateToken(
+									tokenValue,
+									this.address,
+								);
+								if (!this.validToken) {
+									this.validateButton?.setButtonText("Invalid");
+									this.validateButton?.setDisabled(false);
+								} else {
+									this.validateButton?.setButtonText("Valid");
+									this.validateButton?.setDisabled(true);
 
-				this.tokenInputEl = new TextComponent(buttonContainerEl)
-					.setPlaceholder("GitHub API key for private repository")
-					.setValue(this.privateApiKey)
-					.setDisabled(!this.usePrivateApiKey)
-					.onChange(async (value) => {
-						this.privateApiKey = value.trim();
-						if (this.privateApiKey) {
-							this.validateButton?.setButtonText("Validate");
-							this.validateButton?.setDisabled(false);
-						} else {
-							this.validateButton?.setDisabled(true);
-						}
-					});
+									// Update version dropdown when API key changes
+									if (this.address) {
+										await this.updateRepositoryVersionInfo(
+											this.version,
+											validationStatusEl,
+										);
 
-				this.tokenInputEl.inputEl.type = "password";
-
-				// Add validation status element
-				const statusEl = formEl.createDiv("brat-token-validation-status");
-				if (!statusEl) return;
-
-				// Add validate button
-				if (this.tokenInputEl.inputEl.parentElement) {
-					this.validateButton = new ButtonComponent(
-						this.tokenInputEl.inputEl.parentElement,
-					)
-						.setButtonText("Validate")
-						.setDisabled(this.privateApiKey === "")
-						.onClick(async (e: Event) => {
-							e.preventDefault();
-
-							this.validToken = await this.validator?.validateToken(
-								this.privateApiKey,
-								this.address,
-							);
-							if (!this.validToken) {
-								this.validateButton?.setButtonText("Invalid");
-								this.validateButton?.setDisabled(false);
-							} else {
-								this.validateButton?.setButtonText("Valid");
-								this.validateButton?.setDisabled(true);
-
-								// Update version dropdown when API key changes
-								if (this.address) {
-									await this.updateRepositoryVersionInfo(
-										this.version,
-										validationStatusEl,
-									);
+										// Update the secret name for this plugin in the settings if it already exists there
+										if (existBetaPluginInList(this.plugin, this.address)) {
+											updatePluginTokenName(
+												this.plugin,
+												this.address,
+												this.secretName,
+											);
+											toastMessage(
+												this.plugin,
+												`Token setting updated for ${this.address}`,
+												3,
+											);
+										}
+									}
 								}
 							}
-						})
-						.then(async () => {
-							this.validator = new TokenValidator(this.tokenInputEl);
-							this.validToken = await this.validator?.validateToken(
-								this.privateApiKey,
-								this.address,
-							);
-							if (this.validToken && this.usePrivateApiKey) {
+						}),
+				);
+
+			// Initialize validator
+			this.validator = new TokenValidator();
+
+			// Validate the current token if we have a secret name
+			if (this.secretName) {
+				const tokenValue = this.plugin.app.secretStorage.getSecret(
+					this.secretName,
+				);
+				if (tokenValue) {
+					// Validate asynchronously on initial load
+					void this.validator
+						?.validateToken(tokenValue, this.address)
+						.then((isValid) => {
+							this.validToken = isValid;
+							if (this.validToken) {
 								this.validateButton?.setButtonText("Valid");
 								this.validateButton?.setDisabled(true);
 							}
 						});
 				}
-			});
+			}
 
 			formEl.createDiv("modal-button-container", (buttonContainerEl) => {
 				buttonContainerEl.createEl(
@@ -452,8 +445,7 @@ export default class AddNewPluginModal extends Modal {
 							: "Add plugin",
 					)
 					.setCta()
-					.onClick((e: Event) => {
-						e.preventDefault();
+					.onClick(() => {
 						if (this.address !== "") {
 							if (
 								(this.updateVersion && this.version !== "") ||
@@ -491,14 +483,14 @@ export default class AddNewPluginModal extends Modal {
 			newDiv.appendChild(byTfThacker);
 			promotionalLinks(newDiv, false);
 
-			window.setTimeout(() => {
-				const title = formEl.querySelectorAll(".brat-modal .setting-item-info");
-				for (const titleEl of Array.from(title)) {
-					titleEl.remove();
-				}
-			}, 50);
+			// Prevent default form submission on Enter key and button clicks, and ensure buttons don't trigger form submission
+			const buttons = formEl.querySelectorAll("button");
+			for (const button of Array.from(buttons)) {
+				// Set type to prevent form submission
+				button.setAttribute("type", "button");
+			}
 
-			// invoked when button is clicked.
+			// Invoked when "Submit" button is clicked.
 			formEl.addEventListener("submit", (e: Event) => {
 				e.preventDefault();
 				if (this.address !== "") {
@@ -555,12 +547,28 @@ export default class AddNewPluginModal extends Modal {
 		const scrubbedAddress = scrubRepositoryUrl(this.address);
 
 		try {
+			// Get the actual token value from SecretStorage
+			let tokenToUse = "";
+			if (this.secretName) {
+				const tokenValue = this.plugin.app.secretStorage.getSecret(
+					this.secretName,
+				);
+				if (tokenValue) {
+					tokenToUse = tokenValue;
+				}
+			} else if (this.plugin.settings.globalTokenName) {
+				const globalToken = this.plugin.app.secretStorage.getSecret(
+					this.plugin.settings.globalTokenName,
+				);
+				if (globalToken) {
+					tokenToUse = globalToken;
+				}
+			}
+
 			const versions = await fetchReleaseVersions(
 				scrubbedAddress,
 				this.plugin.settings.debuggingMode,
-				this.usePrivateApiKey
-					? this.privateApiKey
-					: this.plugin.settings.personalAccessToken,
+				tokenToUse,
 			);
 
 			if (versions && versions.length > 0) {

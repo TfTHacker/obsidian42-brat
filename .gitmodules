@@ -1,0 +1,3 @@
+[submodule "arch/obsidian-api"]
+	path = arch/obsidian-api
+	url = https://github.com/obsidianmd/obsidian-api

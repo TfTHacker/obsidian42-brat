@@ -10,7 +10,9 @@ export interface ThemeInforamtion {
 export interface PluginVersion {
 	repo: string; // path to the GitHub repository
 	version: "latest" | string; // version of the plugin (semver or latest)
+	/** @deprecated Tokens are now stored in SecretStorage (Obsidian 1.11.4+) */
 	token?: string; // optional private API key
+	tokenName?: string; // name of secret in SecretStorage for per-repo token
 	isIncompatible?: boolean; // if the plugin is incompatible
 }
 
@@ -26,7 +28,9 @@ export interface Settings {
 	loggingVerboseEnabled: boolean;
 	debuggingMode: boolean;
 	notificationsEnabled: boolean;
+	/** @deprecated Tokens are now stored in SecretStorage (Obsidian 1.11.4+) */
 	personalAccessToken?: string;
+	globalTokenName?: string; // name of secret in SecretStorage for global PAT
 	selectLatestPluginVersionByDefault: boolean;
 	allowIncompatiblePlugins: boolean;
 }
@@ -43,6 +47,7 @@ export const DEFAULT_SETTINGS: Settings = {
 	loggingVerboseEnabled: false,
 	debuggingMode: false,
 	notificationsEnabled: true,
+	globalTokenName: "",
 	personalAccessToken: "",
 	selectLatestPluginVersionByDefault: false,
 	allowIncompatiblePlugins: false,
@@ -54,13 +59,15 @@ export const DEFAULT_SETTINGS: Settings = {
  * @param  plugin - the plugin object
  * @param  repositoryPath - path to the GitHub repository
  * @param  specifyVersion  - if the plugin needs to stay at the frozen version, we need to also record the version
+ * @param  isIncompatible - if the plugin is incompatible
+ * @param  secretName - optional: name of secret in SecretStorage for this repo
  */
 export function addBetaPluginToList(
 	plugin: BratPlugin,
 	repositoryPath: string,
 	specifyVersion = "latest",
-	privateApiKey = "",
 	isIncompatible = false,
+	secretName = "",
 ): void {
 	let save = false;
 	if (!plugin.settings.pluginList.contains(repositoryPath)) {
@@ -76,7 +83,8 @@ export function addBetaPluginToList(
 		Object.assign(existingFrozenPlugin, {
 			repo: repositoryPath,
 			version: specifyVersion,
-			token: privateApiKey.trim() !== "" ? privateApiKey : undefined,
+			token: undefined, // Don't store token in settings
+			tokenName: secretName || existingFrozenPlugin.tokenName,
 			isIncompatible: isIncompatible || undefined,
 		});
 		save = true;
@@ -84,7 +92,8 @@ export function addBetaPluginToList(
 		plugin.settings.pluginSubListFrozenVersion.unshift({
 			repo: repositoryPath,
 			version: specifyVersion,
-			token: privateApiKey ? privateApiKey : undefined,
+			token: undefined, // Don't store token in settings
+			tokenName: secretName || undefined,
 			isIncompatible: isIncompatible || undefined,
 		});
 		save = true;
@@ -144,6 +153,27 @@ export function existBetaThemeinInList(
 		(t) => t.repo === repositoryPath,
 	);
 	return !!testIfThemExists;
+}
+
+/**
+ * Updates the token name for a plugin
+ *
+ * @param plugin - the plugin object
+ * @param repositoryPath - path to the GitHub repository
+ * @param tokenName - name of secret in SecretStorage for this repo (empty string to clear)
+ */
+export function updatePluginTokenName(
+	plugin: BratPlugin,
+	repositoryPath: string,
+	tokenName: string,
+): void {
+	const existingFrozenPlugin = plugin.settings.pluginSubListFrozenVersion.find(
+		(p) => p.repo === repositoryPath,
+	);
+	if (existingFrozenPlugin) {
+		existingFrozenPlugin.tokenName = tokenName || undefined;
+		void plugin.saveSettings();
+	}
 }
 
 /**

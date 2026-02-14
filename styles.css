@@ -1,5 +1,5 @@
 .brat-modal .modal-button-container {
-  margin-top: 5px !important;
+  margin-top: 5px;
 }
 
 .brat-modal .disabled-setting {
@@ -13,15 +13,15 @@
 /* Input validation styles */
 .brat-settings .valid-input,
 .brat-modal .valid-repository {
-  border-color: var(--color-green) !important;
+  border-color: var(--color-green);
 }
 .brat-settings .invalid-input,
 .brat-modal .invalid-repository {
-  border-color: var(--color-red) !important;
+  border-color: var(--color-red);
 }
 .brat-settings .validation-error,
 .brat-modal .validation-error {
-  border-color: var(--color-orange) !important;
+  border-color: var(--color-orange);
 }
 
 /* Version selector */
