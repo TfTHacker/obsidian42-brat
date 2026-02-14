@@ -167,13 +167,32 @@ export class BratSettingsTab extends PluginSettingTab {
 		for (const p of this.plugin.settings.pluginList) {
 			const bp = frozenVersions.get(p);
 			betaPluginGroup.addSetting((pluginSettingContainer) => {
+				const secretName = bp?.tokenName || "";
+				const secretValue = secretName
+					? this.plugin.app.secretStorage.getSecret(secretName)
+					: "";
+				const isSecretMissing = Boolean(secretName && !secretValue);
+
+				const pluginDescription = document.createDocumentFragment();
+				const trackedVersionText = bp?.version
+					? ` Tracked version: ${bp.version} ${bp.version === "latest" ? "" : "(frozen)"}`
+					: "";
+				const incompatibleText = bp?.isIncompatible ? " (incompatible)" : "";
+				pluginDescription.createDiv({
+					text: `${trackedVersionText}${incompatibleText}`,
+				});
+				if (isSecretMissing) {
+					pluginDescription.createDiv({
+						text: ` Secret not defined or empty: ${secretName}`,
+						cls: "mod-warning",
+						title:
+							"Token name configured but secret is missing. Add the secret or update the plugin configuration.",
+					});
+				}
+
 				pluginSettingContainer
 					.setName(createGitHubResourceLink(p))
-					.setDesc(
-						(bp?.version
-							? ` Tracked version: ${bp.version} ${bp.version === "latest" ? "" : "(frozen)"}`
-							: "") + (bp?.isIncompatible ? " (incompatible)" : ""),
-					);
+					.setDesc(pluginDescription);
 
 				const containerElement = pluginSettingContainer.settingEl;
 				containerElement.addClass("brat-plugin-item");
@@ -185,19 +204,15 @@ export class BratSettingsTab extends PluginSettingTab {
 				if (!bp?.version || bp.version === "latest") {
 					// Only show update button for plugins tracking latest version
 					pluginSettingContainer.addButton((btn: ButtonComponent) => {
-						const secretName = bp?.tokenName || "";
-						const secretValue = secretName
-							? this.plugin.app.secretStorage.getSecret(secretName)
-							: "";
-
-						if (secretName && !secretValue) {
+						if (isSecretMissing) {
 							// Token name configured but secret missing: make button red, disabled, and show informative tooltip
 							btn
 								.setIcon("sync")
 								.setTooltip(
 									`Secret missing: ${secretName}. Please add the secret or update the plugin configuration.`,
 								)
-								.setWarning();
+								.setWarning()
+								.setDisabled(true);
 						} else {
 							btn
 								.setIcon("sync")
@@ -220,18 +235,23 @@ export class BratSettingsTab extends PluginSettingTab {
 					.addButton((btn: ButtonComponent) => {
 						btn
 							.setIcon("edit")
-							.setTooltip("Change version")
-							.onClick(() => {
-								this.plugin.betaPlugins.displayAddNewPluginModal(
-									true,
-									true,
-									p,
-									bp?.version,
-									bp?.tokenName || "", // Pass secret name, not token value
-								);
-								// @ts-expect-error
-								this.plugin.app.setting.updatePluginSection();
-							});
+							.setTooltip("Change version and update settings");
+
+						if (isSecretMissing) {
+							btn.setWarning();
+						}
+
+						btn.onClick(() => {
+							this.plugin.betaPlugins.displayAddNewPluginModal(
+								true,
+								true,
+								p,
+								bp?.version,
+								bp?.tokenName || "", // Pass secret name, not token value
+							);
+							// @ts-expect-error
+							this.plugin.app.setting.updatePluginSection();
+						});
 					})
 					.addButton((btn: ButtonComponent) => {
 						btn
