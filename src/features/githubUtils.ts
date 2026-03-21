@@ -71,6 +71,22 @@ export const scrubRepositoryUrl = (address: string): string => {
 const TOKEN_PREFIXES = ["ghp_", "github_pat_"];
 const TOKEN_REGEXP =
 	/^(gh[ps]_[a-zA-Z0-9]{36}|github_pat_[a-zA-Z0-9]{22}_[a-zA-Z0-9]{59})$/;
+
+/**
+ * Normalizes all keys in an object to lowercase.
+ */
+const normalizeHeaders = (
+	headers: Record<string, string>,
+): Record<string, string> => {
+	return Object.keys(headers).reduce(
+		(acc, key) => {
+			acc[key.toLowerCase()] = headers[key];
+			return acc;
+		},
+		{} as Record<string, string>,
+	);
+};
+
 /**
  * Fetches GitHub token information by making a request that will fail
  * and extracting the information from the error headers
@@ -161,7 +177,7 @@ export const validateGitHubToken = async (
 			throw error;
 		}
 
-		const headers = error.headers;
+		const headers = normalizeHeaders(error.headers);
 		if (!headers) {
 			throw new Error("No headers in GitHub response");
 		}
@@ -633,7 +649,7 @@ export const gitHubRequest = async (
 	} catch (error) {
 		// Update rate limits from response headers
 		const gitHubError = new GitHubResponseError(error as Error);
-		const headers = gitHubError.headers;
+		const headers = normalizeHeaders(gitHubError.headers);
 		if (headers) {
 			limit = Number.parseInt(headers["x-ratelimit-limit"], 10);
 			remaining = Number.parseInt(headers["x-ratelimit-remaining"], 10);
