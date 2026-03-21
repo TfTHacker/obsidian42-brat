@@ -1,5 +1,5 @@
 import type { TFile } from "obsidian";
-import { Platform, moment } from "obsidian";
+import { moment, Platform } from "obsidian";
 import { getDailyNoteSettings } from "obsidian-daily-notes-interface";
 import type BratPlugin from "../main";
 
@@ -11,7 +11,11 @@ import type BratPlugin from "../main";
  * @param verboseLoggingOn - True if should only be logged if verbose logging is enabled
  *
  */
-export async function logger(plugin: BratPlugin, textToLog: string, verboseLoggingOn = false): Promise<void> {
+export async function logger(
+	plugin: BratPlugin,
+	textToLog: string,
+	verboseLoggingOn = false,
+): Promise<void> {
 	if (plugin.settings.debuggingMode) console.log(`BRAT: ${textToLog}`);
 	if (plugin.settings.loggingEnabled) {
 		if (!plugin.settings.loggingVerboseEnabled && verboseLoggingOn) return;
