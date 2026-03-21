@@ -19,6 +19,10 @@ jobs:
           git config user.name "${GITHUB_ACTOR}"
           git config user.email "${GITHUB_ACTOR}@users.noreply.github.com"
       - run: npm install
+      - name: Build release variant
+        run: npm run build:${RELEASE_CHANNEL}
+        env:
+          RELEASE_CHANNEL: ${{ github.ref_name == 'beta' && 'beta' || 'main' }}
       - run: npx -p @release-it/bumper -p @release-it/conventional-changelog release-it --git.requireBranch="main" --ci --dry-run
         name: Release (DRY RUN)
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'

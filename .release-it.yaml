@@ -3,7 +3,6 @@
 # Run `npx -p @release-it/bumper -p @release-it/conventional-changelog release-it` to release a regular release
 hooks:
   # This bump the manifest.json file with the new version before building
-  "before:init": "npm run build:${branchName}"
   "before:bump": "npm_package_version=${version} node version-bump.mjs"
 npm: false
 skipUnstable: true
