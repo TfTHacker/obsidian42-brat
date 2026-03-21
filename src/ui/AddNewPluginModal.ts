@@ -493,15 +493,7 @@ export default class AddNewPluginModal extends Modal {
 			// Invoked when "Submit" button is clicked.
 			formEl.addEventListener("submit", (e: Event) => {
 				e.preventDefault();
-				if (this.address !== "") {
-					if (
-						(this.updateVersion && this.version !== "") ||
-						!this.updateVersion
-					) {
-						this.addPluginButton?.setDisabled(true);
-						void this.submitForm();
-					}
-				}
+				e.stopPropagation();
 			});
 		});
 
