@@ -4,6 +4,7 @@ import esbuild from "esbuild";
 import copy from "esbuild-copy-static-files";
 
 const prod = process.argv[2] === "production";
+const beta = process.argv[2] === "beta";
 
 const context = await esbuild.context({
   entryPoints: ["src/main.ts"],
@@ -45,7 +46,7 @@ const context = await esbuild.context({
   ],
 });
 
-if (prod) {
+if (prod || beta) {
   await context.rebuild();
   process.exit(0);
 } else {

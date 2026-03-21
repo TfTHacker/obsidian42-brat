@@ -4,8 +4,11 @@
   "description": "Obsidian42 - Beta Reviewer's Autoupdate Tool.",
   "main": "main.js",
   "scripts": {
-    "dev": "node --no-warnings esbuild.config.mjs",
-    "build": "node --no-warnings esbuild.config.mjs production",
+    "dev": "npm run build:dev",
+    "build": "npm run build:main",
+    "build:dev": "node --no-warnings esbuild.config.mjs",
+    "build:beta": "node --no-warnings esbuild.config.mjs beta",
+    "build:main": "node --no-warnings esbuild.config.mjs production",
     "lint": "biome check ./src",
     "version": "node version-bump.mjs",
     "githubaction": "node version-github-action.mjs"
