@@ -22,8 +22,10 @@ export async function logger(
 
 		const fileName = `${plugin.settings.loggingPath}.md`;
 		const dateOutput = `[[${moment().format(getDailyNoteSettings().format).toString()}]] ${moment().format("HH:mm")}`;
-		const os = window.require("os") as { hostname: () => string };
-		const machineName = Platform.isDesktop ? os.hostname() : "MOBILE";
+		const os = Platform.isDesktop
+			? (window.require("os") as { hostname: () => string })
+			: null;
+		const machineName = Platform.isDesktop ? os?.hostname() : "MOBILE";
 		const output = `${dateOutput} ${machineName} ${textToLog.replace("\n", " ")}\n`;
 
 		let file = plugin.app.vault.getAbstractFileByPath(fileName) as TFile;
