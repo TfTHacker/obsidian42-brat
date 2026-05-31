@@ -1,21 +1,15 @@
 export const promotionalLinks = (containerEl: HTMLElement, settingsTab = true): HTMLElement => {
-	const linksDiv = containerEl.createEl("div");
-	linksDiv.style.float = "right";
+	const linksDiv = containerEl.createEl("div", { cls: "brat-promotional-links" });
 
 	if (!settingsTab) {
-		linksDiv.style.padding = "10px";
-		linksDiv.style.paddingLeft = "15px";
-		linksDiv.style.paddingRight = "15px";
+		linksDiv.addClass("brat-promotional-links-modal");
 	} else {
-		linksDiv.style.padding = "15px";
-		linksDiv.style.paddingLeft = "15px";
-		linksDiv.style.paddingRight = "15px";
-		linksDiv.style.marginLeft = "15px";
+		linksDiv.addClass("brat-promotional-links-settings");
 	}
 
 	const twitterSpan = linksDiv.createDiv("coffee");
 	twitterSpan.addClass("ex-twitter-span");
-	twitterSpan.style.paddingLeft = "10px";
+	twitterSpan.addClass("brat-promotional-links-coffee");
 	const captionText = twitterSpan.createDiv();
 	captionText.innerText = "Learn more about my work at:";
 	twitterSpan.appendChild(captionText);

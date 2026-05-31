@@ -23,7 +23,7 @@ export default class BratPlugin extends Plugin {
 	bratApi: BratAPI = new BratAPI(this);
 
 	onload() {
-		console.log(`loading ${this.APP_NAME}`);
+		console.debug(`loading ${this.APP_NAME}`);
 
 		addIcons();
 		this.addRibbonIcon("BratIcon", "BRAT", () => {
@@ -48,18 +48,18 @@ export default class BratPlugin extends Plugin {
 					this.betaPlugins.checkIncompatiblePlugins();
 
 					if (this.settings.updateAtStartup) {
-						setTimeout(() => {
+						window.setTimeout(() => {
 							void this.betaPlugins.checkForPluginUpdatesAndInstallUpdates(
 								false,
 							);
 						}, 60000);
 					}
 					if (this.settings.updateThemesAtStartup) {
-						setTimeout(() => {
+						window.setTimeout(() => {
 							void themesCheckAndUpdates(this, false);
 						}, 120000);
 					}
-					setTimeout(() => {
+					window.setTimeout(() => {
 						window.bratAPI = this.bratApi;
 					}, 500);
 				});
@@ -74,7 +74,7 @@ export default class BratPlugin extends Plugin {
 	}
 
 	onunload(): void {
-		console.log(`unloading ${this.APP_NAME}`);
+		console.debug(`unloading ${this.APP_NAME}`);
 	}
 
 	async loadSettings(): Promise<void> {

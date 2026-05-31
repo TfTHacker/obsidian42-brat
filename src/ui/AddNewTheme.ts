@@ -39,12 +39,13 @@ export default class AddNewTheme extends Modal {
 
 	onOpen(): void {
 		this.contentEl.createEl("h4", {
-			text: "Github repository for beta theme:",
+			text: "GitHub repository for beta theme:",
 		});
 		this.contentEl.createEl("form", {}, (formEl) => {
 			formEl.addClass("brat-modal");
 			new Setting(formEl).addText((textEl) => {
 				textEl.setPlaceholder(
+					// eslint-disable-next-line obsidianmd/ui/sentence-case
 					"Repository (example: https://github.com/GitHubUserName/repository-name",
 				);
 				textEl.setValue(this.address);
@@ -57,7 +58,7 @@ export default class AddNewTheme extends Modal {
 						void this.submitForm();
 					}
 				});
-				textEl.inputEl.style.width = "100%";
+				textEl.inputEl.addClass("brat-full-width-input");
 				window.setTimeout(() => {
 					const title = document.querySelector(".setting-item-info");
 					if (title) title.remove();
@@ -77,25 +78,26 @@ export default class AddNewTheme extends Modal {
 					.setCta()
 					.onClick((e: Event) => {
 						e.preventDefault();
-						console.log("Add theme button clicked");
+						console.debug("Add theme button clicked");
 						if (this.address !== "") void this.submitForm();
 					});
 			});
 
 			const newDiv = formEl.createDiv();
-			newDiv.style.borderTop = "1px solid #ccc";
-			newDiv.style.marginTop = "30px";
+			newDiv.addClass("brat-modal-divider");
 			const byTfThacker = newDiv.createSpan();
 			byTfThacker.createEl("a", {
 				href: "https://bit.ly/o42-twitter",
+				// eslint-disable-next-line obsidianmd/ui/sentence-case
 				text: "TFTHacker",
 			});
 			byTfThacker.appendText(" and ");
 			byTfThacker.createEl("a", {
 				href: "https://github.com/johannrichard",
+				// eslint-disable-next-line obsidianmd/ui/sentence-case
 				text: "johannrichard",
 			});
-			byTfThacker.style.fontStyle = "italic";
+			byTfThacker.addClass("brat-credits");
 			newDiv.appendChild(byTfThacker);
 			promotionalLinks(newDiv, false);
 
@@ -112,7 +114,6 @@ export default class AddNewTheme extends Modal {
 		if (this.openSettingsTabAfterwards) {
 			// @ts-expect-error
 			this.plugin.app.setting.openTab();
-			// @ts-expect-error
 			this.plugin.app.setting.openTabById(this.plugin.APP_ID);
 		}
 	}

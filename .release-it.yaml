@@ -11,7 +11,7 @@ git:
   requireBranch: "beta"
   getLatestTagFromAllRefs: true
   # Remove the [no ci] if you want to github actions to run on commit
-  commitMessage: "chore: release ${version} [no ci]"
+  commitMessage: "chore: 🚀 deploy release ${version} [no ci]"
 github:
   # This will create a github release by opening the browser with a prefilled window
   # Set this to 'false' if you don't want to pre-fill the release

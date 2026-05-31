@@ -8,7 +8,7 @@ export async function isConnectedToInternet(): Promise<boolean> {
 	try {
 		const online = await requestUrl(`https://obsidian.md/?${Math.random()}`);
 		return online.status >= 200 && online.status < 300;
-	} catch (err) {
+	} catch {
 		return false;
 	}
 }

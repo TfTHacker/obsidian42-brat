@@ -1,5 +1,5 @@
-import { FuzzySuggestModal } from "obsidian";
 import type { FuzzyMatch } from "obsidian";
+import { FuzzySuggestModal } from "obsidian";
 import type BratPlugin from "../main";
 
 /**
@@ -17,7 +17,10 @@ export interface SuggesterItem {
  */
 export class GenericFuzzySuggester extends FuzzySuggestModal<SuggesterItem> {
 	data: SuggesterItem[] = [];
-	callbackFunction!: (item: SuggesterItem, evt: MouseEvent | KeyboardEvent) => void;
+	callbackFunction!: (
+		item: SuggesterItem,
+		evt: MouseEvent | KeyboardEvent,
+	) => void;
 
 	constructor(plugin: BratPlugin) {
 		super(plugin.app);
@@ -33,7 +36,9 @@ export class GenericFuzzySuggester extends FuzzySuggestModal<SuggesterItem> {
 		this.data = suggesterData;
 	}
 
-	display(callBack: (item: SuggesterItem, evt: MouseEvent | KeyboardEvent) => void) {
+	display(
+		callBack: (item: SuggesterItem, evt: MouseEvent | KeyboardEvent) => void,
+	) {
 		this.callbackFunction = callBack;
 		this.open();
 	}
@@ -55,7 +60,9 @@ export class GenericFuzzySuggester extends FuzzySuggestModal<SuggesterItem> {
 	}
 
 	enterTrigger(evt: KeyboardEvent): void {
-		const selectedText = document.querySelector(".suggestion-item.is-selected div")?.textContent;
+		const selectedText = document.querySelector(
+			".suggestion-item.is-selected div",
+		)?.textContent;
 		const item = this.data.find((i) => i.display === selectedText);
 		if (item) {
 			this.invokeCallback(item, evt);
@@ -63,13 +70,16 @@ export class GenericFuzzySuggester extends FuzzySuggestModal<SuggesterItem> {
 		}
 	}
 
-	onChooseSuggestion(item: FuzzyMatch<SuggesterItem>, evt: MouseEvent | KeyboardEvent): void {
+	onChooseSuggestion(
+		item: FuzzyMatch<SuggesterItem>,
+		evt: MouseEvent | KeyboardEvent,
+	): void {
 		this.invokeCallback(item.item, evt);
 	}
 
 	invokeCallback(item: SuggesterItem, evt: MouseEvent | KeyboardEvent): void {
 		if (typeof this.callbackFunction === "function") {
-			(this.callbackFunction as (item: SuggesterItem, evt: MouseEvent | KeyboardEvent) => void)(item, evt);
+			this.callbackFunction(item, evt);
 		}
 	}
 }

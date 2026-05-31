@@ -98,7 +98,7 @@ export default class AddNewPluginModal extends Modal {
 			// Reset modal if we don't close (i.e. because plugin could not be installed)
 			this.cancelButton?.setDisabled(false);
 			this.addPluginButton?.setDisabled(false);
-			this.addPluginButton?.setButtonText("Add Plugin");
+			this.addPluginButton?.setButtonText("Add plugin");
 			this.versionSetting?.setDisabled(false);
 
 			return;
@@ -130,7 +130,7 @@ export default class AddNewPluginModal extends Modal {
 		// Reset modal if we don't close (i.e. because plugin could not be installed)
 		this.cancelButton?.setDisabled(false);
 		this.addPluginButton?.setDisabled(false);
-		this.addPluginButton?.setButtonText("Add Plugin");
+		this.addPluginButton?.setButtonText("Add plugin");
 		this.versionSetting?.setDisabled(false);
 	}
 
@@ -174,7 +174,6 @@ export default class AddNewPluginModal extends Modal {
 				dropdown.setValue(selectedVersion);
 
 				dropdown.selectEl.addClass("brat-version-selector");
-				dropdown.selectEl.style.width = "100%";
 			});
 		} else {
 			// Use suggest modal for many versions
@@ -220,7 +219,7 @@ export default class AddNewPluginModal extends Modal {
 			heading.appendText("Change plugin version: ");
 			heading.appendChild(createGitHubResourceLink(this.address));
 		} else {
-			heading.setText("Github repository for beta plugin:");
+			heading.setText("GitHub repository for beta plugin:");
 		}
 
 		this.contentEl.createEl("form", {}, (formEl) => {
@@ -235,7 +234,7 @@ export default class AddNewPluginModal extends Modal {
 						this.repositoryAddressEl = addressEl;
 
 						addressEl.setPlaceholder(
-							"Repository (example: https://github.com/GitHubUserName/repository-name)",
+							"Repository (example: https://GitHub.com/githubusername/repository-name)",
 						);
 						addressEl.setValue(this.address);
 						addressEl.onChange((value) => {
@@ -266,32 +265,34 @@ export default class AddNewPluginModal extends Modal {
 
 						addressEl.inputEl.addEventListener(
 							"keydown",
-							async (e: KeyboardEvent) => {
+							(e: KeyboardEvent) => {
 								if (e.key === "Enter") {
-									if (
-										this.address &&
-										((this.updateVersion && this.version !== "") ||
-											!this.updateVersion)
-									) {
-										e.preventDefault();
-										this.addPluginButton?.setDisabled(true);
-										this.cancelButton?.setDisabled(true);
-										this.versionSetting?.setDisabled(true);
-										void this.submitForm();
-									}
+									void (async () => {
+										if (
+											this.address &&
+											((this.updateVersion && this.version !== "") ||
+												!this.updateVersion)
+										) {
+											e.preventDefault();
+											this.addPluginButton?.setDisabled(true);
+											this.cancelButton?.setDisabled(true);
+											this.versionSetting?.setDisabled(true);
+											void this.submitForm();
+										}
 
-									// Populate version dropdown
-									await this.updateRepositoryVersionInfo(
-										this.version,
-										validationStatusEl,
-									);
+										// Populate version dropdown
+										await this.updateRepositoryVersionInfo(
+											this.version,
+											validationStatusEl,
+										);
+									})();
 								}
 							},
 						);
 
 						// Update version dropdown when input loses focus
-						addressEl.inputEl.addEventListener("blur", async () => {
-							await this.updateRepositoryVersionInfo(
+						addressEl.inputEl.addEventListener("blur", () => {
+							void this.updateRepositoryVersionInfo(
 								this.version,
 								validationStatusEl,
 							);
@@ -299,7 +300,7 @@ export default class AddNewPluginModal extends Modal {
 
 						// FIXME
 						setting.setDesc("Repository");
-						addressEl.inputEl.style.width = "100%";
+						addressEl.inputEl.addClass("brat-full-width-input");
 					});
 				});
 			}
@@ -321,70 +322,72 @@ export default class AddNewPluginModal extends Modal {
 			// Token setting section
 			const tokenElement = formEl.createDiv("token-setting");
 			new Setting(tokenElement)
-				.setName("GitHub Token")
+				.setName("GitHub token")
 				.setDesc("Select a secret as token for this repository (optional)")
 				.addComponent((el) =>
 					new SecretComponent(this.plugin.app, el)
 						.setValue(this.secretName)
-						.onChange(async (selectedSecretName: string | null) => {
-							// User selected a different secret name (can be null when cleared)
-							this.secretName = selectedSecretName?.trim() || "";
-							if (!this.secretName) {
-								if (
-									this.address &&
-									existBetaPluginInList(this.plugin, this.address)
-								) {
-									updatePluginTokenName(this.plugin, this.address, "");
-									toastMessage(
-										this.plugin,
-										`Token setting cleared for ${this.address}`,
-										3,
-									);
-								}
-								void this.updateRepositoryVersionInfo(
-									this.version,
-									validationStatusEl,
-								);
-								return;
-							}
-							const tokenValue = this.secretName
-								? this.plugin.app.secretStorage.getSecret(this.secretName)
-								: null;
-							if (tokenValue) {
-								this.validToken = await this.validator?.validateToken(
-									tokenValue,
-									this.address,
-								);
-								if (!this.validToken) {
-									this.validateButton?.setButtonText("Invalid");
-									this.validateButton?.setDisabled(false);
-								} else {
-									this.validateButton?.setButtonText("Valid");
-									this.validateButton?.setDisabled(true);
-
-									// Update version dropdown when API key changes
-									if (this.address) {
-										await this.updateRepositoryVersionInfo(
-											this.version,
-											validationStatusEl,
+						.onChange((selectedSecretName: string | null) => {
+							void (async () => {
+								// User selected a different secret name (can be null when cleared)
+								this.secretName = selectedSecretName?.trim() || "";
+								if (!this.secretName) {
+									if (
+										this.address &&
+										existBetaPluginInList(this.plugin, this.address)
+									) {
+										updatePluginTokenName(this.plugin, this.address, "");
+										toastMessage(
+											this.plugin,
+											`Token setting cleared for ${this.address}`,
+											3,
 										);
+									}
+									void this.updateRepositoryVersionInfo(
+										this.version,
+										validationStatusEl,
+									);
+									return;
+								}
+								const tokenValue = this.secretName
+									? this.plugin.app.secretStorage.getSecret(this.secretName)
+									: null;
+								if (tokenValue) {
+									this.validToken = await this.validator?.validateToken(
+										tokenValue,
+										this.address,
+									);
+									if (!this.validToken) {
+										this.validateButton?.setButtonText("Invalid");
+										this.validateButton?.setDisabled(false);
+									} else {
+										this.validateButton?.setButtonText("Valid");
+										this.validateButton?.setDisabled(true);
 
-										// Update the secret name for this plugin in the settings if it already exists there
-										if (existBetaPluginInList(this.plugin, this.address)) {
-											updatePluginTokenName(
-												this.plugin,
-												this.address,
-												this.secretName,
+										// Update version dropdown when API key changes
+										if (this.address) {
+											await this.updateRepositoryVersionInfo(
+												this.version,
+												validationStatusEl,
 											);
-											toastMessage(
-												this.plugin,
-												`Token setting updated for ${this.address}`,
-												3,
-											);
+
+											// Update the secret name for this plugin in the settings if it already exists there
+											if (existBetaPluginInList(this.plugin, this.address)) {
+												updatePluginTokenName(
+													this.plugin,
+													this.address,
+													this.secretName,
+												);
+												toastMessage(
+													this.plugin,
+													`Token setting updated for ${this.address}`,
+													3,
+												);
+											}
 										}
 									}
 								}
-							}
+							})();
 						}),
 				);
 
@@ -467,19 +470,20 @@ export default class AddNewPluginModal extends Modal {
 			});
 
 			const newDiv = formEl.createDiv();
-			newDiv.style.borderTop = "1px solid #ccc";
-			newDiv.style.marginTop = "30px";
+			newDiv.addClass("brat-modal-divider");
 			const byTfThacker = newDiv.createSpan();
 			byTfThacker.createEl("a", {
 				href: "https://bit.ly/o42-twitter",
+				// eslint-disable-next-line obsidianmd/ui/sentence-case
 				text: "TFTHacker",
 			});
 			byTfThacker.appendText(" and ");
 			byTfThacker.createEl("a", {
 				href: "https://github.com/johannrichard",
+				// eslint-disable-next-line obsidianmd/ui/sentence-case
 				text: "johannrichard",
 			});
-			byTfThacker.style.fontStyle = "italic";
+			byTfThacker.addClass("brat-credits");
 			newDiv.appendChild(byTfThacker);
 			promotionalLinks(newDiv, false);
 
@@ -518,7 +522,7 @@ export default class AddNewPluginModal extends Modal {
 	) {
 		const validateInputEl = this.repositoryAddressEl;
 		if (this.plugin.settings.debuggingMode) {
-			console.log(
+			console.debug(
 				`[BRAT] Updating version dropdown for ${this.address} with selected version ${selectedVersion}`,
 			);
 		}
@@ -622,7 +626,7 @@ export default class AddNewPluginModal extends Modal {
 			}
 
 			if (error instanceof GitHubResponseError) {
-				const gitHubError = error as GitHubResponseError;
+				const gitHubError = error;
 				switch (gitHubError.status) {
 					case 404:
 						validationStatusEl?.setText(
@@ -651,9 +655,7 @@ export default class AddNewPluginModal extends Modal {
 
 	onClose(): void {
 		if (this.openSettingsTabAfterwards) {
-			// @ts-expect-error
 			this.plugin.app.setting.open();
-			// @ts-expect-error
 			this.plugin.app.setting.openTabById(this.plugin.APP_ID);
 		}
 	}

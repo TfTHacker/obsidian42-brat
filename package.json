@@ -9,7 +9,9 @@
     "build:dev": "node --no-warnings esbuild.config.mjs",
     "build:beta": "node --no-warnings esbuild.config.mjs beta",
     "build:main": "node --no-warnings esbuild.config.mjs production",
-    "lint": "biome check ./src",
+    "lint": "npm run lint:biome && npm run lint:eslint",
+    "lint:biome": "biome check ./src",
+    "lint:eslint": "eslint .",
     "version": "node version-bump.mjs",
     "githubaction": "node version-github-action.mjs"
   },
@@ -21,17 +23,24 @@
   },
   "devDependencies": {
     "@biomejs/biome": "^2.3.15",
+    "@eslint/js": "^9.39.1",
+    "@obsidian-typings/obsidian-public-1.11.4": "^4.93.0",
     "@types/node": "^24.3.1",
     "@types/semver": "^7.7.1",
     "builtin-modules": "5.0.0",
     "esbuild": "0.25.9",
     "esbuild-copy-static-files": "^0.1.0",
+    "eslint": "^9.39.1",
+    "eslint-plugin-obsidianmd": "^0.3.0",
+    "globals": "^17.0.0",
+    "jiti": "^2.7.0",
     "jsdom": "^26.1.0",
     "obsidian": "^1.11.4",
     "ts-node": "^10.9.2",
     "tslib": "^2.8.1",
     "typedoc": "^0.28.12",
-    "typescript": "5.9.2"
+    "typescript": "5.9.2",
+    "typescript-eslint": "^8.46.4"
   },
   "dependencies": {
     "obsidian-daily-notes-interface": "^0.9.4",

@@ -122,13 +122,13 @@ export async function migrateTokensToSecretStorage(
 			// Check if this exact token already exists
 			const existing = findExistingSecret(tokenValue);
 			if (existing) {
-				console.log(`BRAT: Reusing existing secret "${existing}"`);
+				console.debug(`BRAT: Reusing existing secret "${existing}"`);
 				return existing;
 			}
 
 			// Create new secret
 			app.secretStorage.setSecret(secretId, tokenValue);
-			console.log(`BRAT: Created new secret "${secretId}"`);
+			console.debug(`BRAT: Created new secret "${secretId}"`);
 			return secretId;
 		};
 
@@ -162,7 +162,7 @@ export async function migrateTokensToSecretStorage(
 		// Save settings after clearing tokens
 		if (migrated > 0) {
 			await saveSettings();
-			console.log(`BRAT: Migrated ${migrated} token(s) to SecretStorage`);
+			console.debug(`BRAT: Migrated ${migrated} token(s) to SecretStorage`);
 		}
 
 		// Mark migration as complete

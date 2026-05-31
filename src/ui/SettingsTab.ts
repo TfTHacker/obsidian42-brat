@@ -38,7 +38,7 @@ export class BratSettingsTab extends PluginSettingTab {
 		new Setting(containerEl)
 			.setName("Auto-enable plugins after installation")
 			.setDesc(
-				'If enabled beta plugins will be automatically enabled after installtion by default. Note: you can toggle this on and off for each plugin in the "Add Plugin" form.',
+				'If enabled beta plugins will be automatically enabled after installtion by default. Note: you can toggle this on and off for each plugin in the "add plugin" form.',
 			)
 			.addToggle((cb: ToggleComponent) => {
 				cb.setValue(this.plugin.settings.enableAfterInstall).onChange(
@@ -141,12 +141,12 @@ export class BratSettingsTab extends PluginSettingTab {
 		betaPluginGroup.addSetting((setting) => {
 			const pluginListDescription = document.createDocumentFragment();
 			pluginListDescription.createEl("div", {
-				text: `The following is a list of beta plugins added via the command "Add a beta plugin for testing". You can chose to add the latest version or a frozen version. A frozen version is a specific release of a plugin based on its release tag.`,
+				text: `The following is a list of beta plugins added via the command "add a beta plugin for testing". You can chose to add the latest version or a frozen version. A frozen version is a specific release of a plugin based on its release tag.`,
 			});
 
 			pluginListDescription.createEl("p");
 			pluginListDescription.createEl("div", {
-				text: "Click the 'Edit' button next to a plugin to change the installed version and the x button next to a plugin to remove it from the list.",
+				text: `Click the "edit" button next to a plugin to change the installed version. Click the "X" button next to a plugin to remove it from the list.`,
 			});
 			pluginListDescription.createEl("p");
 			pluginListDescription.createEl("span").createEl("b", { text: "Note: " });
@@ -249,7 +249,6 @@ export class BratSettingsTab extends PluginSettingTab {
 								bp?.version,
 								bp?.tokenName || "", // Pass secret name, not token value
 							);
-							// @ts-expect-error
 							this.plugin.app.setting.updatePluginSection();
 						});
 					})
@@ -282,17 +281,16 @@ export class BratSettingsTab extends PluginSettingTab {
 			"Beta themes list",
 		);
 
-		betaThemeGroup.addSetting((setting) =>
+		betaThemeGroup.addSetting((setting) => {
 			setting.addButton((cb: ButtonComponent) => {
 				cb.setButtonText("Add beta theme")
 					.setCta()
 					.onClick(() => {
-						// @ts-expect-error
 						this.plugin.app.setting.close();
 						new AddNewTheme(this.plugin).open();
 					});
-			}),
-		);
+			});
+		});
 
 		betaThemeGroup.addSearch((cb) => {
 			cb.setPlaceholder("Filter themes");
@@ -344,79 +342,86 @@ export class BratSettingsTab extends PluginSettingTab {
 			});
 		}
 
-		const monitoringGroup = new SettingGroup(containerEl)
-			.setHeading("Monitoring")
-			.addSetting((setting) =>
-				setting
-					.setName("Enable notifications")
-					.setDesc(
-						"BRAT will provide popup notifications for its various activities. Turn this off means  no notifications from BRAT.",
-					)
-					.addToggle((cb: ToggleComponent) => {
-						cb.setValue(this.plugin.settings.notificationsEnabled);
-						cb.onChange(async (value: boolean) => {
-							this.plugin.settings.notificationsEnabled = value;
-							await this.plugin.saveSettings();
-						});
-					}),
-			)
-			.addSetting((setting) =>
-				setting
-					.setName("Enable logging")
-					.setDesc("Plugin updates will be logged to a file in the log file.")
-					.addToggle((cb: ToggleComponent) => {
-						cb.setValue(this.plugin.settings.loggingEnabled).onChange(
-							async (value: boolean) => {
-								this.plugin.settings.loggingEnabled = value;
-								await this.plugin.saveSettings();
-							},
-						);
-					}),
-			)
-			.addSetting((setting) =>
-				setting
-					.setName("BRAT log file location")
-					.setDesc(
-						"Logs will be saved to this file. Don't add .md to the file name.",
-					)
-					.addSearch((cb) => {
-						cb.setPlaceholder("Example: BRAT-log")
-							.setValue(this.plugin.settings.loggingPath)
-							.onChange(async (newFolder) => {
-								this.plugin.settings.loggingPath = newFolder;
-								await this.plugin.saveSettings();
-							});
-					}),
-			)
-			.addSetting((setting) =>
-				setting
-					.setName("Enable verbose logging")
-					.setDesc("Get a lot  more information in  the log.")
-					.addToggle((cb: ToggleComponent) => {
-						cb.setValue(this.plugin.settings.loggingVerboseEnabled).onChange(
-							async (value: boolean) => {
-								this.plugin.settings.loggingVerboseEnabled = value;
-								await this.plugin.saveSettings();
-							},
-						);
-					}),
-			);
+		const monitoringGroup = new SettingGroup(containerEl).setHeading(
+			"Monitoring",
+		);
 
-		monitoringGroup.addSetting((setting) =>
+		monitoringGroup.addSetting((setting) => {
+			setting
+				.setName("Enable notifications")
+				.setDesc(
+					// eslint-disable-next-line obsidianmd/ui/sentence-case
+					"BRAT will provide popup notifications for its various activities. Turn this off means no notifications.",
+				)
+				.addToggle((cb: ToggleComponent) => {
+					cb.setValue(this.plugin.settings.notificationsEnabled);
+					cb.onChange((value: boolean) => {
+						this.plugin.settings.notificationsEnabled = value;
+						void this.plugin.saveSettings();
+					});
+				});
+		});
+
+		monitoringGroup.addSetting((setting) => {
+			setting
+				.setName("Enable logging")
+				.setDesc("Plugin updates will be logged to a file in the log file.")
+				.addToggle((cb: ToggleComponent) => {
+					cb.setValue(this.plugin.settings.loggingEnabled).onChange(
+						(value: boolean) => {
+							this.plugin.settings.loggingEnabled = value;
+							void this.plugin.saveSettings();
+						},
+					);
+				});
+		});
+
+		monitoringGroup.addSetting((setting) => {
+			setting
+				// eslint-disable-next-line obsidianmd/ui/sentence-case
+				.setName("BRAT log file location")
+				.setDesc(
+					"Logs will be saved to this file. Don't add .md to the file name.",
+				)
+				.addSearch((cb) => {
+					cb.setPlaceholder("Example: BRAT-log")
+						.setValue(this.plugin.settings.loggingPath)
+						.onChange((newFolder) => {
+							this.plugin.settings.loggingPath = newFolder;
+							void this.plugin.saveSettings();
+						});
+				});
+		});
+
+		monitoringGroup.addSetting((setting) => {
+			setting
+				.setName("Enable verbose logging")
+				.setDesc("Get a lot  more information in  the log.")
+				.addToggle((cb: ToggleComponent) => {
+					cb.setValue(this.plugin.settings.loggingVerboseEnabled).onChange(
+						(value: boolean) => {
+							this.plugin.settings.loggingVerboseEnabled = value;
+							void this.plugin.saveSettings();
+						},
+					);
+				});
+		});
+
+		monitoringGroup.addSetting((setting) => {
 			setting
 				.setName("Debugging mode")
 				.setDesc(
-					"Atomic Bomb level console logging. Can be used for troubleshooting and development.",
+					"Atomic bomb level console logging. Can be used for troubleshooting and development.",
 				)
 				.addToggle((cb: ToggleComponent) => {
 					cb.setValue(this.plugin.settings.debuggingMode).onChange(
-						async (value: boolean) => {
+						(value: boolean) => {
 							this.plugin.settings.debuggingMode = value;
-							await this.plugin.saveSettings();
+							void this.plugin.saveSettings();
 						},
 					);
-				}),
-		);
+				});
+		});
 
 		// Personal access token setting
 		const tokenSection = new SettingGroup(containerEl).setHeading(
@@ -445,22 +450,24 @@ export class BratSettingsTab extends PluginSettingTab {
 			// Set the component to show the current secret name from settings
 			this.accessTokenSetting
 				.setValue(this.plugin.settings.globalTokenName || "")
-				.onChange(async (secretName: string | null) => {
-					// secretName is the NAME of the secret, not the value (can be null when cleared)
-					const normalizedName = secretName?.trim() || "";
-					this.plugin.settings.globalTokenName = normalizedName;
-					await this.plugin.saveSettings();
+				.onChange((secretName: string | null) => {
+					void (async () => {
+						// secretName is the NAME of the secret, not the value (can be null when cleared)
+						const normalizedName = secretName?.trim() || "";
+						this.plugin.settings.globalTokenName = normalizedName;
+						await this.plugin.saveSettings();
 
-					// Get the actual token value for validation
-					if (normalizedName) {
-						currentTokenValue =
-							this.plugin.app.secretStorage.getSecret(normalizedName) || "";
-						this.accessTokenButton?.setDisabled(false);
-					} else {
-						currentTokenValue = "";
-						this.accessTokenButton?.setDisabled(true);
-						await this.validator?.validateToken("");
-					}
+						// Get the actual token value for validation
+						if (normalizedName) {
+							currentTokenValue =
+								this.plugin.app.secretStorage.getSecret(normalizedName) || "";
+							this.accessTokenButton?.setDisabled(false);
+						} else {
+							currentTokenValue = "";
+							this.accessTokenButton?.setDisabled(true);
+							await this.validator?.validateToken("");
+						}
+					})();
 				});
 
 			// Get initial token value for validation
@@ -500,11 +507,13 @@ export class BratSettingsTab extends PluginSettingTab {
 					this.validator = new TokenValidator(this.tokenInfo);
 
 					// Validate the current token on load
-					this.validator?.validateToken(currentTokenValue).then((valid) => {
-						this.accessTokenButton?.setDisabled(
-							valid || !this.plugin.settings.globalTokenName,
-						);
-					});
+					void this.validator
+						?.validateToken(currentTokenValue)
+						.then((valid) => {
+							this.accessTokenButton?.setDisabled(
+								valid || !this.plugin.settings.globalTokenName,
+							);
+						});
 				});
 		});
 	}

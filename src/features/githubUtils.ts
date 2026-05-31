@@ -3,13 +3,11 @@ import {
 	type RequestUrlResponse,
 	requestUrl,
 } from "obsidian";
+import { compare as compareVersions, coerce as semverCoerce } from "semver";
 import {
 	GHRateLimitError,
 	GitHubResponseError,
 } from "../utils/GitHubAPIErrors";
-
-const compareVersions = require("semver/functions/compare");
-const semverCoerce = require("semver/functions/coerce");
 
 export interface ReleaseVersion {
 	version: string; // The tag name of the release
@@ -268,14 +266,17 @@ export const isPrivateRepo = async (
 					}
 				: {},
 		});
-		const data = response.json;
-		return data.private;
+		const json = response.json as unknown;
+		if (typeof json === "object" && json !== null && "private" in json) {
+			return Boolean(json.private);
+		}
+		return false;
 	} catch (error) {
 		// Special handling for rate limit errors
 		if (error instanceof GHRateLimitError) {
 			throw error; // Rethrow rate limit errors
 		}
-		if (debugLogging) console.log("error in isPrivateRepo", URL, error);
+		if (debugLogging) console.error("error in isPrivateRepo", URL, error);
 		return false;
 	}
 };
@@ -301,7 +302,8 @@ export const fetchReleaseVersions = async (
 					}
 				: {},
 		});
-		const data = response.json;
+		const data = response.json as unknown;
+		if (!Array.isArray(data)) return null;
 		return data.map((release: { tag_name: string; prerelease: boolean }) => ({
 			version: release.tag_name,
 			prerelease: release.prerelease,
@@ -316,7 +318,7 @@ export const fetchReleaseVersions = async (
 		}
 
 		if (debugLogging)
-			console.log("Error in fetchReleaseVersions", apiUrl, error);
+			console.error("Error in fetchReleaseVersions", apiUrl, error);
 		return null;
 	}
 };
@@ -369,7 +371,7 @@ export const grabReleaseFileFromRepository = async (
 			throw error;
 		}
 		if (debugLogging)
-			console.log("error in grabReleaseFileFromRepository", release, error);
+			console.error("error in grabReleaseFileFromRepository", release, error);
 		return null;
 	}
 };
@@ -395,7 +397,7 @@ export const grabCommmunityPluginList = async (
 			? null
 			: (response.json as CommunityPlugin[]);
 	} catch (error) {
-		if (debugLogging) console.log("error in grabCommmunityPluginList", error);
+		if (debugLogging) console.error("error in grabCommmunityPluginList", error);
 		return null;
 	}
 };
@@ -415,7 +417,7 @@ export const grabCommmunityThemesList = async (
 		const response: RequestUrlResponse = await requestUrl({ url: themesUrl });
 		return response.status === 404 ? null : (response.json as CommunityTheme[]);
 	} catch (error) {
-		if (debugLogging) console.log("error in grabCommmunityThemesList", error);
+		if (debugLogging) console.error("error in grabCommmunityThemesList", error);
 		return null;
 	}
 };
@@ -430,7 +432,8 @@ export const grabCommmunityThemeCssFile = async (
 		const response: RequestUrlResponse = await requestUrl({ url: themesUrl });
 		return response.status === 404 ? null : response.text;
 	} catch (error) {
-		if (debugLogging) console.log("error in grabCommmunityThemeCssFile", error);
+		if (debugLogging)
+			console.error("error in grabCommmunityThemeCssFile", error);
 		return null;
 	}
 };
@@ -445,7 +448,7 @@ export const grabCommmunityThemeManifestFile = async (
 		return response.status === 404 ? null : response.text;
 	} catch (error) {
 		if (debugLogging)
-			console.log("error in grabCommmunityThemeManifestFile", error);
+			console.error("error in grabCommmunityThemeManifestFile", error);
 		return null;
 	}
 };
@@ -493,7 +496,8 @@ export const grabLastCommitInfoForFile = async (
 		const response: RequestUrlResponse = await requestUrl({ url: url });
 		return response.status === 404 ? null : (response.json as CommitInfo[]);
 	} catch (error) {
-		if (debugLogging) console.log("error in grabLastCommitInfoForAFile", error);
+		if (debugLogging)
+			console.error("error in grabLastCommitInfoForAFile", error);
 		return null;
 	}
 };
@@ -579,35 +583,48 @@ export const grabReleaseFromRepository = async (
 		if (response.status === 404) return null;
 
 		// If we fetch a specific version, we get a single release object
+		const responseJson: unknown = response.json;
 		const releases: Release[] =
-			version && version !== "latest" ? [response.json] : response.json;
+			version && version !== "latest"
+				? responseJson && typeof responseJson === "object"
+					? [responseJson as Release]
+					: []
+				: Array.isArray(responseJson)
+					? (responseJson as Release[])
+					: [];
 
 		if (debugLogging) {
-			console.log(`grabReleaseFromRepository for ${repositoryPath}:`, releases);
+			console.error(
+				`grabReleaseFromRepository for ${repositoryPath}:`,
+				releases,
+			);
 		}
 		return (
 			releases
 				.sort((a, b) => {
-					try {
-						// FIX for issue #105: Not all developers use semver compliant version tags
-						// FIX for issue #114: Cannot handle releases with non-version names
-						const aVersion = semverCoerce(a.tag_name, {
-							includePrerelease: true,
-							loose: true,
-						});
-						const bVersion = semverCoerce(b.tag_name, {
-							includePrerelease: true,
-							loose: true,
-						});
-						// Fallback to semverCoerce if compareVersions fails
-						return compareVersions(bVersion, aVersion);
-					} catch {
-						const aDate = new Date(a.published_at).getTime();
-						const bDate = new Date(b.published_at).getTime();
-						if (aDate < bDate) return 1;
-						if (aDate > bDate) return -1;
-						return 0;
+					// FIX for issue #105: Not all developers use semver compliant version tags
+					// FIX for issue #114: Cannot handle releases with non-version names
+					const aVersion = semverCoerce(a.tag_name, {
+						includePrerelease: true,
+						loose: true,
+					});
+					const bVersion = semverCoerce(b.tag_name, {
+						includePrerelease: true,
+						loose: true,
+					});
+
+					if (aVersion && bVersion) {
+						return compareVersions(bVersion.version, aVersion.version);
 					}
+
+					if (aVersion && !bVersion) return -1;
+					if (!aVersion && bVersion) return 1;
+
+					const aDate = new Date(a.published_at).getTime();
+					const bDate = new Date(b.published_at).getTime();
+					if (aDate < bDate) return 1;
+					if (aDate > bDate) return -1;
+					return 0;
 				})
 				.filter((release) => includePrereleases || !release.prerelease)[0] ??
 			null
@@ -615,7 +632,7 @@ export const grabReleaseFromRepository = async (
 	} catch (error) {
 		// Special handling for rate limit errors
 		if (debugLogging) {
-			console.log(
+			console.error(
 				`Error in grabReleaseFromRepository for ${repositoryPath}:`,
 				error,
 			);
@@ -671,12 +688,12 @@ export const gitHubRequest = async (
 					`\nReset in: ${rateLimitError.getMinutesToReset()} minutes`,
 				);
 			}
-			throw rateLimitError as GHRateLimitError;
+			throw rateLimitError;
 		}
 
 		if (debugLogging) {
-			console.log("GitHub request failed:", error);
+			console.error("GitHub request failed:", error);
 		}
-		throw gitHubError as GitHubResponseError;
+		throw gitHubError;
 	}
 };

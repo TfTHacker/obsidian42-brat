@@ -130,10 +130,8 @@ export default class PluginCommands {
 			showInRibbon: true,
 			callback: () => {
 				const pluginList: SuggesterItem[] = Object.values(
-					// @ts-expect-error
 					this.plugin.app.plugins.manifests,
 				).map((m) => {
-					// @ts-expect-error
 					return { display: m.id, info: m.id };
 				});
 				const gfs = new GenericFuzzySuggester(this.plugin);
@@ -166,8 +164,7 @@ export default class PluginCommands {
 				gfs.setSuggesterData(pluginList);
 				gfs.display((results) => {
 					void this.plugin.log(`${results.display} plugin disabled`, false);
-					if (this.plugin.settings.debuggingMode) console.log(results.info);
-					// @ts-expect-error
+					if (this.plugin.settings.debuggingMode) console.debug(results.info);
 					void this.plugin.app.plugins.disablePluginAndSave(
 						results.info as string,
 					);
@@ -192,7 +189,6 @@ export default class PluginCommands {
 				gfs.setSuggesterData(pluginList);
 				gfs.display((results) => {
 					void this.plugin.log(`${results.display} plugin enabled`, false);
-					// @ts-expect-error
 					void this.plugin.app.plugins.enablePluginAndSave(
 						results.info as string,
 					);
@@ -261,19 +257,16 @@ export default class PluginCommands {
 			name: "Plugins: Open Plugin Settings Tab",
 			showInRibbon: true,
 			callback: () => {
-				// @ts-expect-error
 				const settings = this.plugin.app.setting;
 				const listOfPluginSettingsTabs: SuggesterItem[] = Object.values(
 					settings.pluginTabs,
 				).map((t) => {
-					// @ts-expect-error
 					return { display: `Plugin: ${t.name}`, info: t.id };
 				});
 				const gfs = new GenericFuzzySuggester(this.plugin);
 				const listOfCoreSettingsTabs: SuggesterItem[] = Object.values(
 					settings.settingTabs,
 				).map((t) => {
-					// @ts-expect-error
 					return { display: `Core: ${t.name}`, info: t.id };
 				});
 				for (const si of listOfPluginSettingsTabs) {
@@ -322,33 +315,26 @@ export default class PluginCommands {
 				bratCommandList.push({ display: cmd.name, info: cmd.callback });
 		}
 		const gfs = new GenericFuzzySuggester(this.plugin);
-		// @ts-expect-error
 		const settings = this.plugin.app.setting;
 
 		const listOfCoreSettingsTabs: SuggesterItem[] = Object.values(
 			settings.settingTabs,
-			// @ts-expect-error
 		).map((t: SettingTab) => {
 			return {
-				// @ts-expect-error
 				display: `Core: ${t.name}`,
 				info: () => {
 					settings.open();
-					// @ts-expect-error
 					settings.openTabById(t.id);
 				},
 			};
 		});
 		const listOfPluginSettingsTabs: SuggesterItem[] = Object.values(
 			settings.pluginTabs,
-			// @ts-expect-error
 		).map((t: SettingTab) => {
 			return {
-				// @ts-expect-error
 				display: `Plugin: ${t.name}`,
 				info: () => {
 					settings.open();
-					// @ts-expect-error
 					settings.openTabById(t.id);
 				},
 			};
