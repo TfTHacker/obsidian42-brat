@@ -111,12 +111,12 @@
 
 /* Hide filtered plugin items */
 .brat-plugin-item[hidden] {
-  display: none !important;
+  display: none;
 }
 
 /* Hide filtered theme items */
 .brat-theme-item[hidden] {
-  display: none !important;
+  display: none;
 }
 
 /* Filter and button layout */
