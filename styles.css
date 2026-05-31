@@ -150,3 +150,33 @@
 .brat-filter-and-button .setting-item-control {
   justify-content: flex-end;
 }
+
+.brat-full-width-input {
+  width: 100%;
+}
+
+.brat-modal-divider {
+  border-top: 1px solid var(--background-modifier-border);
+  margin-top: 30px;
+}
+
+.brat-credits {
+  font-style: italic;
+}
+
+.brat-promotional-links {
+  float: right;
+}
+
+.brat-promotional-links-modal {
+  padding: 10px 15px;
+}
+
+.brat-promotional-links-settings {
+  padding: 15px;
+  margin-left: 15px;
+}
+
+.brat-promotional-links-coffee {
+  padding-left: 10px;
+}
