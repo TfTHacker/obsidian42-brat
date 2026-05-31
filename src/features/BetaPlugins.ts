@@ -423,8 +423,7 @@ export default class BetaPlugins {
 			// Retrieve actual token value from SecretStorage
 			let tokenValue = "";
 			if (secretName && secretName.trim() !== "") {
-				tokenValue =
-					(await this.plugin.app.secretStorage.getSecret(secretName)) || "";
+				tokenValue = this.plugin.app.secretStorage.getSecret(secretName) || "";
 				if (!tokenValue) {
 					toastMessage(
 						this.plugin,
@@ -434,9 +433,9 @@ export default class BetaPlugins {
 				}
 			} else if (this.plugin.settings.globalTokenName) {
 				tokenValue =
-					(await this.plugin.app.secretStorage.getSecret(
+					this.plugin.app.secretStorage.getSecret(
 						this.plugin.settings.globalTokenName,
-					)) || "";
+					) || "";
 			}
 
 			const noticeTimeout = 10;
@@ -563,6 +562,7 @@ export default class BetaPlugins {
 								f.appendText("The ");
 								f.createEl("code", { text: "manifest.json" });
 								f.appendText(" for this plugin indicates that the plugin has ");
+								// eslint-disable-next-line obsidianmd/ui/sentence-case
 								f.createEl("code", { text: "isDesktopOnly: true" });
 								f.appendText(", but you are using a mobile device.");
 								f.createEl("br");
@@ -622,7 +622,6 @@ export default class BetaPlugins {
 					secretName, // Store secret name in settings
 				);
 				if (enableAfterInstall) {
-					// @ts-expect-error
 					const { plugins } = this.plugin.app;
 					const pluginTargetFolderPath = normalizePath(
 						`${plugins.getPluginFolder()}/${primaryManifest.id}`,
@@ -630,7 +629,6 @@ export default class BetaPlugins {
 					await plugins.loadManifest(pluginTargetFolderPath);
 					await plugins.enablePluginAndSave(primaryManifest.id);
 				}
-				// @ts-expect-error
 				await this.plugin.app.plugins.loadManifests();
 				if (forceReinstall) {
 					// reload if enabled
@@ -798,7 +796,6 @@ export default class BetaPlugins {
 	 *
 	 */
 	async reloadPlugin(pluginName: string): Promise<void> {
-		// @ts-expect-error
 		const { plugins } = this.plugin.app;
 		try {
 			await plugins.disablePlugin(pluginName);
@@ -921,11 +918,9 @@ export default class BetaPlugins {
 	 * @returns manifests  of plugins
 	 */
 	getEnabledDisabledPlugins(enabled: boolean): PluginManifest[] {
-		// @ts-expect-error
 		const pl = this.plugin.app.plugins;
 		const manifests: PluginManifest[] = Object.values(pl.manifests);
 		const enabledPlugins: PluginManifest[] = Object.values(pl.plugins).map(
-			// @ts-expect-error
 			(p) => p.manifest,
 		);
 		return enabled
