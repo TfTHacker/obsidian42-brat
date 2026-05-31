@@ -25,6 +25,8 @@
     "@biomejs/biome": "^2.3.15",
     "@eslint/js": "^9.39.1",
     "@obsidian-typings/obsidian-public-1.11.4": "^4.93.0",
+    "@release-it/bumper": "^7.0.6",
+    "@release-it/conventional-changelog": "^11.0.1",
     "@types/node": "^24.3.1",
     "@types/semver": "^7.7.1",
     "builtin-modules": "5.0.0",
