@@ -1,5 +1,5 @@
+import type { ThemeManifest } from "@obsidian-typings/obsidian-public-latest";
 import { Notice, normalizePath } from "obsidian";
-import type { ThemeManifest } from "obsidian-typings";
 import type BratPlugin from "../main";
 import {
 	addBetaThemeToList,
@@ -92,7 +92,7 @@ export const themeSave = async (
 	if (newInstall) {
 		addBetaThemeToList(plugin, cssGithubRepository, themeCss);
 		msg = `${manifestInfo.name} theme installed from ${cssGithubRepository}. `;
-		setTimeout(() => {
+		window.setTimeout(() => {
 			plugin.app.customCss.setTheme(manifestInfo.name);
 		}, 500);
 	} else {
@@ -148,9 +148,7 @@ export const themesCheckAndUpdates = async (
 			await themeSave(plugin, t.repo, false);
 	}
 	const msg2 = "Checking for beta theme updates COMPLETED";
-	(async (): Promise<void> => {
-		await plugin.log(msg2, true);
-	})();
+	await plugin.log(msg2, true);
 	if (showInfo) {
 		if (plugin.settings.notificationsEnabled && newNotice) newNotice.hide();
 		toastMessage(plugin, msg2);
