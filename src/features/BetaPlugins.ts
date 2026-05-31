@@ -1,3 +1,4 @@
+import type {} from "@obsidian-typings/obsidian-public-latest";
 import type { PluginManifest } from "obsidian";
 import {
 	apiVersion,

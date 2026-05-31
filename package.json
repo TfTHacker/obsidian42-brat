@@ -24,6 +24,7 @@
   "devDependencies": {
     "@biomejs/biome": "^2.3.15",
     "@eslint/js": "^9.39.1",
+    "@obsidian-typings/obsidian-public-1.11.4": "^4.93.0",
     "@types/node": "^24.3.1",
     "@types/semver": "^7.7.1",
     "builtin-modules": "5.0.0",
@@ -35,7 +36,6 @@
     "jiti": "^2.7.0",
     "jsdom": "^26.1.0",
     "obsidian": "^1.11.4",
-    "obsidian-typings": "^6.13.0",
     "ts-node": "^10.9.2",
     "tslib": "^2.8.1",
     "typedoc": "^0.28.12",
