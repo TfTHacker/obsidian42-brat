@@ -269,7 +269,7 @@ export default class BetaPlugins {
 			if (reportIssues)
 				toastMessage(
 					this.plugin,
-					`${repositoryPath}\nUnspecified error encountered: ${error}, verify debug for more information.`,
+					`${repositoryPath}\nUnspecified error encountered: ${String(error)}, verify debug for more information.`,
 					noticeTimeout,
 				);
 			return null;
@@ -313,7 +313,7 @@ export default class BetaPlugins {
 		);
 
 		if (!release) {
-			return Promise.reject("No release found");
+			throw new Error("No release found");
 		}
 
 		// if we have version specified, we always want to get the remote manifest file.
