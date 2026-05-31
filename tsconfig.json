@@ -13,8 +13,7 @@
     "importHelpers": true,
     "isolatedModules": true,
     "strictNullChecks": true,
-    "lib": ["es2022", "DOM", "ES5", "ES6", "ES7"],
-    "types": ["@obsidian-typings/obsidian-public-latest"]
+    "lib": ["es2022", "DOM", "ES5", "ES6", "ES7"]
   },
   "include": ["**/*.ts", "src/types.d.ts"]
 }
