@@ -77,7 +77,7 @@ export default class AddNewTheme extends Modal {
 					.setCta()
 					.onClick((e: Event) => {
 						e.preventDefault();
-						console.log("Add theme button clicked");
+						console.debug("Add theme button clicked");
 						if (this.address !== "") void this.submitForm();
 					});
 			});

@@ -518,7 +518,7 @@ export default class AddNewPluginModal extends Modal {
 	) {
 		const validateInputEl = this.repositoryAddressEl;
 		if (this.plugin.settings.debuggingMode) {
-			console.log(
+			console.debug(
 				`[BRAT] Updating version dropdown for ${this.address} with selected version ${selectedVersion}`,
 			);
 		}

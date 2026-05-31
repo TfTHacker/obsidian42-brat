@@ -166,7 +166,7 @@ export default class PluginCommands {
 				gfs.setSuggesterData(pluginList);
 				gfs.display((results) => {
 					void this.plugin.log(`${results.display} plugin disabled`, false);
-					if (this.plugin.settings.debuggingMode) console.log(results.info);
+					if (this.plugin.settings.debuggingMode) console.debug(results.info);
 					// @ts-expect-error
 					void this.plugin.app.plugins.disablePluginAndSave(
 						results.info as string,

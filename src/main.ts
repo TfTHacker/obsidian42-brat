@@ -23,7 +23,7 @@ export default class BratPlugin extends Plugin {
 	bratApi: BratAPI = new BratAPI(this);
 
 	onload() {
-		console.log(`loading ${this.APP_NAME}`);
+		console.debug(`loading ${this.APP_NAME}`);
 
 		addIcons();
 		this.addRibbonIcon("BratIcon", "BRAT", () => {
@@ -74,7 +74,7 @@ export default class BratPlugin extends Plugin {
 	}
 
 	onunload(): void {
-		console.log(`unloading ${this.APP_NAME}`);
+		console.debug(`unloading ${this.APP_NAME}`);
 	}
 
 	async loadSettings(): Promise<void> {

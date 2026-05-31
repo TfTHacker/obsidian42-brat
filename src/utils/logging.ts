@@ -16,7 +16,7 @@ export async function logger(
 	textToLog: string,
 	verboseLoggingOn = false,
 ): Promise<void> {
-	if (plugin.settings.debuggingMode) console.log(`BRAT: ${textToLog}`);
+	if (plugin.settings.debuggingMode) console.debug(`BRAT: ${textToLog}`);
 	if (plugin.settings.loggingEnabled) {
 		if (!plugin.settings.loggingVerboseEnabled && verboseLoggingOn) return;
 
