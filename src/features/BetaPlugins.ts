@@ -6,6 +6,7 @@ import {
 	Platform,
 	requireApiVersion,
 } from "obsidian";
+import { compare as compareVersions, coerce as semverCoerce } from "semver";
 import { confirm } from "src/ui/ConfirmModal";
 import {
 	GHRateLimitError,
@@ -23,8 +24,6 @@ import {
 	type Release,
 } from "./githubUtils";
 
-const compareVersions = require("semver/functions/compare");
-const semverCoerce = require("semver/functions/coerce");
 /**
  * all the files needed for a plugin based on the release files are hre
  */
@@ -195,28 +194,36 @@ export default class BetaPlugins {
 				return null;
 			}
 
-			try {
-				// Improve robustness: if we can't compare versions, fallback to manifest version
-				const expectedVersion = semverCoerce(release.tag_name, {
-					includePrerelease: true,
-					loose: true,
-				});
-				const manifestVersion = semverCoerce(manifestJson.version, {
-					includePrerelease: true,
-					loose: true,
-				});
-				if (compareVersions(expectedVersion, manifestVersion) !== 0) {
-					if (reportIssues)
-						toastMessage(
-							this.plugin,
-							`${repositoryPath}\nVersion mismatch detected:\nRelease tag version: ${release.tag_name}\nManifest version: ${manifestJson.version}\n\nThe release tag version will be used to ensure consistency.`,
-							noticeTimeout,
-						);
+			// Improve robustness: if semver coercion fails, compare raw versions.
+			const expectedVersion = semverCoerce(release.tag_name, {
+				includePrerelease: true,
+				loose: true,
+			});
+			const manifestVersion = semverCoerce(manifestJson.version, {
+				includePrerelease: true,
+				loose: true,
+			});
 
-					// Overwrite the manifest version with the release version
-					manifestJson.version = expectedVersion.version;
-				}
-			} catch {}
+			const hasVersionMismatch =
+				expectedVersion && manifestVersion
+					? compareVersions(
+							expectedVersion.version,
+							manifestVersion.version,
+						) !== 0
+					: expectedVersion !== null &&
+						manifestJson.version !== release.tag_name;
+
+			if (hasVersionMismatch && expectedVersion) {
+				if (reportIssues)
+					toastMessage(
+						this.plugin,
+						`${repositoryPath}\nVersion mismatch detected:\nRelease tag version: ${release.tag_name}\nManifest version: ${manifestJson.version}\n\nThe release tag version will be used to ensure consistency.`,
+						noticeTimeout,
+					);
+
+				// Overwrite the manifest version with the normalized release version.
+				manifestJson.version = expectedVersion.version;
+			}
 			return manifestJson;
 		} catch (error) {
 			if (error instanceof GHRateLimitError) {
@@ -312,7 +319,7 @@ export default class BetaPlugins {
 		// if we have version specified, we always want to get the remote manifest file.
 		const reallyGetManifestOrNot = getManifest || specifyVersion !== "";
 
-		console.log({ reallyGetManifestOrNot, version: release.tag_name });
+		console.debug({ reallyGetManifestOrNot, version: release.tag_name });
 
 		return {
 			mainJs: await grabReleaseFileFromRepository(
@@ -399,7 +406,7 @@ export default class BetaPlugins {
 	): Promise<boolean> {
 		try {
 			if (this.plugin.settings.debuggingMode) {
-				console.log(
+				console.debug(
 					"BRAT: addPlugin",
 					repositoryPath,
 					updatePluginFiles,
@@ -527,7 +534,7 @@ export default class BetaPlugins {
 					tokenValue,
 				);
 
-				console.log("rFiles", rFiles);
+				console.debug("rFiles", rFiles);
 				// if beta, use that manifest, or if there is no manifest in release, use the primaryManifest
 				if (usingBetaManifest || rFiles.manifest === "")
 					rFiles.manifest = JSON.stringify(primaryManifest);
@@ -588,7 +595,7 @@ export default class BetaPlugins {
 				}
 
 				if (this.plugin.settings.debuggingMode)
-					console.log("BRAT: rFiles.manifest", usingBetaManifest, rFiles);
+					console.debug("BRAT: rFiles.manifest", usingBetaManifest, rFiles);
 
 				if (rFiles.mainJs === null) {
 					const msg = `${repositoryPath}\nThe release is not complete and cannot be downloaded. main.js is missing from the Release`;
@@ -672,7 +679,7 @@ export default class BetaPlugins {
 						// even though failed, return true since install will be attempted
 						return true;
 					}
-					console.log(
+					console.error(
 						"BRAT - Local Manifest Load",
 						primaryManifest.id,
 						JSON.stringify(e, null, 2),
@@ -689,9 +696,9 @@ export default class BetaPlugins {
 					return false;
 				}
 
-				const localManifestJson = (await JSON.parse(
+				const localManifestJson = JSON.parse(
 					localManifestContents,
-				)) as PluginManifest;
+				) as PluginManifest;
 				// FIX for issue #105: Not all developers use semver compliant version tags
 				const localVersion = semverCoerce(localManifestJson.version, {
 					includePrerelease: true,
@@ -701,7 +708,13 @@ export default class BetaPlugins {
 					includePrerelease: true,
 					loose: true,
 				});
-				if (compareVersions(localVersion, remoteVersion) === -1) {
+				const hasNewerRemote =
+					localVersion && remoteVersion
+						? compareVersions(localVersion.version, remoteVersion.version) ===
+							-1
+						: localManifestJson.version !== primaryManifest.version;
+
+				if (hasNewerRemote) {
 					// Remote version is higher, update
 					const releaseFiles = await getRelease();
 					if (releaseFiles === null) return false;
@@ -726,7 +739,6 @@ export default class BetaPlugins {
 						primaryManifest.id,
 						releaseFiles,
 					);
-					// @ts-expect-error
 					await this.plugin.app.plugins.loadManifests();
 					await this.reloadPlugin(primaryManifest.id);
 					const msg = `${primaryManifest.id}\nPlugin has been updated from version ${localManifestJson.version} to ${primaryManifest.version}. `;
@@ -791,7 +803,7 @@ export default class BetaPlugins {
 			await plugins.disablePlugin(pluginName);
 			await plugins.enablePlugin(pluginName);
 		} catch (e) {
-			if (this.plugin.settings.debuggingMode) console.log("reload plugin", e);
+			if (this.plugin.settings.debuggingMode) console.error("reload plugin", e);
 		}
 	}
 
@@ -835,7 +847,7 @@ export default class BetaPlugins {
 		onlyCheckDontUpdate = false,
 	): Promise<void> {
 		if (!(await isConnectedToInternet())) {
-			console.log("BRAT: No internet detected.");
+			console.debug("BRAT: No internet detected.");
 			return;
 		}
 		let newNotice: Notice | undefined;
