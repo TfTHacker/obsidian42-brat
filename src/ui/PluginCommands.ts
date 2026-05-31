@@ -341,14 +341,11 @@ export default class PluginCommands {
 		});
 		const listOfPluginSettingsTabs: SuggesterItem[] = Object.values(
 			settings.pluginTabs,
-			// @ts-expect-error
 		).map((t: SettingTab) => {
 			return {
-				// @ts-expect-error
 				display: `Plugin: ${t.name}`,
 				info: () => {
 					settings.open();
-					// @ts-expect-error
 					settings.openTabById(t.id);
 				},
 			};

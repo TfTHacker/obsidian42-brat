@@ -48,18 +48,18 @@ export default class BratPlugin extends Plugin {
 					this.betaPlugins.checkIncompatiblePlugins();
 
 					if (this.settings.updateAtStartup) {
-						setTimeout(() => {
+						window.setTimeout(() => {
 							void this.betaPlugins.checkForPluginUpdatesAndInstallUpdates(
 								false,
 							);
 						}, 60000);
 					}
 					if (this.settings.updateThemesAtStartup) {
-						setTimeout(() => {
+						window.setTimeout(() => {
 							void themesCheckAndUpdates(this, false);
 						}, 120000);
 					}
-					setTimeout(() => {
+					window.setTimeout(() => {
 						window.bratAPI = this.bratApi;
 					}, 500);
 				});
