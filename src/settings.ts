@@ -9,6 +9,7 @@ export interface ThemeInforamtion {
 
 export interface PluginVersion {
 	repo: string; // path to the GitHub repository
+	// eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
 	version: "latest" | string; // version of the plugin (semver or latest)
 	/** @deprecated Tokens are now stored in SecretStorage (Obsidian 1.11.4+) */
 	token?: string; // optional private API key
