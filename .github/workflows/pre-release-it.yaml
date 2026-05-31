@@ -27,12 +27,12 @@ jobs:
         run: npm run build:${RELEASE_CHANNEL}
         env:
           RELEASE_CHANNEL: ${{ github.ref_name == 'beta' && 'beta' || 'main' }}
-      - run: npx -p @release-it/bumper -p @release-it/conventional-changelog release-it --git.requireBranch="main" --ci --dry-run
+      - run: npx -p @release-it/bumper -p @release-it/conventional-changelog release-it --git.requireBranch="main" --git.requireCleanWorkingDir=false --ci --dry-run
         name: Release (DRY RUN)
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - run: npx -p @release-it/bumper -p @release-it/conventional-changelog release-it --git.requireBranch="main" --ci
+      - run: npx -p @release-it/bumper -p @release-it/conventional-changelog release-it --git.requireBranch="main" --git.requireCleanWorkingDir=false --ci
         name: Release
         if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main'
         env:
@@ -44,12 +44,12 @@ jobs:
           subject-path: |
             build/main.js
             build/styles.css
-      - run: npx -p @release-it/bumper -p @release-it/conventional-changelog release-it --preRelease=beta --ci --dry-run
+      - run: npx -p @release-it/bumper -p @release-it/conventional-changelog release-it --git.requireCleanWorkingDir=false --preRelease=beta --ci --dry-run
         name: Pre-Release (DRY RUN)
         if: github.event_name == 'push' && github.ref == 'refs/heads/beta'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - run: npx -p @release-it/bumper -p @release-it/conventional-changelog release-it --preRelease=beta --ci
+      - run: npx -p @release-it/bumper -p @release-it/conventional-changelog release-it --git.requireCleanWorkingDir=false --preRelease=beta --ci
         name: Pre-Release
         if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/beta'
         env:
