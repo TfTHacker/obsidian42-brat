@@ -38,7 +38,7 @@ export class BratSettingsTab extends PluginSettingTab {
 		new Setting(containerEl)
 			.setName("Auto-enable plugins after installation")
 			.setDesc(
-				'If enabled beta plugins will be automatically enabled after installtion by default. Note: you can toggle this on and off for each plugin in the "Add Plugin" form.',
+				'If enabled beta plugins will be automatically enabled after installtion by default. Note: you can toggle this on and off for each plugin in the "add plugin" form.',
 			)
 			.addToggle((cb: ToggleComponent) => {
 				cb.setValue(this.plugin.settings.enableAfterInstall).onChange(
@@ -141,12 +141,12 @@ export class BratSettingsTab extends PluginSettingTab {
 		betaPluginGroup.addSetting((setting) => {
 			const pluginListDescription = document.createDocumentFragment();
 			pluginListDescription.createEl("div", {
-				text: `The following is a list of beta plugins added via the command "Add a beta plugin for testing". You can chose to add the latest version or a frozen version. A frozen version is a specific release of a plugin based on its release tag.`,
+				text: `The following is a list of beta plugins added via the command "add a beta plugin for testing". You can chose to add the latest version or a frozen version. A frozen version is a specific release of a plugin based on its release tag.`,
 			});
 
 			pluginListDescription.createEl("p");
 			pluginListDescription.createEl("div", {
-				text: "Click the 'Edit' button next to a plugin to change the installed version and the x button next to a plugin to remove it from the list.",
+				text: `Click the "edit" button next to a plugin to change the installed version. Click the "X" button next to a plugin to remove it from the list.`,
 			});
 			pluginListDescription.createEl("p");
 			pluginListDescription.createEl("span").createEl("b", { text: "Note: " });
@@ -249,7 +249,6 @@ export class BratSettingsTab extends PluginSettingTab {
 								bp?.version,
 								bp?.tokenName || "", // Pass secret name, not token value
 							);
-							// @ts-expect-error
 							this.plugin.app.setting.updatePluginSection();
 						});
 					})
@@ -287,7 +286,6 @@ export class BratSettingsTab extends PluginSettingTab {
 				cb.setButtonText("Add beta theme")
 					.setCta()
 					.onClick(() => {
-						// @ts-expect-error
 						this.plugin.app.setting.close();
 						new AddNewTheme(this.plugin).open();
 					});
@@ -350,7 +348,8 @@ export class BratSettingsTab extends PluginSettingTab {
 				setting
 					.setName("Enable notifications")
 					.setDesc(
-						"BRAT will provide popup notifications for its various activities. Turn this off means  no notifications from BRAT.",
+						// eslint-disable-next-line obsidianmd/ui/sentence-case
+						"BRAT will provide popup notifications for its various activities. Turn this off means no notifications.",
 					)
 					.addToggle((cb: ToggleComponent) => {
 						cb.setValue(this.plugin.settings.notificationsEnabled);
@@ -375,6 +374,7 @@ export class BratSettingsTab extends PluginSettingTab {
 			)
 			.addSetting((setting) =>
 				setting
+					// eslint-disable-next-line obsidianmd/ui/sentence-case
 					.setName("BRAT log file location")
 					.setDesc(
 						"Logs will be saved to this file. Don't add .md to the file name.",
@@ -406,7 +406,7 @@ export class BratSettingsTab extends PluginSettingTab {
 			setting
 				.setName("Debugging mode")
 				.setDesc(
-					"Atomic Bomb level console logging. Can be used for troubleshooting and development.",
+					"Atomic bomb level console logging. Can be used for troubleshooting and development.",
 				)
 				.addToggle((cb: ToggleComponent) => {
 					cb.setValue(this.plugin.settings.debuggingMode).onChange(
