@@ -3,9 +3,9 @@
 	"name": "BRAT",
 	"version": "2.0.2",
 	"minAppVersion": "1.11.4",
-	"description": "Easily install a beta version of a plugin for testing.",
+	"description": "Easily install plugin beta versions for testing.",
 	"author": "TfTHacker",
-	"authorUrl": "https://github.com/TfTHacker/obsidian42-brat",
+	"authorUrl": "https://github.com/TfTHacker",
 	"helpUrl": "https://tfthacker.com/BRAT",
 	"isDesktopOnly": false,
 	"fundingUrl": {
