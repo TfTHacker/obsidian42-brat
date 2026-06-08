@@ -1,4 +1,7 @@
+import { getTranslations } from "../i18n";
+
 export const promotionalLinks = (containerEl: HTMLElement, settingsTab = true): HTMLElement => {
+	const text = getTranslations().common.promotional;
 	const linksDiv = containerEl.createEl("div", { cls: "brat-promotional-links" });
 
 	if (!settingsTab) {
@@ -11,7 +14,7 @@ export const promotionalLinks = (containerEl: HTMLElement, settingsTab = true): 
 	twitterSpan.addClass("ex-twitter-span");
 	twitterSpan.addClass("brat-promotional-links-coffee");
 	const captionText = twitterSpan.createDiv();
-	captionText.innerText = "Learn more about my work at:";
+	captionText.innerText = text.learnMore;
 	twitterSpan.appendChild(captionText);
 	const twitterLink = twitterSpan.createEl("a", {
 		href: "https://tfthacker.com",

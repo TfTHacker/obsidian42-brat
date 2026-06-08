@@ -1,5 +1,6 @@
 import { type App, SuggestModal } from "obsidian";
 import type { ReleaseVersion } from "src/features/githubUtils";
+import { getTranslations } from "../i18n";
 
 export class VersionSuggestModal extends SuggestModal<ReleaseVersion> {
 	selected: string;
@@ -8,15 +9,16 @@ export class VersionSuggestModal extends SuggestModal<ReleaseVersion> {
 
 	constructor(app: App, repository: string, versions: ReleaseVersion[], selected: string, onChoose: (version: string) => void) {
 		super(app);
+		const text = getTranslations().versionSuggestModal;
 		this.versions = versions;
 		this.selected = selected;
 		this.onChoose = onChoose;
-		this.setTitle("Select a version");
-		this.setPlaceholder(`Type to search for a version for ${repository}`);
+		this.setTitle(text.title);
+		this.setPlaceholder(text.placeholder(repository));
 		this.setInstructions([
-			{ command: "↑↓", purpose: "Navigate versions" },
-			{ command: "↵", purpose: "Select version" },
-			{ command: "esc", purpose: "Dismiss modal" },
+			{ command: "↑↓", purpose: text.instructions.navigateVersions },
+			{ command: "↵", purpose: text.instructions.selectVersion },
+			{ command: "esc", purpose: text.instructions.dismissModal },
 		]);
 	}
 
@@ -26,8 +28,9 @@ export class VersionSuggestModal extends SuggestModal<ReleaseVersion> {
 	}
 
 	renderSuggestion(version: ReleaseVersion, el: HTMLElement) {
+		const text = getTranslations().versionSuggestModal;
 		el.createEl("div", {
-			text: `${version.version} ${version.prerelease ? "(Prerelease)" : ""}`,
+			text: `${text.versionLabel(version.version)} ${version.prerelease ? text.prereleaseSuffix : ""}`,
 		});
 	}
 
