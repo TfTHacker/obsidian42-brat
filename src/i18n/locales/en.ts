@@ -57,9 +57,11 @@ export const en = {
 			personalAccessToken: {
 				name: "Personal access token",
 				desc: {
-					prependText: "Set a personal access token to increase rate limits for public repositories on GitHub. You can create one in ",
+					prependText:
+						"Set a personal access token to increase rate limits for public repositories on GitHub. You can create one in ",
 					linkText: "your GitHub account settings",
-					appendText: " and then add it here. Please consult the documentation for more details.",
+					appendText:
+						" and then add it here. Please consult the documentation for more details.",
 				},
 			},
 			clearPersonalAccessToken: "Clear personal access token",
@@ -74,19 +76,24 @@ export const en = {
 				editAndRemove:
 					'Click the "edit" button next to a plugin to change the installed version. Click the "X" button next to a plugin to remove it from the list.',
 				noteLabel: "Note: ",
-				noteText: "Removing from the list does not delete the plugin, this should be done from the Community Plugins tab in Settings.",
+				noteText:
+					"Removing from the list does not delete the plugin, this should be done from the Community Plugins tab in Settings.",
 			},
 			addBetaPlugin: "Add beta plugin",
-			trackedVersion: (version: string, frozen: boolean): string => ` Tracked version: ${version} ${frozen ? "(frozen)" : ""}`,
+			trackedVersion: (version: string, frozen: boolean): string =>
+				` Tracked version: ${version} ${frozen ? "(frozen)" : ""}`,
 			incompatible: " (incompatible)",
-			secretMissing: (secretName: string): string => ` Secret not defined or empty: ${secretName}`,
-			secretMissingTitle: "Token name configured but secret is missing. Add the secret or update the plugin configuration.",
+			secretMissing: (secretName: string): string =>
+				` Secret not defined or empty: ${secretName}`,
+			secretMissingTitle:
+				"Token name configured but secret is missing. Add the secret or update the plugin configuration.",
 			secretMissingTooltip: (secretName: string): string =>
 				`Secret missing: ${secretName}. Please add the secret or update the plugin configuration.`,
 			checkAndUpdatePlugin: "Check and update plugin",
 			changeVersionAndUpdateSettings: "Change version and update settings",
 			removeThisBetaPlugin: "Remove this beta plugin",
 			confirmRemoval: "Click once more to confirm removal",
+			copyPluginIdentifier: "Copy plugin identifier",
 		},
 		betaThemeList: {
 			heading: "Beta themes list",
@@ -94,6 +101,11 @@ export const en = {
 			filterPlaceholder: "Filter themes",
 			deleteThisBetaTheme: "Delete this beta theme",
 			confirmRemoval: "Click once more to confirm removal",
+			copyThemeIdentifier: "Copy theme identifier",
+		},
+		copyIdentifier: {
+			copied: (identifier: string): string => `Copied: ${identifier}`,
+			failed: "Failed to copy identifier. Check clipboard permissions.",
 		},
 	},
 	addBetaPluginModal: {
@@ -111,15 +123,19 @@ export const en = {
 		},
 		repository: {
 			label: "Repository",
-			placeholder: "Repository (example: https://GitHub.com/githubusername/repository-name)",
-			enterAddressToValidate: "Enter a GitHub repository address to validate it.",
+			placeholder:
+				"Repository (example: https://GitHub.com/githubusername/repository-name)",
+			enterAddressToValidate:
+				"Enter a GitHub repository address to validate it.",
 			addressRequired: "Repository address is required.",
 			validating: "Validating repository address...",
 			noReleasesFound: "Error: No releases found in this repository.",
-			notFound: "Repository not found. Check the address or provide a valid token for access to a private repository.",
+			notFound:
+				"Repository not found. Check the address or provide a valid token for access to a private repository.",
 			accessDenied: "Access denied. Check your personal access token.",
 			error: (message: string): string => `Error: ${message}`,
-			rateLimitExceeded: (minutes: number): string => `GitHub API rate limit exceeded. Try again in ${minutes} minutes.`,
+			rateLimitExceeded: (minutes: number): string =>
+				`GitHub API rate limit exceeded. Try again in ${minutes} minutes.`,
 			rateLimitToast: (message: string): string =>
 				`${message} Consider adding a personal access token in BRAT settings for higher limits. See documentation for details.`,
 			gitHubResponseToast: (message: string): string => `${message} `,
@@ -133,15 +149,18 @@ export const en = {
 		token: {
 			name: "GitHub token",
 			desc: "Select a secret as token for this repository (optional)",
-			settingCleared: (repository: string): string => `Token setting cleared for ${repository}`,
-			settingUpdated: (repository: string): string => `Token setting updated for ${repository}`,
+			settingCleared: (repository: string): string =>
+				`Token setting cleared for ${repository}`,
+			settingUpdated: (repository: string): string =>
+				`Token setting updated for ${repository}`,
 		},
 		enableAfterInstall: "Enable after installing the plugin",
 		alreadyInList: "This plugin is already in the list for beta testing",
 	},
 	versionSuggestModal: {
 		title: "Select a version",
-		placeholder: (repository: string): string => `Type to search for a version for ${repository}`,
+		placeholder: (repository: string): string =>
+			`Type to search for a version for ${repository}`,
 		versionLabel: (version: string): string => version,
 		instructions: {
 			navigateVersions: "Navigate versions",

@@ -59,9 +59,11 @@ export const zhCn = {
 			personalAccessToken: {
 				name: "个人访问令牌",
 				desc: {
-					prependText: "设置个人访问令牌可以提高访问 GitHub 公共仓库时的请求额度。你可以在 ",
+					prependText:
+						"设置个人访问令牌可以提高访问 GitHub 公共仓库时的请求额度。你可以在 ",
 					linkText: "GitHub 令牌设置",
-					appendText: " 中创建令牌，然后在这里选择保存该令牌的密钥。更多信息请参考文档。",
+					appendText:
+						" 中创建令牌，然后在这里选择保存该令牌的密钥。更多信息请参考文档。",
 				},
 			},
 			clearPersonalAccessToken: "清除个人访问令牌设置",
@@ -73,21 +75,27 @@ export const zhCn = {
 			description: {
 				intro:
 					"下方列出已通过 BRAT 添加的 Beta 插件。你可以让插件跟随最新版本，也可以固定到某个发布版本。固定版本指基于 release 标签指定的某个插件版本。",
-				editAndRemove: "点击插件旁的编辑按钮可以更改安装版本；点击 X 按钮会将它从列表中移除。",
+				editAndRemove:
+					"点击插件旁的编辑按钮可以更改安装版本；点击 X 按钮会将它从列表中移除。",
 				noteLabel: "注意：",
-				noteText: "从列表中移除不会删除插件本体。如需删除插件，请到设置中的“第三方插件”页面操作。",
+				noteText:
+					"从列表中移除不会删除插件本体。如需删除插件，请到设置中的“第三方插件”页面操作。",
 			},
 			addBetaPlugin: "添加 Beta 插件",
 			trackedVersion: (version: string, frozen: boolean): string =>
 				`跟踪版本：${version === "latest" ? "最新版本" : version}${frozen ? "（固定）" : ""}`,
 			incompatible: "（不兼容）",
-			secretMissing: (secretName: string): string => `密钥未定义或为空：${secretName}`,
-			secretMissingTitle: "已配置密钥名称，但密钥不存在或为空。请添加密钥，或更新该插件配置。",
-			secretMissingTooltip: (secretName: string): string => `密钥缺失：${secretName}。请添加密钥，或更新该插件配置。`,
+			secretMissing: (secretName: string): string =>
+				`密钥未定义或为空：${secretName}`,
+			secretMissingTitle:
+				"已配置密钥名称，但密钥不存在或为空。请添加密钥，或更新该插件配置。",
+			secretMissingTooltip: (secretName: string): string =>
+				`密钥缺失：${secretName}。请添加密钥，或更新该插件配置。`,
 			checkAndUpdatePlugin: "检查并更新插件",
 			changeVersionAndUpdateSettings: "更改版本和设置",
 			removeThisBetaPlugin: "移除此 Beta 插件",
 			confirmRemoval: "再次点击确认移除",
+			copyPluginIdentifier: "复制插件标识符",
 		},
 		betaThemeList: {
 			heading: "Beta 主题列表",
@@ -95,6 +103,11 @@ export const zhCn = {
 			filterPlaceholder: "筛选主题",
 			deleteThisBetaTheme: "删除此 Beta 主题",
 			confirmRemoval: "再次点击确认移除",
+			copyThemeIdentifier: "复制主题标识符",
+		},
+		copyIdentifier: {
+			copied: (identifier: string): string => `已复制：${identifier}`,
+			failed: "复制标识符失败，请检查剪贴板权限。",
 		},
 	},
 	addBetaPluginModal: {
@@ -112,7 +125,8 @@ export const zhCn = {
 		},
 		repository: {
 			label: "仓库",
-			placeholder: "仓库（示例：https://GitHub.com/githubusername/repository-name）",
+			placeholder:
+				"仓库（示例：https://GitHub.com/githubusername/repository-name）",
 			enterAddressToValidate: "输入 GitHub 仓库地址后会自动验证。",
 			addressRequired: "需要填写仓库地址。",
 			validating: "正在验证仓库地址...",
@@ -120,8 +134,10 @@ export const zhCn = {
 			notFound: "找不到仓库。请检查地址，或提供可访问私有仓库的有效令牌。",
 			accessDenied: "访问被拒绝。请检查个人访问令牌。",
 			error: (message: string): string => `错误：${message}`,
-			rateLimitExceeded: (minutes: number): string => `GitHub API 请求额度已用尽。请在 ${minutes} 分钟后重试。`,
-			rateLimitToast: (): string => "GitHub API 请求额度已用尽。可以在 BRAT 设置中添加个人访问令牌以提高额度。详情请查看文档。",
+			rateLimitExceeded: (minutes: number): string =>
+				`GitHub API 请求额度已用尽。请在 ${minutes} 分钟后重试。`,
+			rateLimitToast: (): string =>
+				"GitHub API 请求额度已用尽。可以在 BRAT 设置中添加个人访问令牌以提高额度。详情请查看文档。",
 			gitHubResponseToast: (message: string): string => `${message} `,
 		},
 		version: {
@@ -133,16 +149,20 @@ export const zhCn = {
 		token: {
 			name: "GitHub 令牌",
 			desc: "选择一个密钥，作为访问此仓库的令牌（可选）",
-			settingCleared: (repository: string): string => `已清除 ${repository} 的令牌设置`,
-			settingUpdated: (repository: string): string => `已更新 ${repository} 的令牌设置`,
+			settingCleared: (repository: string): string =>
+				`已清除 ${repository} 的令牌设置`,
+			settingUpdated: (repository: string): string =>
+				`已更新 ${repository} 的令牌设置`,
 		},
 		enableAfterInstall: "安装后启用此插件",
 		alreadyInList: "这个插件已经在 Beta 测试列表中",
 	},
 	versionSuggestModal: {
 		title: "选择版本",
-		placeholder: (repository: string): string => `输入关键词，搜索 ${repository} 的版本`,
-		versionLabel: (version: string): string => (version === "latest" ? "最新版本" : version),
+		placeholder: (repository: string): string =>
+			`输入关键词，搜索 ${repository} 的版本`,
+		versionLabel: (version: string): string =>
+			version === "latest" ? "最新版本" : version,
 		instructions: {
 			navigateVersions: "浏览版本",
 			selectVersion: "选择版本",

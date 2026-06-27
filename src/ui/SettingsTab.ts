@@ -35,20 +35,16 @@ export class BratSettingsTab extends PluginSettingTab {
 	private async copyRepoIdentifier(identifier: string): Promise<void> {
 		if (!identifier) return;
 
+		const t = getTranslations().settings.copyIdentifier;
 		try {
 			if (!navigator.clipboard?.writeText) {
 				throw new Error("Clipboard API unavailable");
 			}
 			await navigator.clipboard.writeText(identifier);
-
-			toastMessage(this.plugin, `Copied: ${identifier}`, 3);
+			toastMessage(this.plugin, t.copied(identifier), 3);
 		} catch (error) {
 			console.error("Failed to copy repository identifier", identifier, error);
-			toastMessage(
-				this.plugin,
-				"Failed to copy identifier. Check clipboard permissions.",
-				5,
-			);
+			toastMessage(this.plugin, t.failed, 5);
 		}
 	}
 
@@ -225,7 +221,7 @@ export class BratSettingsTab extends PluginSettingTab {
 				pluginSettingContainer.addExtraButton((btn: ExtraButtonComponent) => {
 					btn
 						.setIcon("copy")
-						.setTooltip("Copy plugin identifier")
+						.setTooltip(text.betaPluginList.copyPluginIdentifier)
 						.onClick(async () => {
 							await this.copyRepoIdentifier(p);
 						});
@@ -355,7 +351,7 @@ export class BratSettingsTab extends PluginSettingTab {
 				themeSettingContainer.addExtraButton((btn: ExtraButtonComponent) => {
 					btn
 						.setIcon("copy")
-						.setTooltip("Copy theme identifier")
+						.setTooltip(text.betaThemeList.copyThemeIdentifier)
 						.onClick(async () => {
 							await this.copyRepoIdentifier(bp.repo);
 						});

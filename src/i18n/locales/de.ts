@@ -62,7 +62,8 @@ export const de = {
 					prependText:
 						"Lege ein persönliches Zugriffstoken fest, um die Rate Limits für öffentliche GitHub-Repositorys zu erhöhen. Du kannst es in ",
 					linkText: "deinen GitHub-Kontoeinstellungen",
-					appendText: " erstellen und anschließend hier hinzufügen. Weitere Informationen findest du in der Dokumentation.",
+					appendText:
+						" erstellen und anschließend hier hinzufügen. Weitere Informationen findest du in der Dokumentation.",
 				},
 			},
 			clearPersonalAccessToken: "Persönliches Zugriffstoken löschen",
@@ -84,15 +85,18 @@ export const de = {
 			trackedVersion: (version: string, frozen: boolean): string =>
 				` Verfolgte Version: ${version === "latest" ? "neueste Version" : version} ${frozen ? "(fixiert)" : ""}`,
 			incompatible: " (inkompatibel)",
-			secretMissing: (secretName: string): string => ` Secret nicht definiert oder leer: ${secretName}`,
+			secretMissing: (secretName: string): string =>
+				` Secret nicht definiert oder leer: ${secretName}`,
 			secretMissingTitle:
 				"Ein Token-Name ist konfiguriert, aber das Secret fehlt. Füge das Secret hinzu oder aktualisiere die Plugin-Konfiguration.",
 			secretMissingTooltip: (secretName: string): string =>
 				`Secret fehlt: ${secretName}. Bitte füge das Secret hinzu oder aktualisiere die Plugin-Konfiguration.`,
 			checkAndUpdatePlugin: "Plugin prüfen und aktualisieren",
-			changeVersionAndUpdateSettings: "Version ändern und Einstellungen aktualisieren",
+			changeVersionAndUpdateSettings:
+				"Version ändern und Einstellungen aktualisieren",
 			removeThisBetaPlugin: "Dieses Beta-Plugin entfernen",
 			confirmRemoval: "Zum Bestätigen erneut klicken",
+			copyPluginIdentifier: "Plugin-Kennung kopieren",
 		},
 		betaThemeList: {
 			heading: "Beta-Theme-Liste",
@@ -100,6 +104,12 @@ export const de = {
 			filterPlaceholder: "Themes filtern",
 			deleteThisBetaTheme: "Dieses Beta-Theme löschen",
 			confirmRemoval: "Zum Bestätigen erneut klicken",
+			copyThemeIdentifier: "Theme-Kennung kopieren",
+		},
+		copyIdentifier: {
+			copied: (identifier: string): string => `Kopiert: ${identifier}`,
+			failed:
+				"Kennung konnte nicht kopiert werden. Bitte prüfe die Clipboard-Berechtigungen.",
 		},
 	},
 	addBetaPluginModal: {
@@ -117,15 +127,21 @@ export const de = {
 		},
 		repository: {
 			label: "Repository",
-			placeholder: "Repository (Beispiel: https://GitHub.com/githubusername/repository-name)",
-			enterAddressToValidate: "Gib eine GitHub-Repository-Adresse ein, um sie zu validieren.",
+			placeholder:
+				"Repository (Beispiel: https://GitHub.com/githubusername/repository-name)",
+			enterAddressToValidate:
+				"Gib eine GitHub-Repository-Adresse ein, um sie zu validieren.",
 			addressRequired: "Repository-Adresse ist erforderlich.",
 			validating: "Repository-Adresse wird validiert...",
-			noReleasesFound: "Fehler: In diesem Repository wurden keine Releases gefunden.",
-			notFound: "Repository nicht gefunden. Prüfe die Adresse oder gib ein gültiges Token für den Zugriff auf ein privates Repository an.",
-			accessDenied: "Zugriff verweigert. Prüfe dein persönliches Zugriffstoken.",
+			noReleasesFound:
+				"Fehler: In diesem Repository wurden keine Releases gefunden.",
+			notFound:
+				"Repository nicht gefunden. Prüfe die Adresse oder gib ein gültiges Token für den Zugriff auf ein privates Repository an.",
+			accessDenied:
+				"Zugriff verweigert. Prüfe dein persönliches Zugriffstoken.",
 			error: (message: string): string => `Fehler: ${message}`,
-			rateLimitExceeded: (minutes: number): string => `GitHub API Rate Limit überschritten. Versuche es in ${minutes} Minuten erneut.`,
+			rateLimitExceeded: (minutes: number): string =>
+				`GitHub API Rate Limit überschritten. Versuche es in ${minutes} Minuten erneut.`,
 			rateLimitToast: (message: string): string =>
 				`${message} Du kannst in den BRAT-Einstellungen ein persönliches Zugriffstoken hinzufügen, um höhere Limits zu erhalten. Siehe Dokumentation für Details.`,
 			gitHubResponseToast: (message: string): string => `${message} `,
@@ -139,16 +155,20 @@ export const de = {
 		token: {
 			name: "GitHub-Token",
 			desc: "Wähle ein Secret als Token für dieses Repository aus (optional)",
-			settingCleared: (repository: string): string => `Token-Einstellung für ${repository} gelöscht`,
-			settingUpdated: (repository: string): string => `Token-Einstellung für ${repository} aktualisiert`,
+			settingCleared: (repository: string): string =>
+				`Token-Einstellung für ${repository} gelöscht`,
+			settingUpdated: (repository: string): string =>
+				`Token-Einstellung für ${repository} aktualisiert`,
 		},
 		enableAfterInstall: "Plugin nach der Installation aktivieren",
 		alreadyInList: "Dieses Plugin ist bereits in der Beta-Testliste",
 	},
 	versionSuggestModal: {
 		title: "Version auswählen",
-		placeholder: (repository: string): string => `Version für ${repository} suchen`,
-		versionLabel: (version: string): string => (version === "latest" ? "Neueste Version" : version),
+		placeholder: (repository: string): string =>
+			`Version für ${repository} suchen`,
+		versionLabel: (version: string): string =>
+			version === "latest" ? "Neueste Version" : version,
 		instructions: {
 			navigateVersions: "Versionen durchsuchen",
 			selectVersion: "Version auswählen",
