@@ -1,9 +1,13 @@
 import { getLanguage } from "obsidian";
+import { de } from "./locales/de";
 import { en, type LocaleStrings } from "./locales/en";
+import { ja } from "./locales/ja";
 import { zhCn } from "./locales/zh-cn";
 
 const locales: Record<string, LocaleStrings> = {
+	de,
 	en,
+	ja,
 	"zh-cn": zhCn,
 };
 
