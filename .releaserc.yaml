@@ -17,15 +17,12 @@ plugins:
         - path: build/main.js
         - path: build/manifest.json
         - path: build/styles.css
-  # updated `manifest.json`, `versions.json` and `package.json` files with the new version number.
   - - "@semantic-release/git"
     - assets:
         - manifest.json
-        - package.json
-        - package-lock.json
+        - versions.json
       message: >-
-        chore: 🔖 set `package.json`, `manifest.json` and
-        `package-lock.json` to ${nextRelease.version} [skip ci]
+        chore: :rocket: deploy release ${nextRelease.version} [skip ci]
 
         ${nextRelease.notes}
 tagFormat: "${version}"

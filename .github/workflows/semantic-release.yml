@@ -34,7 +34,21 @@ jobs:
         env:
           HUSKY: 0
 
+      - name: Build release variant
+        if: github.event_name == 'push'
+        run: npm run build:${RELEASE_CHANNEL}
+        env:
+          RELEASE_CHANNEL: ${{ github.ref_name == 'beta' && 'beta' || 'main' }}
+
       - name: Release update
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: npx semantic-release
+        run: npx semantic-release ${{ github.event_name == 'push' && '--dry-run' || '' }}
+
+      - name: Generate artifact attestation (main release)
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: actions/attest@v4
+        with:
+          subject-path: |
+            build/main.js
+            build/styles.css
