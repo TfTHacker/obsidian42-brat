@@ -1,3 +1,4 @@
+import type {} from "@obsidian-typings/obsidian-public-1.11.4";
 import type { SettingTab } from "obsidian";
 import type { CommunityPlugin, CommunityTheme } from "../features/githubUtils";
 import {
