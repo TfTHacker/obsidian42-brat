@@ -152,6 +152,7 @@ export class BratSettingsTab extends PluginSettingTab {
 		});
 
 		betaPluginGroup.addSetting((setting) => {
+			// eslint-disable-next-line obsidianmd/prefer-active-doc -- BRAT compatibility: activeDocument breaks settings description rendering
 			const pluginListDescription = document.createDocumentFragment();
 			pluginListDescription.createEl("div", {
 				text: text.betaPluginList.description.intro,
@@ -188,6 +189,7 @@ export class BratSettingsTab extends PluginSettingTab {
 					: "";
 				const isSecretMissing = Boolean(secretName && !secretValue);
 
+				// eslint-disable-next-line obsidianmd/prefer-active-doc -- BRAT compatibility: activeDocument breaks settings description rendering
 				const pluginDescription = document.createDocumentFragment();
 				const trackedVersionText = bp?.version
 					? text.betaPluginList.trackedVersion(

@@ -60,6 +60,7 @@ export default class AddNewTheme extends Modal {
 				});
 				textEl.inputEl.addClass("brat-full-width-input");
 				window.setTimeout(() => {
+					// eslint-disable-next-line obsidianmd/prefer-active-doc -- BRAT compatibility: activeDocument breaks this modal flow
 					const title = document.querySelector(".setting-item-info");
 					if (title) title.remove();
 					textEl.inputEl.focus();

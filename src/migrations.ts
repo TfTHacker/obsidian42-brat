@@ -132,6 +132,8 @@ export async function migrateTokensToSecretStorage(
 			return secretId;
 		};
 
+		// Legacy token fields are intentionally read/written during migration.
+		/* eslint-disable @typescript-eslint/no-deprecated */
 		// Migrate global personal access token
 		if (
 			settings.personalAccessToken &&
@@ -158,6 +160,7 @@ export async function migrateTokensToSecretStorage(
 				}
 			}
 		}
+		/* eslint-enable @typescript-eslint/no-deprecated */
 
 		// Save settings after clearing tokens
 		if (migrated > 0) {

@@ -60,6 +60,7 @@ export class GenericFuzzySuggester extends FuzzySuggestModal<SuggesterItem> {
 	}
 
 	enterTrigger(evt: KeyboardEvent): void {
+		// eslint-disable-next-line obsidianmd/prefer-active-doc -- BRAT compatibility: activeDocument breaks suggester selection
 		const selectedText = document.querySelector(
 			".suggestion-item.is-selected div",
 		)?.textContent;
