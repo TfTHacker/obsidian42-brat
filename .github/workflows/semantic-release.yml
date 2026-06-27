@@ -42,7 +42,13 @@ jobs:
       - name: Release update
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: npx semantic-release
+          RELEASE_CHANNEL: ${{ github.ref_name == 'beta' && 'beta' || 'main' }}
+        run: |
+          if [ "${GITHUB_REF_NAME}" = "main" ]; then
+            npx semantic-release --extends ./.releaserc.main.yaml
+          else
+            npx semantic-release
+          fi
 
       - name: Generate artifact attestation (main release)
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
