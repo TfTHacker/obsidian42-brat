@@ -45,7 +45,6 @@ export default class AddNewTheme extends Modal {
 			formEl.addClass("brat-modal");
 			new Setting(formEl).addText((textEl) => {
 				textEl.setPlaceholder(
-					// eslint-disable-next-line obsidianmd/ui/sentence-case
 					"Repository (example: https://github.com/GitHubUserName/repository-name",
 				);
 				textEl.setValue(this.address);
@@ -89,13 +88,12 @@ export default class AddNewTheme extends Modal {
 			const byTfThacker = newDiv.createSpan();
 			byTfThacker.createEl("a", {
 				href: "https://bit.ly/o42-twitter",
-				// eslint-disable-next-line obsidianmd/ui/sentence-case
 				text: "TFTHacker",
 			});
 			byTfThacker.appendText(" and ");
 			byTfThacker.createEl("a", {
 				href: "https://github.com/johannrichard",
-				// eslint-disable-next-line obsidianmd/ui/sentence-case
+				// eslint-disable-next-line obsidianmd/ui/sentence-case -- preserve author's lowercase handle
 				text: "johannrichard",
 			});
 			byTfThacker.addClass("brat-credits");

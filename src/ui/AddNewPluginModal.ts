@@ -107,11 +107,7 @@ export default class AddNewPluginModal extends Modal {
 		}
 
 		if (!this.version && existBetaPluginInList(this.plugin, scrubbedAddress)) {
-			toastMessage(
-				this.plugin,
-				text.alreadyInList,
-				10,
-			);
+			toastMessage(this.plugin, text.alreadyInList, 10);
 			return;
 		}
 
@@ -238,9 +234,7 @@ export default class AddNewPluginModal extends Modal {
 					setting.addText((addressEl) => {
 						this.repositoryAddressEl = addressEl;
 
-						addressEl.setPlaceholder(
-							text.repository.placeholder,
-						);
+						addressEl.setPlaceholder(text.repository.placeholder);
 						addressEl.setValue(this.address);
 						addressEl.onChange((value) => {
 							this.address = scrubRepositoryUrl(value.trim());
@@ -313,9 +307,7 @@ export default class AddNewPluginModal extends Modal {
 			// TODO: Find better way to build the modal
 			const validationStatusEl = formEl.createDiv("validation-status");
 			if (!this.address)
-				validationStatusEl.setText(
-					text.repository.enterAddressToValidate,
-				);
+				validationStatusEl.setText(text.repository.enterAddressToValidate);
 
 			// Then add version dropdown
 			this.versionSetting = new Setting(formEl)
@@ -476,20 +468,18 @@ export default class AddNewPluginModal extends Modal {
 
 			const newDiv = formEl.createDiv();
 			newDiv.addClass("brat-modal-divider");
-			const byTfThacker = newDiv.createSpan();
-			byTfThacker.createEl("a", {
+			const authorByline = newDiv.createSpan();
+			authorByline.createEl("a", {
 				href: "https://bit.ly/o42-twitter",
-				// eslint-disable-next-line obsidianmd/ui/sentence-case
 				text: "TFTHacker",
 			});
-			byTfThacker.appendText(commonText.and);
-			byTfThacker.createEl("a", {
+			authorByline.appendText(commonText.and);
+			authorByline.createEl("a", {
 				href: "https://github.com/johannrichard",
-				// eslint-disable-next-line obsidianmd/ui/sentence-case
 				text: "johannrichard",
 			});
-			byTfThacker.addClass("brat-credits");
-			newDiv.appendChild(byTfThacker);
+			authorByline.addClass("brat-credits");
+			newDiv.appendChild(authorByline);
 			promotionalLinks(newDiv, false);
 
 			// Prevent default form submission on Enter key and button clicks, and ensure buttons don't trigger form submission
