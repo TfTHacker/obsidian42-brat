@@ -508,8 +508,8 @@ export default class AddNewPluginModal extends Modal {
 
 		if (this.address) {
 			// If we have a prefilled repo, trigger the version dropdown update
-			window.setTimeout(async () => {
-				await this.updateRepositoryVersionInfo(this.version);
+			window.setTimeout(() => {
+				void this.updateRepositoryVersionInfo(this.version);
 			}, 100);
 		}
 	}
