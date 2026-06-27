@@ -37,7 +37,7 @@ export default tseslint.config(
 				"warn",
 				{
 					acronyms: ["BRAT"],
-					brands: ["BRAT"],
+					brands: ["BRAT", "TFTHacker", "johannrichard"],
 				},
 			],
 		},
