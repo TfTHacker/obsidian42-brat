@@ -1,0 +1,18 @@
+# Semantic release configuration for this Obsidian plugin.
+# Run `npx semantic-release` in CI after building the selected release variant.
+branches:
+  - main
+  - name: beta
+    prerelease: beta
+plugins:
+  - - "@semantic-release/commit-analyzer"
+    - preset: conventionalcommits
+  - - "@semantic-release/release-notes-generator"
+    - preset: conventionalcommits
+  - semantic-release-obsidian-plugin
+  - - "@semantic-release/github"
+    - assets:
+        - path: manifest.json
+        - path: build/main.js
+        - path: build/styles.css
+tagFormat: "${version}"

@@ -1,10 +1,7 @@
-# Automated release management using release-it and conventional commits. Run this manually to create a (pre-)release or push to the main and beta branch to create a dry-run.
+# Manual release-it fallback. Keep this for ad-hoc releases, but do not run it automatically.
 name: Release It
 
 on:
-  push:
-    branches:
-      - beta
   workflow_dispatch:
 
 jobs:

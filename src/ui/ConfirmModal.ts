@@ -41,7 +41,7 @@ class ConfirmModal extends Modal {
 	}
 
 	public override onOpen(): void {
-		super.onOpen();
+		void super.onOpen();
 		this.titleEl.setText(this.options.title);
 		this.contentEl.createEl("p", { text: this.options.message });
 		const okButton = new ButtonComponent(this.contentEl);
@@ -50,12 +50,14 @@ class ConfirmModal extends Modal {
 		okButton.setCta();
 		okButton.onClick(() => {
 			this.isConfirmed = true;
-			this.close();
+			void this.close();
 		});
 
 		const cancelButton = new ButtonComponent(this.contentEl);
 		cancelButton.setButtonText(this.options.cancelButtonText);
-		cancelButton.onClick(this.close.bind(this));
+		cancelButton.onClick(() => {
+			void this.close();
+		});
 	}
 }
 

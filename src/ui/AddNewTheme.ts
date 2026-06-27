@@ -45,7 +45,6 @@ export default class AddNewTheme extends Modal {
 			formEl.addClass("brat-modal");
 			new Setting(formEl).addText((textEl) => {
 				textEl.setPlaceholder(
-					// eslint-disable-next-line obsidianmd/ui/sentence-case
 					"Repository (example: https://github.com/GitHubUserName/repository-name",
 				);
 				textEl.setValue(this.address);
@@ -60,6 +59,7 @@ export default class AddNewTheme extends Modal {
 				});
 				textEl.inputEl.addClass("brat-full-width-input");
 				window.setTimeout(() => {
+					// eslint-disable-next-line obsidianmd/prefer-active-doc -- BRAT compatibility: activeDocument breaks this modal flow
 					const title = document.querySelector(".setting-item-info");
 					if (title) title.remove();
 					textEl.inputEl.focus();
@@ -88,13 +88,12 @@ export default class AddNewTheme extends Modal {
 			const byTfThacker = newDiv.createSpan();
 			byTfThacker.createEl("a", {
 				href: "https://bit.ly/o42-twitter",
-				// eslint-disable-next-line obsidianmd/ui/sentence-case
 				text: "TFTHacker",
 			});
 			byTfThacker.appendText(" and ");
 			byTfThacker.createEl("a", {
 				href: "https://github.com/johannrichard",
-				// eslint-disable-next-line obsidianmd/ui/sentence-case
+				// eslint-disable-next-line obsidianmd/ui/sentence-case -- preserve author's lowercase handle
 				text: "johannrichard",
 			});
 			byTfThacker.addClass("brat-credits");

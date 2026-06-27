@@ -78,7 +78,8 @@ export default class BratPlugin extends Plugin {
 	}
 
 	async loadSettings(): Promise<void> {
-		this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
+		const loadedSettings = (await this.loadData()) as Partial<Settings> | null;
+		this.settings = Object.assign({}, DEFAULT_SETTINGS, loadedSettings ?? {});
 	}
 
 	async saveSettings(): Promise<void> {

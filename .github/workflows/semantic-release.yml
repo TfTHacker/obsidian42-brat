@@ -1,0 +1,70 @@
+name: Semantic Release
+
+on:
+  push:
+    branches:
+      - main
+      - beta
+
+permissions:
+  contents: read
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
+      id-token: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: latest
+
+      - name: Install dependencies
+        run: npm ci
+        env:
+          HUSKY: 0
+
+      - name: Build release variant
+        if: github.event_name == 'push'
+        run: npm run build:${RELEASE_CHANNEL}
+        env:
+          RELEASE_CHANNEL: ${{ github.ref_name == 'beta' && 'beta' || 'main' }}
+
+      - name: Release update
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: npx semantic-release
+
+      - name: Configure Git
+        run: |
+          git config --global user.name "${{ github.actor }}"
+          git config --global user.email "${{ github.actor }}@users.noreply.github.com"
+
+      - name: Commit manifest.json (main only)
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: |
+          if git diff --quiet -- manifest.json; then
+            echo "manifest.json unchanged; skipping commit"
+            exit 0
+          fi
+
+          git add manifest.json
+          git commit -m "chore: 🔖 sync manifest version [skip ci]"
+          git push
+
+      - name: Generate artifact attestation (main release)
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: actions/attest@v4
+        with:
+          subject-path: |
+            build/main.js
+            build/styles.css

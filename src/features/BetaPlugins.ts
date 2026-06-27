@@ -1,4 +1,4 @@
-import type {} from "@obsidian-typings/obsidian-public-latest";
+import type {} from "@obsidian-typings/obsidian-public-1.11.4";
 import type { PluginManifest } from "obsidian";
 import {
 	apiVersion,
@@ -562,7 +562,6 @@ export default class BetaPlugins {
 								f.appendText("The ");
 								f.createEl("code", { text: "manifest.json" });
 								f.appendText(" for this plugin indicates that the plugin has ");
-								// eslint-disable-next-line obsidianmd/ui/sentence-case
 								f.createEl("code", { text: "isDesktopOnly: true" });
 								f.appendText(", but you are using a mobile device.");
 								f.createEl("br");

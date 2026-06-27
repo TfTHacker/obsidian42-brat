@@ -1,3 +1,4 @@
+import type {} from "@obsidian-typings/obsidian-public-1.11.4";
 import type { SettingTab } from "obsidian";
 import type { CommunityPlugin, CommunityTheme } from "../features/githubUtils";
 import {
@@ -58,7 +59,7 @@ export default class PluginCommands {
 						f.repo,
 						{
 							version: f.version,
-							token: f.token,
+							tokenName: f.tokenName,
 						},
 					]),
 				);
@@ -87,7 +88,7 @@ export default class PluginCommands {
 						false,
 						true,
 						false,
-						frozen?.token,
+						frozen?.tokenName,
 					);
 				});
 			},
@@ -165,9 +166,7 @@ export default class PluginCommands {
 				gfs.display((results) => {
 					void this.plugin.log(`${results.display} plugin disabled`, false);
 					if (this.plugin.settings.debuggingMode) console.debug(results.info);
-					void this.plugin.app.plugins.disablePluginAndSave(
-						results.info as string,
-					);
+					void this.plugin.app.plugins.disablePluginAndSave(results.info);
 				});
 			},
 		},
@@ -189,9 +188,7 @@ export default class PluginCommands {
 				gfs.setSuggesterData(pluginList);
 				gfs.display((results) => {
 					void this.plugin.log(`${results.display} plugin enabled`, false);
-					void this.plugin.app.plugins.enablePluginAndSave(
-						results.info as string,
-					);
+					void this.plugin.app.plugins.enablePluginAndSave(results.info);
 				});
 			},
 		},
@@ -225,6 +222,64 @@ export default class PluginCommands {
 							window.open(`https://github.com/${results.info as string}`);
 					});
 				}
+			},
+		},
+		{
+			id: "openCommunityPagePlugin",
+			icon: "BratIcon",
+			name: "Plugins: Open the community page for a plugin",
+			showInRibbon: true,
+			callback: async () => {
+				const communityPlugins = await grabCommmunityPluginList(
+					this.plugin.settings.debuggingMode,
+				);
+				if (!communityPlugins) {
+					toastMessage(
+						this.plugin,
+						"Could not load the Obsidian community plugin list.",
+						5,
+					);
+					return;
+				}
+
+				const pluginByRepo = new Map(
+					communityPlugins.map((plugin) => [plugin.repo, plugin]),
+				);
+				const seenPluginIds = new Set<string>();
+
+				const prioritizedBratPlugins: SuggesterItem[] =
+					this.plugin.settings.pluginList
+						.map((repo) => pluginByRepo.get(repo))
+						.filter((plugin): plugin is CommunityPlugin => Boolean(plugin))
+						.map((plugin) => {
+							seenPluginIds.add(plugin.id);
+							return {
+								display: `BRAT: ${plugin.name} (${plugin.id})`,
+								info: plugin.id,
+							};
+						});
+
+				const communityPluginList: SuggesterItem[] = communityPlugins
+					.filter((plugin) => !seenPluginIds.has(plugin.id))
+					.map((plugin) => {
+						return {
+							display: `Plugin: ${plugin.name} (${plugin.id})`,
+							info: plugin.id,
+						};
+					});
+
+				const gfs = new GenericFuzzySuggester(this.plugin);
+				gfs.setSuggesterData([
+					...prioritizedBratPlugins,
+					...communityPluginList,
+				]);
+				gfs.display((results) => {
+					if (results.info) {
+						window.open(
+							`https://obsidian.md/plugins?id=${encodeURIComponent(results.info as string)}`,
+						);
+					}
+				});
 			},
 		},
 		{
@@ -275,7 +330,7 @@ export default class PluginCommands {
 				gfs.setSuggesterData(listOfCoreSettingsTabs);
 				gfs.display((results) => {
 					settings.open();
-					settings.openTabById(results.info as string);
+					settings.openTabById(results.info);
 				});
 			},
 		},
