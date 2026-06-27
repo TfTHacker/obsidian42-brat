@@ -15,6 +15,7 @@ import { TokenValidator } from "src/utils/TokenValidator";
 import { themeDelete } from "../features/themes";
 import { getTranslations } from "../i18n";
 import type BratPlugin from "../main";
+import { toastMessage } from "../utils/notifications";
 import { createGitHubResourceLink, createLink } from "../utils/utils";
 import AddNewTheme from "./AddNewTheme";
 import { promotionalLinks } from "./Promotional";
@@ -29,6 +30,26 @@ export class BratSettingsTab extends PluginSettingTab {
 	constructor(app: App, plugin: BratPlugin) {
 		super(app, plugin);
 		this.plugin = plugin;
+	}
+
+	private async copyRepoIdentifier(identifier: string): Promise<void> {
+		if (!identifier) return;
+
+		try {
+			if (!navigator.clipboard?.writeText) {
+				throw new Error("Clipboard API unavailable");
+			}
+			await navigator.clipboard.writeText(identifier);
+
+			toastMessage(this.plugin, `Copied: ${identifier}`, 3);
+		} catch (error) {
+			console.error("Failed to copy repository identifier", identifier, error);
+			toastMessage(
+				this.plugin,
+				"Failed to copy identifier. Check clipboard permissions.",
+				5,
+			);
+		}
 	}
 
 	display(): void {
@@ -199,6 +220,15 @@ export class BratSettingsTab extends PluginSettingTab {
 					pluginName: p.toLowerCase(),
 				});
 
+				pluginSettingContainer.addExtraButton((btn: ExtraButtonComponent) => {
+					btn
+						.setIcon("copy")
+						.setTooltip("Copy plugin identifier")
+						.onClick(async () => {
+							await this.copyRepoIdentifier(p);
+						});
+				});
+
 				if (!bp?.version || bp.version === "latest") {
 					// Only show update button for plugins tracking latest version
 					pluginSettingContainer.addButton((btn: ButtonComponent) => {
@@ -320,6 +350,15 @@ export class BratSettingsTab extends PluginSettingTab {
 					themeName: bp.repo.toLowerCase(),
 				});
 
+				themeSettingContainer.addExtraButton((btn: ExtraButtonComponent) => {
+					btn
+						.setIcon("copy")
+						.setTooltip("Copy theme identifier")
+						.onClick(async () => {
+							await this.copyRepoIdentifier(bp.repo);
+						});
+				});
+
 				themeSettingContainer.addButton((btn: ButtonComponent) => {
 					btn
 						.setIcon("cross")
@@ -424,10 +463,15 @@ export class BratSettingsTab extends PluginSettingTab {
 				.setName(text.githubPersonalAccessToken.personalAccessToken.name)
 				.setDesc(
 					createLink({
-						prependText: text.githubPersonalAccessToken.personalAccessToken.desc.prependText,
+						prependText:
+							text.githubPersonalAccessToken.personalAccessToken.desc
+								.prependText,
 						url: "https://github.com/settings/tokens/new?scopes=public_repo",
-						text: text.githubPersonalAccessToken.personalAccessToken.desc.linkText,
-						appendText: text.githubPersonalAccessToken.personalAccessToken.desc.appendText,
+						text: text.githubPersonalAccessToken.personalAccessToken.desc
+							.linkText,
+						appendText:
+							text.githubPersonalAccessToken.personalAccessToken.desc
+								.appendText,
 					}),
 				);
 
