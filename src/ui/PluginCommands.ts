@@ -59,7 +59,7 @@ export default class PluginCommands {
 						f.repo,
 						{
 							version: f.version,
-							token: f.token,
+							tokenName: f.tokenName,
 						},
 					]),
 				);
@@ -88,7 +88,7 @@ export default class PluginCommands {
 						false,
 						true,
 						false,
-						frozen?.token,
+						frozen?.tokenName,
 					);
 				});
 			},
@@ -166,9 +166,7 @@ export default class PluginCommands {
 				gfs.display((results) => {
 					void this.plugin.log(`${results.display} plugin disabled`, false);
 					if (this.plugin.settings.debuggingMode) console.debug(results.info);
-					void this.plugin.app.plugins.disablePluginAndSave(
-						results.info as string,
-					);
+					void this.plugin.app.plugins.disablePluginAndSave(results.info);
 				});
 			},
 		},
@@ -190,9 +188,7 @@ export default class PluginCommands {
 				gfs.setSuggesterData(pluginList);
 				gfs.display((results) => {
 					void this.plugin.log(`${results.display} plugin enabled`, false);
-					void this.plugin.app.plugins.enablePluginAndSave(
-						results.info as string,
-					);
+					void this.plugin.app.plugins.enablePluginAndSave(results.info);
 				});
 			},
 		},
@@ -334,7 +330,7 @@ export default class PluginCommands {
 				gfs.setSuggesterData(listOfCoreSettingsTabs);
 				gfs.display((results) => {
 					settings.open();
-					settings.openTabById(results.info as string);
+					settings.openTabById(results.info);
 				});
 			},
 		},
