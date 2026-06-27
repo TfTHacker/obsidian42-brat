@@ -1,6 +1,39 @@
 import { moment, Platform, TFile } from "obsidian";
-import { getDailyNoteSettings } from "obsidian-daily-notes-interface";
 import type BratPlugin from "../main";
+
+const DEFAULT_DAILY_NOTE_FORMAT = "YYYY-MM-DD";
+
+interface DailyNotesPluginLike {
+	instance?: {
+		options?: {
+			format?: string;
+		};
+	};
+}
+
+interface PeriodicNotesPluginLike {
+	settings?: {
+		daily?: {
+			enabled?: boolean;
+			format?: string;
+		};
+	};
+}
+
+function getDailyNoteFormat(plugin: BratPlugin): string {
+	const periodicNotes = plugin.app.plugins.getPlugin(
+		"periodic-notes",
+	) as PeriodicNotesPluginLike | null;
+	const periodicDailySettings = periodicNotes?.settings?.daily;
+	if (periodicDailySettings?.enabled) {
+		return periodicDailySettings.format ?? DEFAULT_DAILY_NOTE_FORMAT;
+	}
+
+	const dailyNotes = plugin.app.internalPlugins.getPluginById(
+		"daily-notes",
+	) as DailyNotesPluginLike | null;
+	return dailyNotes?.instance?.options?.format ?? DEFAULT_DAILY_NOTE_FORMAT;
+}
 
 /**
  * Logs events to a log file
@@ -21,7 +54,7 @@ export async function logger(
 
 		const fileName = `${plugin.settings.loggingPath}.md`;
 		const now = moment.unix(Math.floor(Date.now() / 1000));
-		const dateOutput = `[[${now.format(getDailyNoteSettings().format).toString()}]] ${now.format("HH:mm")}`;
+		const dateOutput = `[[${now.format(getDailyNoteFormat(plugin)).toString()}]] ${now.format("HH:mm")}`;
 		const os = Platform.isDesktop
 			? (window.require("os") as { hostname: () => string })
 			: null;
