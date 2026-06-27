@@ -7,16 +7,34 @@ const locales: Record<string, LocaleStrings> = {
 	"zh-cn": zhCn,
 };
 
+const localeAliases: Record<string, string> = {
+	"en-gb": "en",
+	"en-us": "en",
+	zh: "zh-cn",
+	"zh-hans": "zh-cn",
+	"zh-sg": "zh-cn",
+};
+
 function normalizeLanguage(language: string): string {
-	const normalizedLanguage = language.toLowerCase().replace(/_/g, "-");
-
-	if (normalizedLanguage === "zh" || normalizedLanguage === "zh-cn" || normalizedLanguage === "zh-hans") {
-		return "zh-cn";
-	}
-
-	return normalizedLanguage;
+	return language.toLowerCase().replace(/_/g, "-");
 }
 
-export function getTranslations(): LocaleStrings {
-	return locales[normalizeLanguage(getLanguage())] ?? en;
+function resolveLocale(language: string): string {
+	const normalizedLanguage = normalizeLanguage(language);
+
+	if (locales[normalizedLanguage]) {
+		return normalizedLanguage;
+	}
+
+	const alias = localeAliases[normalizedLanguage];
+	if (alias) {
+		return alias;
+	}
+
+	const baseLanguage = normalizedLanguage.split("-")[0];
+	return localeAliases[baseLanguage] ?? baseLanguage;
+}
+
+export function getTranslations(language = getLanguage()): LocaleStrings {
+	return locales[resolveLocale(language)] ?? en;
 }
