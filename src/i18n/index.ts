@@ -32,7 +32,7 @@ function resolveLocale(language: string): string {
 	}
 
 	const baseLanguage = normalizedLanguage.split("-")[0];
-	return localeAliases[baseLanguage] ?? baseLanguage;
+	return locales[baseLanguage] ? baseLanguage : normalizedLanguage;
 }
 
 export function getTranslations(language = getLanguage()): LocaleStrings {
