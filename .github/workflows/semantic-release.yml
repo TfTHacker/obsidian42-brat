@@ -42,13 +42,24 @@ jobs:
       - name: Release update
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          RELEASE_CHANNEL: ${{ github.ref_name == 'beta' && 'beta' || 'main' }}
+        run: npx semantic-release
+
+      - name: Configure Git
         run: |
-          if [ "${GITHUB_REF_NAME}" = "main" ]; then
-            npx semantic-release --extends ./.releaserc.main.yaml
-          else
-            npx semantic-release
+          git config --global user.name "${{ github.actor }}"
+          git config --global user.email "${{ github.actor }}@users.noreply.github.com"
+
+      - name: Commit manifest.json (main only)
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: |
+          if git diff --quiet -- manifest.json; then
+            echo "manifest.json unchanged; skipping commit"
+            exit 0
           fi
+
+          git add manifest.json
+          git commit -m "chore: 🔖 sync manifest version [skip ci]"
+          git push
 
       - name: Generate artifact attestation (main release)
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'

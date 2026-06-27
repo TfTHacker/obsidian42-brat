@@ -15,5 +15,4 @@ plugins:
         - path: manifest.json
         - path: build/main.js
         - path: build/styles.css
-  - "@semantic-release/git"
 tagFormat: "${version}"
