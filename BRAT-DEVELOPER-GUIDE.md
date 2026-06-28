@@ -113,3 +113,28 @@ If you want to provide read-only access to a private repository (e.g. for privat
 ![image](https://github.com/user-attachments/assets/da16fb77-623e-4ee2-abf3-0b63ea216e89)
 
 ![image](https://github.com/user-attachments/assets/d2898fd5-17d8-49a9-be46-710382319d89)
+
+## Managing beta plugin and theme lists in settings
+
+The BRAT settings page includes lists for tracked beta plugins and themes.
+
+### Beta plugin list
+
+Use this list to manage repositories you added through the command **"add a beta plugin for testing"**.
+
+- You can track either:
+  - the **latest** release, or
+  - a **frozen** version.
+- A frozen version means BRAT tracks one specific release tag for that repository.
+- Click the **edit** button next to a plugin to change the tracked version and related settings.
+- Click the red **X** button next to a plugin to remove it from BRAT tracking.
+
+### Beta theme list
+
+Use this list to manage beta themes tracked by BRAT.
+
+- Click the red **X** button next to a theme to remove it from BRAT tracking.
+
+> [!NOTE]
+> Removing a plugin or theme from BRAT tracking does not uninstall it from your vault.
+> Remove installed plugins from Settings > Community plugins and installed themes from Settings > Appearance.

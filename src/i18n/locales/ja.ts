@@ -59,11 +59,9 @@ export const ja = {
 			personalAccessToken: {
 				name: "個人アクセストークン",
 				desc: {
-					prependText:
-						"個人アクセストークンを設定すると、GitHub の公開リポジトリに対するレート制限を緩和できます。トークンは ",
+					prependText: "個人アクセストークンを設定すると、GitHub の公開リポジトリに対するレート制限を緩和できます。トークンは ",
 					linkText: "GitHub アカウント設定",
-					appendText:
-						" で作成し、ここに追加できます。詳しくはドキュメントを参照してください。",
+					appendText: " で作成し、ここに追加できます。詳しくはドキュメントを参照してください。",
 				},
 			},
 			clearPersonalAccessToken: "個人アクセストークンをクリア",
@@ -78,15 +76,13 @@ export const ja = {
 				editAndRemove:
 					"プラグイン横の「編集」ボタンをクリックすると、インストールするバージョンを変更できます。プラグイン横の「X」ボタンをクリックすると、一覧から削除できます。",
 				noteLabel: "注意：",
-				noteText:
-					"一覧から削除してもプラグイン本体は削除されません。削除するには、設定のコミュニティプラグインタブから操作してください。",
+				noteText: "一覧から削除してもプラグイン本体は削除されません。削除するには、設定のコミュニティプラグインタブから操作してください。",
 			},
 			addBetaPlugin: "Beta プラグインを追加",
 			trackedVersion: (version: string, frozen: boolean): string =>
 				` 追跡中のバージョン：${version === "latest" ? "最新バージョン" : version}${frozen ? "（固定）" : ""}`,
 			incompatible: "（互換性なし）",
-			secretMissing: (secretName: string): string =>
-				` シークレットが未定義または空です：${secretName}`,
+			secretMissing: (secretName: string): string => ` シークレットが未定義または空です：${secretName}`,
 			secretMissingTitle:
 				"トークン名は設定されていますが、シークレットが見つからないか空です。シークレットを追加するか、プラグイン設定を更新してください。",
 			secretMissingTooltip: (secretName: string): string =>
@@ -107,8 +103,7 @@ export const ja = {
 		},
 		copyIdentifier: {
 			copied: (identifier: string): string => `コピーしました：${identifier}`,
-			failed:
-				"識別子のコピーに失敗しました。クリップボードの権限を確認してください。",
+			failed: "識別子のコピーに失敗しました。クリップボードの権限を確認してください。",
 		},
 	},
 	addBetaPluginModal: {
@@ -126,20 +121,16 @@ export const ja = {
 		},
 		repository: {
 			label: "リポジトリ",
-			placeholder:
-				"リポジトリ（例：https://GitHub.com/githubusername/repository-name）",
-			enterAddressToValidate:
-				"検証する GitHub リポジトリアドレスを入力してください。",
+			placeholder: "リポジトリ（例：https://GitHub.com/githubusername/repository-name）",
+			enterAddressToValidate: "検証する GitHub リポジトリアドレスを入力してください。",
 			addressRequired: "リポジトリアドレスが必要です。",
 			validating: "リポジトリアドレスを検証中...",
 			noReleasesFound: "エラー：このリポジトリにリリースが見つかりません。",
 			notFound:
 				"リポジトリが見つかりません。アドレスを確認するか、プライベートリポジトリにアクセスできる有効なトークンを指定してください。",
-			accessDenied:
-				"アクセスが拒否されました。個人アクセストークンを確認してください。",
+			accessDenied: "アクセスが拒否されました。個人アクセストークンを確認してください。",
 			error: (message: string): string => `エラー：${message}`,
-			rateLimitExceeded: (minutes: number): string =>
-				`GitHub API のレート制限を超過しました。${minutes} 分後にもう一度お試しください。`,
+			rateLimitExceeded: (minutes: number): string => `GitHub API のレート制限を超過しました。${minutes} 分後にもう一度お試しください。`,
 			rateLimitToast: (message: string): string =>
 				`${message} BRAT 設定で個人アクセストークンを追加すると、より高い制限を利用できます。詳しくはドキュメントを参照してください。`,
 			gitHubResponseToast: (message: string): string => `${message} `,
@@ -153,20 +144,30 @@ export const ja = {
 		token: {
 			name: "GitHub トークン",
 			desc: "このリポジトリ用のトークンとして使用するシークレットを選択します（任意）",
-			settingCleared: (repository: string): string =>
-				`${repository} のトークン設定をクリアしました`,
-			settingUpdated: (repository: string): string =>
-				`${repository} のトークン設定を更新しました`,
+			settingCleared: (repository: string): string => `${repository} のトークン設定をクリアしました`,
+			settingUpdated: (repository: string): string => `${repository} のトークン設定を更新しました`,
 		},
 		enableAfterInstall: "インストール後にプラグインを有効化",
 		alreadyInList: "このプラグインはすでに Beta テスト一覧にあります",
 	},
+	addBetaThemeModal: {
+		heading: {
+			githubRepositoryForBetaTheme: "Beta テーマの GitHub リポジトリ：",
+		},
+		alreadyInList: "このテーマはすでに Beta テスト一覧にあります",
+	},
+	themeMessages: {
+		noThemeCssFile: "このリポジトリのルートパスには theme.css または theme-beta.css がないため、インストールできるテーマがありません。",
+		noManifestFile: "このリポジトリのルートパスには manifest.json がないため、テーマをインストールできません。",
+		installed: (themeName: string, repository: string): string => `${repository} からテーマ ${themeName} をインストールしました。`,
+		updated: (themeName: string, repository: string): string => `${repository} からテーマ ${themeName} を更新しました。`,
+		removed: (repository: string): string =>
+			`${repository} を BRAT のテーマ一覧から削除したため、今後は更新されません。ただし、テーマファイル自体は Vault に残ります。削除するには、設定 > 外観 からテーマを削除してください。`,
+	},
 	versionSuggestModal: {
 		title: "バージョンを選択",
-		placeholder: (repository: string): string =>
-			`${repository} のバージョンを検索`,
-		versionLabel: (version: string): string =>
-			version === "latest" ? "最新バージョン" : version,
+		placeholder: (repository: string): string => `${repository} のバージョンを検索`,
+		versionLabel: (version: string): string => (version === "latest" ? "最新バージョン" : version),
 		instructions: {
 			navigateVersions: "バージョンを移動",
 			selectVersion: "バージョンを選択",
