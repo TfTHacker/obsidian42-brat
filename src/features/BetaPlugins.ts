@@ -9,7 +9,13 @@ import { addBetaPluginToList } from "../settings";
 import AddNewPluginModal from "../ui/AddNewPluginModal";
 import { isConnectedToInternet } from "../utils/internetconnection";
 import { toastMessage } from "../utils/notifications";
-import { grabReleaseFileFromRepository, grabReleaseFromRepository, isPrivateRepo, type Release } from "./githubUtils";
+import {
+	grabCommmunityPluginList,
+	grabReleaseFileFromRepository,
+	grabReleaseFromRepository,
+	isPrivateRepo,
+	type Release,
+} from "./githubUtils";
 
 /**
  * all the files needed for a plugin based on the release files are hre
@@ -26,6 +32,12 @@ interface PluginManifestEx extends PluginManifest {
 		isDesktopOnlyOriginal?: boolean;
 		minAppVersionOriginal?: string;
 	};
+}
+
+export interface GraduatedPlugin {
+	repo: string;
+	installedVersion: string;
+	stableVersion: string;
 }
 
 /**
@@ -704,6 +716,7 @@ export default class BetaPlugins {
 			}
 			toastMessage(this.plugin, msg2, 10);
 		}
+		await this.checkForOfficiallyReleasedPlugins();
 	}
 
 	/**
@@ -749,6 +762,102 @@ export default class BetaPlugins {
 				`The following incompatible plugins were forcefully installed by BRAT and may not work as expected:\n${incompatiblePluginIds.join("\n")}`,
 				30,
 			);
+		}
+	}
+
+	/**
+	 * Detects BRAT-tracked plugins that have graduated to the official Obsidian community plugin list
+	 * and have a stable (non-prerelease) release with version >= installed version.
+	 *
+	 * @returns Array of graduated plugin metadata
+	 */
+	async getOfficiallyReleasedPlugins(): Promise<GraduatedPlugin[]> {
+		const communityPlugins = await grabCommmunityPluginList(this.plugin.settings.debuggingMode);
+		if (!communityPlugins) return [];
+
+		const communityRepos = new Set(communityPlugins.map((p) => p.repo));
+
+		// Only check non-frozen plugins
+		const frozenVersions = new Map(this.plugin.settings.pluginSubListFrozenVersion.map((f) => [f.repo, f.version]));
+		const repoTokens = new Map(this.plugin.settings.pluginSubListFrozenVersion.map((f) => [f.repo, f.tokenName || ""]));
+
+		const graduated: GraduatedPlugin[] = [];
+
+		for (const repo of this.plugin.settings.pluginList) {
+			const version = frozenVersions.get(repo);
+			if (version && version !== "latest") continue;
+			if (!communityRepos.has(repo)) continue;
+
+			try {
+				// Resolve token for this repo
+				let tokenValue = "";
+				const secretName = repoTokens.get(repo) || "";
+				if (secretName) {
+					tokenValue = this.plugin.app.secretStorage.getSecret(secretName) || "";
+				} else if (this.plugin.settings.globalTokenName) {
+					tokenValue = this.plugin.app.secretStorage.getSecret(this.plugin.settings.globalTokenName) || "";
+				}
+
+				// Fetch latest stable (non-prerelease) release
+				const stableRelease = await grabReleaseFromRepository(
+					repo,
+					undefined,
+					false, // exclude prereleases
+					this.plugin.settings.debuggingMode,
+					false,
+					tokenValue || undefined,
+				);
+
+				if (!stableRelease) continue;
+
+				// Read local installed version
+				const pluginId = communityPlugins.find((p) => p.repo === repo)?.id;
+				if (!pluginId) continue;
+
+				const localManifest = this.plugin.app.plugins.manifests[pluginId];
+				if (!localManifest) continue;
+
+				const localVersion = semverCoerce(localManifest.version, { includePrerelease: true, loose: true });
+				const stableVersion = semverCoerce(stableRelease.tag_name, { includePrerelease: true, loose: true });
+
+				if (!localVersion || !stableVersion) continue;
+
+				// Stable release version >= installed version means plugin has graduated
+				if (compareVersions(stableVersion.version, localVersion.version) >= 0) {
+					graduated.push({
+						repo,
+						installedVersion: localManifest.version,
+						stableVersion: stableRelease.tag_name,
+					});
+				}
+			} catch (error) {
+				if (this.plugin.settings.debuggingMode) {
+					console.debug(`BRAT: Error checking graduation for ${repo}:`, error);
+				}
+			}
+		}
+
+		return graduated;
+	}
+
+	/**
+	 * Checks for graduated plugins and notifies the user via toast notifications.
+	 * Called at the end of every update cycle.
+	 */
+	async checkForOfficiallyReleasedPlugins(): Promise<void> {
+		try {
+			const graduated = await this.getOfficiallyReleasedPlugins();
+			for (const plugin of graduated) {
+				const msg = `${plugin.repo} has been officially released (stable: ${plugin.stableVersion}). You can remove it from BRAT and use Obsidian's built-in updates.`;
+				await this.plugin.log(msg, true);
+				toastMessage(this.plugin, msg, 30, () => {
+					window.open(`https://github.com/${plugin.repo}/releases/tag/${plugin.stableVersion}`);
+				});
+			}
+		} catch (error) {
+			if (this.plugin.settings.debuggingMode) {
+				console.debug("BRAT: Error checking for officially released plugins:", error);
+			}
 		}
 	}
 }
