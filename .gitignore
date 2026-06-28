@@ -11,6 +11,7 @@ build
 
 # other
 **/.DS_Store
+.impeccable
 
 # AGENTS.md
 **/AGENTS.md
