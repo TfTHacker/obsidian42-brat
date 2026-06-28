@@ -10,6 +10,8 @@ declare global {
 }
 
 declare module "obsidian" {
+	// TODO: remove this compatibility shim once we can depend on the newest Obsidian typings.
+	// We keep it for now because BRAT still supports dual-mode with the older typings.
 	export interface SettingControlBase<V, K extends string = string> {
 		key: K;
 		defaultValue?: V;
