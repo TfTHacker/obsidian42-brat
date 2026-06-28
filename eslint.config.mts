@@ -9,8 +9,6 @@ export default tseslint.config(
 		"build",
 		"main.js",
 		"esbuild.config.mjs",
-		"version-bump.mjs",
-		"version-github-action.mjs",
 		"versions.json",
 		"package.json",
 		"package-lock.json",
