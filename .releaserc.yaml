@@ -1,15 +1,17 @@
 # Semantic release configuration for this Obsidian plugin.
 # Run `npx semantic-release` in CI after building the selected release variant.
 branches:
-  - main
+  - name: main
   - name: beta
-    prerelease: beta
+    prerelease: true # Using true automatically uses 'beta' as the suffix based on the branch name
+
 plugins:
   - - "@semantic-release/commit-analyzer"
-    - preset: conventionalcommits
+    - preset: "conventionalcommits"
+  # FIXED: Removed the accidental extra list item dash here
   - - "@semantic-release/release-notes-generator"
-    - preset: conventionalcommits
-  - semantic-release-obsidian-plugin
+    - preset: "conventionalcommits"
+  - "semantic-release-obsidian-plugin"
   - - "@semantic-release/github"
     - assets:
         - path: manifest.json
