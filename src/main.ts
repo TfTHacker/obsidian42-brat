@@ -18,6 +18,7 @@ export default class BratPlugin extends Plugin {
 	APP_NAME = "BRAT";
 	APP_ID = "obsidian42-brat";
 	settings: Settings = DEFAULT_SETTINGS;
+	settingsTab: BratSettingsTab = new BratSettingsTab(this.app, this);
 	betaPlugins = new BetaPlugins(this);
 	commands: PluginCommands = new PluginCommands(this);
 	bratApi: BratAPI = new BratAPI(this);
@@ -33,25 +34,18 @@ export default class BratPlugin extends Plugin {
 		this.loadSettings()
 			.then(async () => {
 				// Migrate tokens to SecretStorage (Obsidian 1.11.4+)
-				await migrateTokensToSecretStorage(this.app, this.settings, () =>
-					this.saveSettings(),
-				);
+				await migrateTokensToSecretStorage(this.app, this.settings, () => this.saveSettings());
 
 				this.app.workspace.onLayoutReady(() => {
-					this.addSettingTab(new BratSettingsTab(this.app, this));
+					this.addSettingTab(this.settingsTab);
 
-					this.registerObsidianProtocolHandler(
-						"brat",
-						this.obsidianProtocolHandler,
-					);
+					this.registerObsidianProtocolHandler("brat", this.obsidianProtocolHandler);
 
 					this.betaPlugins.checkIncompatiblePlugins();
 
 					if (this.settings.updateAtStartup) {
 						window.setTimeout(() => {
-							void this.betaPlugins.checkForPluginUpdatesAndInstallUpdates(
-								false,
-							);
+							void this.betaPlugins.checkForPluginUpdatesAndInstallUpdates(false);
 						}, 60000);
 					}
 					if (this.settings.updateThemesAtStartup) {
@@ -97,14 +91,7 @@ export default class BratPlugin extends Plugin {
 				let modal: AddNewPluginModal | AddNewTheme;
 				switch (which) {
 					case "plugin":
-						modal = new AddNewPluginModal(
-							this,
-							this.betaPlugins,
-							true,
-							false,
-							params[which],
-							params.version ? params.version : undefined,
-						);
+						modal = new AddNewPluginModal(this, this.betaPlugins, true, false, params[which], params.version ? params.version : undefined);
 						modal.open();
 						break;
 					case "theme":
