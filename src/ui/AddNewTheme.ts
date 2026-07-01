@@ -1,5 +1,6 @@
 import { ButtonComponent, Modal, Setting } from "obsidian";
 import { themeSave } from "../features/themes";
+import { getTranslations } from "../i18n";
 import type BratPlugin from "../main";
 import { existBetaThemeinInList } from "../settings";
 import { toastMessage } from "../utils/notifications";
@@ -12,41 +13,41 @@ export default class AddNewTheme extends Modal {
 	plugin: BratPlugin;
 	address: string;
 	openSettingsTabAfterwards: boolean;
+	onSubmitted?: () => void;
 
-	constructor(plugin: BratPlugin, openSettingsTabAfterwards = false) {
+	constructor(plugin: BratPlugin, openSettingsTabAfterwards = false, onSubmitted?: () => void) {
 		super(plugin.app);
 		this.plugin = plugin;
 		this.address = "";
 		this.openSettingsTabAfterwards = openSettingsTabAfterwards;
+		this.onSubmitted = onSubmitted;
 	}
 
 	async submitForm(): Promise<void> {
+		const text = getTranslations();
 		if (this.address === "") return;
 		const scrubbedAddress = this.address.replace("https://github.com/", "");
 		if (existBetaThemeinInList(this.plugin, scrubbedAddress)) {
-			toastMessage(
-				this.plugin,
-				"This theme is already in the list for beta testing",
-				10,
-			);
+			toastMessage(this.plugin, text.addBetaThemeModal.alreadyInList, 10);
 			return;
 		}
 
 		if (await themeSave(this.plugin, scrubbedAddress, true)) {
+			this.onSubmitted?.();
 			this.close();
 		}
 	}
 
 	onOpen(): void {
+		const text = getTranslations();
+		const commonText = text.common;
 		this.contentEl.createEl("h4", {
-			text: "GitHub repository for beta theme:",
+			text: text.addBetaThemeModal.heading.githubRepositoryForBetaTheme,
 		});
 		this.contentEl.createEl("form", {}, (formEl) => {
 			formEl.addClass("brat-modal");
 			new Setting(formEl).addText((textEl) => {
-				textEl.setPlaceholder(
-					"Repository (example: https://github.com/GitHubUserName/repository-name",
-				);
+				textEl.setPlaceholder(text.addBetaPluginModal.repository.placeholder);
 				textEl.setValue(this.address);
 				textEl.onChange((value) => {
 					this.address = value.trim();
@@ -67,14 +68,12 @@ export default class AddNewTheme extends Modal {
 			});
 
 			formEl.createDiv("modal-button-container", (buttonContainerEl) => {
-				new ButtonComponent(buttonContainerEl)
-					.setButtonText("Never mind")
-					.onClick(() => {
-						this.close();
-					});
+				new ButtonComponent(buttonContainerEl).setButtonText(text.addBetaPluginModal.buttons.neverMind).onClick(() => {
+					this.close();
+				});
 
 				new ButtonComponent(buttonContainerEl)
-					.setButtonText("Add theme")
+					.setButtonText(text.settings.betaThemeList.addBetaTheme)
 					.setCta()
 					.onClick((e: Event) => {
 						e.preventDefault();
@@ -90,7 +89,7 @@ export default class AddNewTheme extends Modal {
 				href: "https://bit.ly/o42-twitter",
 				text: "TFTHacker",
 			});
-			byTfThacker.appendText(" and ");
+			byTfThacker.appendText(commonText.and);
 			byTfThacker.createEl("a", {
 				href: "https://github.com/johannrichard",
 				// eslint-disable-next-line obsidianmd/ui/sentence-case -- preserve author's lowercase handle

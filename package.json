@@ -11,9 +11,7 @@
     "build:main": "node --no-warnings esbuild.config.mjs production",
     "lint": "npm run lint:biome && npm run lint:eslint",
     "lint:biome": "biome check ./src",
-    "lint:eslint": "eslint .",
-    "version": "node version-bump.mjs",
-    "githubaction": "node version-github-action.mjs"
+    "lint:eslint": "eslint ."
   },
   "author": "TfT Hacker",
   "license": "MIT",
@@ -25,8 +23,6 @@
     "@biomejs/biome": "^2.3.15",
     "@eslint/js": "^9.39.1",
     "@obsidian-typings/obsidian-public-1.11.4": "^4.93.0",
-    "@release-it/bumper": "^7.0.6",
-    "@release-it/conventional-changelog": "^11.0.1",
     "@semantic-release/commit-analyzer": "^13.0.1",
     "@semantic-release/github": "^12.0.8",
     "@semantic-release/release-notes-generator": "^14.1.1",
