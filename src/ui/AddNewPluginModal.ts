@@ -37,9 +37,6 @@ export default class AddNewPluginModal extends Modal {
 
 	// Token Validation
 	secretName: string;
-	validToken: boolean | undefined;
-	tokenInputEl: SecretComponent | null = null;
-	validateButton: ButtonComponent | null = null;
 	validator: TokenValidator | null = null;
 
 	// Plugin install action
@@ -356,23 +353,15 @@ export default class AddNewPluginModal extends Modal {
 							}
 							const tokenValue = this.secretName ? this.plugin.app.secretStorage.getSecret(this.secretName) : null;
 							if (tokenValue) {
-								this.validToken = await this.validator?.validateToken(tokenValue, this.address);
-								if (!this.validToken) {
-									this.validateButton?.setButtonText(text.buttons.invalid);
-									this.validateButton?.setDisabled(false);
-								} else {
-									this.validateButton?.setButtonText(text.buttons.valid);
-									this.validateButton?.setDisabled(true);
+								const validToken = await this.validator?.validateToken(tokenValue, this.address);
+								if (validToken && this.address) {
+									// Refresh the version dropdown now that a (valid) token is available.
+									await this.updateRepositoryVersionInfo(this.version, validationStatusEl);
 
-									// Update version dropdown when API key changes
-									if (this.address) {
-										await this.updateRepositoryVersionInfo(this.version, validationStatusEl);
-
-										// Update the secret name for this plugin in the settings if it already exists there
-										if (existBetaPluginInList(this.plugin, this.address)) {
-											updatePluginTokenName(this.plugin, this.address, this.secretName);
-											toastMessage(this.plugin, text.token.settingUpdated(this.address), 3);
-										}
+									// Update the secret name for this plugin in the settings if it already exists there
+									if (existBetaPluginInList(this.plugin, this.address)) {
+										updatePluginTokenName(this.plugin, this.address, this.secretName);
+										toastMessage(this.plugin, text.token.settingUpdated(this.address), 3);
 									}
 								}
 							}
@@ -380,23 +369,8 @@ export default class AddNewPluginModal extends Modal {
 					}),
 				);
 
-			// Initialize validator
+			// Initialize validator (used by the token selector's onChange above).
 			this.validator = new TokenValidator();
-
-			// Validate the current token if we have a secret name
-			if (this.secretName) {
-				const tokenValue = this.plugin.app.secretStorage.getSecret(this.secretName);
-				if (tokenValue) {
-					// Validate asynchronously on initial load
-					void this.validator?.validateToken(tokenValue, this.address).then((isValid) => {
-						this.validToken = isValid;
-						if (this.validToken) {
-							this.validateButton?.setButtonText(text.buttons.valid);
-							this.validateButton?.setDisabled(true);
-						}
-					});
-				}
-			}
 
 			formEl.createDiv("modal-button-container", (buttonContainerEl) => {
 				buttonContainerEl.createEl(
