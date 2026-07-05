@@ -83,9 +83,14 @@ export default class PluginCommands {
 			name: "Plugins: Choose a single plugin to reinstall",
 			showInRibbon: true,
 			callback: () => {
-				const pluginSubListFrozenVersionNames = new Set(this.plugin.settings.pluginSubListFrozenVersion.map((f) => f.repo));
+				// Only exclude plugins pinned to a specific frozen version. Plugins tracking
+				// "latest" are also stored in pluginSubListFrozenVersion, so excluding the whole
+				// list (as before) left this reinstall picker empty for every plugin.
+				const frozenVersionRepos = new Set(
+					this.plugin.settings.pluginSubListFrozenVersion.filter((f) => f.version && f.version !== "latest").map((f) => f.repo),
+				);
 				const pluginList: SuggesterItem[] = Object.values(this.plugin.settings.pluginList)
-					.filter((f) => !pluginSubListFrozenVersionNames.has(f))
+					.filter((f) => !frozenVersionRepos.has(f))
 					.map((m) => {
 						return { display: m, info: m };
 					});

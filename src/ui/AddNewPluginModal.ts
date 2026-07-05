@@ -229,6 +229,9 @@ export default class AddNewPluginModal extends Modal {
 										this.cancelButton?.setDisabled(true);
 										this.versionSetting?.setDisabled(true);
 										void this.submitForm();
+										// Return so we don't also re-fetch versions, which would re-enable the
+										// version setting and mutate this.version while the install is in flight.
+										return;
 									}
 
 									// Populate version dropdown

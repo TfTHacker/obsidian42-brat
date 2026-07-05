@@ -550,12 +550,18 @@ export default class BetaPlugins {
 					localManifestContents = await this.plugin.app.vault.adapter.read(`${pluginTargetFolderPath}manifest.json`);
 				} catch (e) {
 					if ((e as ErrnoType).errno === -4058 || (e as ErrnoType).errno === -2) {
-						// file does not exist, try installing the plugin
-						await this.addPlugin(repositoryPath, false, usingBetaManifest, false, specifyVersion, false, enableAfterInstall, secretName);
+						// file does not exist, try installing the plugin (seeIfUpdatedOnly must
+						// be false here so the plugin is actually installed, not just checked)
+						await this.addPlugin(repositoryPath, false, false, false, specifyVersion, false, enableAfterInstall, secretName);
 						// even though failed, return true since install will be attempted
 						return true;
 					}
+					// Any other read error (permissions, unexpected adapter error, or a mobile
+					// adapter error with no errno): bail out instead of falling through to
+					// JSON.parse("") below, which would throw a SyntaxError surfaced as a
+					// generic "Unknown error".
 					console.error("BRAT - Local Manifest Load", primaryManifest.id, JSON.stringify(e, null, 2));
+					return false;
 				}
 
 				if (specifyVersion !== "" && specifyVersion !== "latest") {
