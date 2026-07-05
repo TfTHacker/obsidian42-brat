@@ -9,6 +9,7 @@ export const ja = {
 	},
 	settings: {
 		general: {
+			heading: "一般",
 			autoEnablePluginsAfterInstallation: {
 				name: "インストール後に Beta プラグインを自動で有効化",
 				desc: "有効にすると、新しくインストールした Beta プラグインは既定で自動的に有効になります。個別のプラグインについては「プラグインを追加」フォームで切り替えられます。",
@@ -70,6 +71,7 @@ export const ja = {
 		betaPluginList: {
 			heading: "Beta プラグイン一覧",
 			filterPlaceholder: "プラグインを絞り込み",
+			emptyState: "ベータプラグインはまだ追加されていません。",
 			description: {
 				intro:
 					'以下は、"add a beta plugin for testing" コマンドで追加された Beta プラグインの一覧です。最新バージョンを使うことも、特定のバージョンに固定することもできます。固定バージョンとは、リリースタグに基づく特定のプラグインリリースです。',
@@ -97,6 +99,7 @@ export const ja = {
 			heading: "Beta テーマ一覧",
 			addBetaTheme: "Beta テーマを追加",
 			filterPlaceholder: "テーマを絞り込み",
+			emptyState: "ベータテーマはまだ追加されていません。",
 			deleteThisBetaTheme: "この Beta テーマを削除",
 			confirmRemoval: "もう一度クリックして削除を確認",
 			copyThemeIdentifier: "テーマ識別子をコピー",

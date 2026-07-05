@@ -9,6 +9,7 @@ export const zhCn = {
 	},
 	settings: {
 		general: {
+			heading: "常规",
 			autoEnablePluginsAfterInstallation: {
 				name: "安装后自动启用 Beta 插件",
 				desc: "开启后，新安装的 Beta 插件会默认自动启用。你仍然可以在“添加插件”表单中为单个插件单独调整。",
@@ -70,6 +71,7 @@ export const zhCn = {
 		betaPluginList: {
 			heading: "Beta 插件列表",
 			filterPlaceholder: "筛选插件",
+			emptyState: "尚未添加测试插件。",
 			description: {
 				intro:
 					"下方列出已通过 BRAT 添加的 Beta 插件。你可以让插件跟随最新版本，也可以固定到某个发布版本。固定版本指基于 release 标签指定的某个插件版本。",
@@ -94,6 +96,7 @@ export const zhCn = {
 			heading: "Beta 主题列表",
 			addBetaTheme: "添加 Beta 主题",
 			filterPlaceholder: "筛选主题",
+			emptyState: "尚未添加测试主题。",
 			deleteThisBetaTheme: "删除此 Beta 主题",
 			confirmRemoval: "再次点击确认移除",
 			copyThemeIdentifier: "复制主题标识符",

@@ -7,6 +7,7 @@ export const en = {
 	},
 	settings: {
 		general: {
+			heading: "General",
 			autoEnablePluginsAfterInstallation: {
 				name: "Auto-enable plugins after installation",
 				desc: 'If enabled beta plugins will be automatically enabled after installtion by default. Note: you can toggle this on and off for each plugin in the "add plugin" form.',
@@ -68,6 +69,7 @@ export const en = {
 		betaPluginList: {
 			heading: "Beta plugin list",
 			filterPlaceholder: "Filter plugins",
+			emptyState: "No beta plugins added yet.",
 			description: {
 				intro:
 					'The following is a list of beta plugins added via the command "add a beta plugin for testing". You can chose to add the latest version or a frozen version. A frozen version is a specific release of a plugin based on its release tag.',
@@ -93,6 +95,7 @@ export const en = {
 			heading: "Beta themes list",
 			addBetaTheme: "Add beta theme",
 			filterPlaceholder: "Filter themes",
+			emptyState: "No beta themes added yet.",
 			deleteThisBetaTheme: "Delete this beta theme",
 			confirmRemoval: "Click once more to confirm removal",
 			copyThemeIdentifier: "Copy theme identifier",

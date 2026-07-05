@@ -9,6 +9,7 @@ export const de = {
 	},
 	settings: {
 		general: {
+			heading: "Allgemein",
 			autoEnablePluginsAfterInstallation: {
 				name: "Beta-Plugins nach der Installation automatisch aktivieren",
 				desc: "Wenn aktiviert, werden neu installierte Beta-Plugins standardmäßig automatisch aktiviert. Diese Option kann im Formular zum Hinzufügen eines Plugins pro Plugin angepasst werden.",
@@ -71,6 +72,7 @@ export const de = {
 		betaPluginList: {
 			heading: "Beta-Plugin-Liste",
 			filterPlaceholder: "Plugins filtern",
+			emptyState: "Noch keine Beta-Plugins hinzugefügt.",
 			description: {
 				intro:
 					'Dies ist die Liste der Beta-Plugins, die über den Befehl "add a beta plugin for testing" hinzugefügt wurden. Du kannst die neueste Version verwenden oder eine Version fixieren. Eine fixierte Version ist ein bestimmtes Plugin-Release anhand seines Release-Tags.',
@@ -99,6 +101,7 @@ export const de = {
 			heading: "Beta-Theme-Liste",
 			addBetaTheme: "Beta-Theme hinzufügen",
 			filterPlaceholder: "Themes filtern",
+			emptyState: "Noch keine Beta-Themes hinzugefügt.",
 			deleteThisBetaTheme: "Dieses Beta-Theme löschen",
 			confirmRemoval: "Zum Bestätigen erneut klicken",
 			copyThemeIdentifier: "Theme-Kennung kopieren",
