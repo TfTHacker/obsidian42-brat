@@ -5,6 +5,7 @@ import type BratPlugin from "../main";
 import { addBetaThemeToList, updateBetaThemeLastUpdateChecksum } from "../settings";
 import { isConnectedToInternet } from "../utils/internetconnection";
 import { toastMessage } from "../utils/notifications";
+import { isSafeVaultFolderName } from "../utils/utils";
 import { checksumForString, grabChecksumOfThemeCssFile, grabCommmunityThemeCssFile, grabCommmunityThemeManifestFile } from "./githubUtils";
 
 /**
@@ -34,7 +35,25 @@ export const themeSave = async (plugin: BratPlugin, cssGithubRepository: string,
 		return false;
 	}
 
-	const manifestInfo = (await JSON.parse(themeManifest)) as ThemeManifest;
+	let manifestInfo: ThemeManifest;
+	try {
+		manifestInfo = JSON.parse(themeManifest) as ThemeManifest;
+	} catch (error) {
+		console.error("BRAT - invalid theme manifest.json", cssGithubRepository, error);
+		toastMessage(plugin, text.noManifestFile);
+		return false;
+	}
+
+	// Security: the theme name comes verbatim from the remote manifest and is
+	// concatenated into the install path (.obsidian/themes/<name>). Reject names
+	// containing path separators or ".." so a malicious theme cannot escape the
+	// themes folder and overwrite other files.
+	if (!isSafeVaultFolderName(manifestInfo.name)) {
+		const msg = text.unsafeThemeName(cssGithubRepository, manifestInfo.name);
+		console.error("BRAT - unsafe theme name", cssGithubRepository, manifestInfo.name);
+		toastMessage(plugin, msg);
+		return false;
+	}
 
 	const themeTargetFolderPath = normalizePath(themesRootPath(plugin) + manifestInfo.name);
 

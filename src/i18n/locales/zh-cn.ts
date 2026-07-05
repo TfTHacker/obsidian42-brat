@@ -160,6 +160,8 @@ export const zhCn = {
 	themeMessages: {
 		noThemeCssFile: "这个仓库的根目录里没有 theme.css 或 theme-beta.css 文件，因此没有可安装的主题。",
 		noManifestFile: "这个仓库的根目录里没有 manifest.json 文件，因此无法安装该主题。",
+		unsafeThemeName: (repository: string, themeName: string): string =>
+			`${repository}：主题 manifest 声明了不安全的名称（“${themeName}”），因此无法安装此主题。`,
 		installed: (themeName: string, repository: string): string => `已从 ${repository} 安装主题 ${themeName}。`,
 		updated: (themeName: string, repository: string): string => `已从 ${repository} 更新主题 ${themeName}。`,
 		removed: (repository: string): string =>
