@@ -144,10 +144,12 @@ export const ja = {
 			selectVersionEllipsis: "バージョンを選択...",
 			latestVersion: "最新バージョン",
 			prereleaseSuffix: "（プレリリース）",
+			useLatestName: "常に最新バージョンを使用",
+			useLatestDesc: "このプラグインを最新リリースに保ち、自動的に更新します。オフにすると、一覧から特定のバージョンを固定できます。",
 		},
 		token: {
 			name: "GitHub トークン",
-			desc: "このリポジトリ用のトークンとして使用するシークレットを選択します（任意）",
+			desc: "「Link…」ボタンから、このリポジトリの GitHub トークンとして使う保存済みシークレットをリンクします（任意）。",
 			settingCleared: (repository: string): string => `${repository} のトークン設定をクリアしました`,
 			settingUpdated: (repository: string): string => `${repository} のトークン設定を更新しました`,
 		},

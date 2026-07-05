@@ -139,10 +139,13 @@ export const en = {
 			selectVersionEllipsis: "Select a version...",
 			latestVersion: "Latest version",
 			prereleaseSuffix: "(Prerelease)",
+			useLatestName: "Always use the latest version",
+			useLatestDesc:
+				"Keep this plugin on its newest release and update it automatically. Turn this off to pin a specific version from the list.",
 		},
 		token: {
 			name: "GitHub token",
-			desc: "Select a secret as token for this repository (optional)",
+			desc: "Use the Link… button to link a saved secret as the GitHub token for this repository (optional).",
 			settingCleared: (repository: string): string => `Token setting cleared for ${repository}`,
 			settingUpdated: (repository: string): string => `Token setting updated for ${repository}`,
 		},

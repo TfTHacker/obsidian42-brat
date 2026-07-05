@@ -139,10 +139,12 @@ export const zhCn = {
 			selectVersionEllipsis: "选择版本...",
 			latestVersion: "最新版本",
 			prereleaseSuffix: "（预发布）",
+			useLatestName: "始终使用最新版本",
+			useLatestDesc: "让此插件保持最新发布版本并自动更新。关闭后可从列表中固定某个特定版本。",
 		},
 		token: {
 			name: "GitHub 令牌",
-			desc: "选择一个密钥，作为访问此仓库的令牌（可选）",
+			desc: "使用“Link…”按钮，将已保存的密钥关联为此仓库的 GitHub 令牌（可选）。",
 			settingCleared: (repository: string): string => `已清除 ${repository} 的令牌设置`,
 			settingUpdated: (repository: string): string => `已更新 ${repository} 的令牌设置`,
 		},
