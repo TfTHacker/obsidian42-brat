@@ -50,18 +50,27 @@ export default class BratPlugin extends Plugin {
 					this.betaPlugins.checkIncompatiblePlugins();
 
 					if (this.settings.updateAtStartup) {
-						window.setTimeout(() => {
-							void this.betaPlugins.checkForPluginUpdatesAndInstallUpdates(false);
-						}, 60000);
+						// registerInterval so the timer is cancelled if BRAT unloads before it
+						// fires (clearInterval also clears setTimeout ids), avoiding update
+						// checks running against a dead plugin instance.
+						this.registerInterval(
+							window.setTimeout(() => {
+								void this.betaPlugins.checkForPluginUpdatesAndInstallUpdates(false);
+							}, 60000),
+						);
 					}
 					if (this.settings.updateThemesAtStartup) {
-						window.setTimeout(() => {
-							void themesCheckAndUpdates(this, false);
-						}, 120000);
+						this.registerInterval(
+							window.setTimeout(() => {
+								void themesCheckAndUpdates(this, false);
+							}, 120000),
+						);
 					}
-					window.setTimeout(() => {
-						window.bratAPI = this.bratApi;
-					}, 500);
+					this.registerInterval(
+						window.setTimeout(() => {
+							window.bratAPI = this.bratApi;
+						}, 500),
+					);
 				});
 			})
 			.catch((error: unknown) => {
@@ -75,6 +84,8 @@ export default class BratPlugin extends Plugin {
 
 	onunload(): void {
 		console.debug(`unloading ${this.APP_NAME}`);
+		// Remove the global API handle so it does not dangle after unload.
+		delete window.bratAPI;
 	}
 
 	async loadSettings(): Promise<void> {
