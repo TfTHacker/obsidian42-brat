@@ -373,7 +373,10 @@ export default class BetaPlugins {
 
 			const noticeTimeout = 10;
 			// attempt to get manifest-beta.json
-			let primaryManifest = await this.validateRepository(repositoryPath, true, true, specifyVersion, tokenValue);
+			// Don't report issues on the beta-manifest probe: most plugins have no beta
+			// manifest, so a failure here is expected and would produce a spurious toast
+			// on top of the regular-manifest attempt below.
+			let primaryManifest = await this.validateRepository(repositoryPath, true, false, specifyVersion, tokenValue);
 			const usingBetaManifest: boolean = !!primaryManifest;
 			// attempt to get manifest.json
 			if (!usingBetaManifest) primaryManifest = await this.validateRepository(repositoryPath, false, true, specifyVersion, tokenValue);

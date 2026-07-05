@@ -34,7 +34,7 @@ export const themeSave = async (plugin: BratPlugin, cssGithubRepository: string,
 		return false;
 	}
 
-	const manifestInfo = (await JSON.parse(themeManifest)) as ThemeManifest;
+	const manifestInfo = JSON.parse(themeManifest) as ThemeManifest;
 
 	const themeTargetFolderPath = normalizePath(themesRootPath(plugin) + manifestInfo.name);
 
@@ -82,12 +82,18 @@ export const themesCheckAndUpdates = async (plugin: BratPlugin, showInfo: boolea
 	await plugin.log(msg1, true);
 	if (showInfo && plugin.settings.notificationsEnabled) newNotice = new Notice(`BRAT\n${msg1}`, 30000);
 	for (const t of plugin.settings.themesList) {
-		// first test to see if theme-beta.css exists
-		let lastUpdateOnline = await grabChecksumOfThemeCssFile(t.repo, true, plugin.settings.debuggingMode);
-		// if theme-beta.css does NOT exist, try to get theme.css
-		if (lastUpdateOnline === "0") lastUpdateOnline = await grabChecksumOfThemeCssFile(t.repo, false, plugin.settings.debuggingMode);
-		console.debug("BRAT: lastUpdateOnline", lastUpdateOnline);
-		if (lastUpdateOnline !== t.lastUpdate) await themeSave(plugin, t.repo, false);
+		// Guard each theme independently so one bad manifest/repo doesn't abort the
+		// whole update loop (and leave the "STARTED" notice hanging).
+		try {
+			// first test to see if theme-beta.css exists
+			let lastUpdateOnline = await grabChecksumOfThemeCssFile(t.repo, true, plugin.settings.debuggingMode);
+			// if theme-beta.css does NOT exist, try to get theme.css
+			if (lastUpdateOnline === "0") lastUpdateOnline = await grabChecksumOfThemeCssFile(t.repo, false, plugin.settings.debuggingMode);
+			console.debug("BRAT: lastUpdateOnline", lastUpdateOnline);
+			if (lastUpdateOnline !== t.lastUpdate) await themeSave(plugin, t.repo, false);
+		} catch (error) {
+			console.error("BRAT - theme update failed", t.repo, error);
+		}
 	}
 	const msg2 = "Checking for beta theme updates COMPLETED";
 	await plugin.log(msg2, true);

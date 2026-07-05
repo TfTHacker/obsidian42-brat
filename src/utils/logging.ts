@@ -59,7 +59,7 @@ export async function logger(
 			? (window.require("os") as { hostname: () => string })
 			: null;
 		const machineName = Platform.isDesktop ? os?.hostname() : "MOBILE";
-		const output = `${dateOutput} ${machineName} ${textToLog.replace("\n", " ")}\n`;
+		const output = `${dateOutput} ${machineName} ${textToLog.replace(/\n/g, " ")}\n`;
 
 		const file = plugin.app.vault.getAbstractFileByPath(fileName);
 		if (!(file instanceof TFile)) {
