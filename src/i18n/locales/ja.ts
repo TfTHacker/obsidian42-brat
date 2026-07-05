@@ -125,6 +125,7 @@ export const ja = {
 		repository: {
 			label: "リポジトリ",
 			placeholder: "リポジトリ（例：https://GitHub.com/githubusername/repository-name）",
+			pasteTooltip: "クリップボードから貼り付け",
 			enterAddressToValidate: "検証する GitHub リポジトリアドレスを入力してください。",
 			addressRequired: "リポジトリアドレスが必要です。",
 			validating: "リポジトリアドレスを検証中...",

@@ -121,6 +121,7 @@ export const en = {
 		repository: {
 			label: "Repository",
 			placeholder: "Repository (example: https://GitHub.com/githubusername/repository-name)",
+			pasteTooltip: "Paste from clipboard",
 			enterAddressToValidate: "Enter a GitHub repository address to validate it.",
 			addressRequired: "Repository address is required.",
 			validating: "Validating repository address...",

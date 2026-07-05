@@ -127,6 +127,7 @@ export const de = {
 		repository: {
 			label: "Repository",
 			placeholder: "Repository (Beispiel: https://GitHub.com/githubusername/repository-name)",
+			pasteTooltip: "Aus Zwischenablage einfügen",
 			enterAddressToValidate: "Gib eine GitHub-Repository-Adresse ein, um sie zu validieren.",
 			addressRequired: "Repository-Adresse ist erforderlich.",
 			validating: "Repository-Adresse wird validiert...",

@@ -246,6 +246,31 @@ export default class AddNewPluginModal extends Modal {
 						setting.setDesc(text.repository.label);
 						addressEl.inputEl.addClass("brat-full-width-input");
 					});
+
+					// Convenience "paste from clipboard" button next to the repository input
+					setting.addExtraButton((pasteBtn) => {
+						pasteBtn
+							.setIcon("clipboard-paste")
+							.setTooltip(text.repository.pasteTooltip)
+							.onClick(() => {
+								void (async () => {
+									try {
+										if (!navigator.clipboard?.readText) return;
+										const pasted = (await navigator.clipboard.readText()).trim();
+										if (!pasted) return;
+
+										this.repositoryAddressEl?.setValue(pasted);
+										this.address = scrubRepositoryUrl(pasted);
+										if (!this.version) {
+											this.addPluginButton?.setDisabled(!this.isGitHubRepositoryMatch(this.address));
+										}
+										await this.updateRepositoryVersionInfo(this.version, validationStatusEl);
+									} catch (error) {
+										console.error("Failed to paste repository address", error);
+									}
+								})();
+							});
+					});
 				});
 			}
 			// Add validation status element (as a separate element)

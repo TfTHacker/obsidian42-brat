@@ -122,6 +122,7 @@ export const zhCn = {
 		repository: {
 			label: "仓库",
 			placeholder: "仓库（示例：https://GitHub.com/githubusername/repository-name）",
+			pasteTooltip: "从剪贴板粘贴",
 			enterAddressToValidate: "输入 GitHub 仓库地址后会自动验证。",
 			addressRequired: "需要填写仓库地址。",
 			validating: "正在验证仓库地址...",
