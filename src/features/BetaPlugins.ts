@@ -41,6 +41,29 @@ export interface GraduatedPlugin {
 }
 
 /**
+ * Options for {@link BetaPlugins.addPlugin}. Only `repositoryPath` is required;
+ * every other field defaults as documented on the method.
+ */
+export interface AddPluginOptions {
+	/** path to GitHub repository formatted as USERNAME/repository */
+	repositoryPath: string;
+	/** true if this is just an update, not an install */
+	updatePluginFiles?: boolean;
+	/** if true (with updatePluginFiles), only check for updates without applying them */
+	seeIfUpdatedOnly?: boolean;
+	/** if true, report when an update did not succeed */
+	reportIfNotUpdted?: boolean;
+	/** if set, install this specific version instead of the manifest-beta.json value */
+	specifyVersion?: string;
+	/** if true, force a reinstall even if the plugin is already installed */
+	forceReinstall?: boolean;
+	/** if true, enable the plugin after install (defaults to the user setting) */
+	enableAfterInstall?: boolean;
+	/** name of the secret in SecretStorage to use as the token for this repo */
+	secretName?: string;
+}
+
+/**
  * Primary handler for adding, updating, deleting beta plugins tracked by this plugin
  */
 export default class BetaPlugins {
@@ -320,27 +343,21 @@ export default class BetaPlugins {
 	 * Primary function for adding a new beta plugin to Obsidian.
 	 * Also this function is used for updating existing plugins.
 	 *
-	 * @param repositoryPath    - path to GitHub repository formated as USERNAME/repository
-	 * @param updatePluginFiles - true if this is just an update not an install
-	 * @param seeIfUpdatedOnly  - if true, and updatePluginFiles true, will just check for updates, but not do the update. will report to user that there is a new plugin
-	 * @param reportIfNotUpdted - if true, report if an update has not succed
-	 * @param specifyVersion    - if not empty, need to install a specified version instead of the value in manifest-beta.json
-	 * @param forceReinstall    - if true, will force a reinstall of the plugin, even if it is already installed
-	 * @param enableAfterInstall - if true, will enable the plugin after install
-	 * @param privateApiKey     - if not empty, will use the private API key to access the repository, otherwise a PAT from settings will be used if available
+	 * @param options - see {@link AddPluginOptions}
 	 *
 	 * @returns true if succeeds
 	 */
-	async addPlugin(
-		repositoryPath: string,
-		updatePluginFiles = false,
-		seeIfUpdatedOnly = false,
-		reportIfNotUpdted = false,
-		specifyVersion = "",
-		forceReinstall = false,
-		enableAfterInstall = this.plugin.settings.enableAfterInstall,
-		secretName = "", // Name of secret in SecretStorage
-	): Promise<boolean> {
+	async addPlugin(options: AddPluginOptions): Promise<boolean> {
+		const {
+			repositoryPath,
+			updatePluginFiles = false,
+			seeIfUpdatedOnly = false,
+			reportIfNotUpdted = false,
+			specifyVersion = "",
+			forceReinstall = false,
+			enableAfterInstall = this.plugin.settings.enableAfterInstall,
+			secretName = "", // Name of secret in SecretStorage
+		} = options;
 		try {
 			if (this.plugin.settings.debuggingMode) {
 				console.debug(
@@ -552,7 +569,13 @@ export default class BetaPlugins {
 					if ((e as ErrnoType).errno === -4058 || (e as ErrnoType).errno === -2) {
 						// file does not exist, try installing the plugin (seeIfUpdatedOnly must
 						// be false here so the plugin is actually installed, not just checked)
-						await this.addPlugin(repositoryPath, false, false, false, specifyVersion, false, enableAfterInstall, secretName);
+						await this.addPlugin({
+							repositoryPath,
+							seeIfUpdatedOnly: false,
+							specifyVersion,
+							enableAfterInstall,
+							secretName,
+						});
 						// even though failed, return true since install will be attempted
 						return true;
 					}
@@ -673,16 +696,15 @@ export default class BetaPlugins {
 		forceReinstall = false,
 		secretName = "",
 	): Promise<boolean> {
-		const result = await this.addPlugin(
+		const result = await this.addPlugin({
 			repositoryPath,
-			true,
-			onlyCheckDontUpdate,
+			updatePluginFiles: true,
+			seeIfUpdatedOnly: onlyCheckDontUpdate,
 			reportIfNotUpdted,
-			"",
 			forceReinstall,
-			false,
+			enableAfterInstall: false,
 			secretName,
-		);
+		});
 		if (!result && !onlyCheckDontUpdate) toastMessage(this.plugin, `${repositoryPath}\nUpdate of plugin failed.`);
 		return result;
 	}
