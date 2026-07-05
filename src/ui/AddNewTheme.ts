@@ -1,4 +1,5 @@
 import { ButtonComponent, Modal, Setting } from "obsidian";
+import { scrubRepositoryUrl } from "../features/githubUtils";
 import { themeSave } from "../features/themes";
 import { getTranslations } from "../i18n";
 import type BratPlugin from "../main";
@@ -26,7 +27,7 @@ export default class AddNewTheme extends Modal {
 	async submitForm(): Promise<void> {
 		const text = getTranslations();
 		if (this.address === "") return;
-		const scrubbedAddress = this.address.replace("https://github.com/", "");
+		const scrubbedAddress = scrubRepositoryUrl(this.address);
 		if (existBetaThemeinInList(this.plugin, scrubbedAddress)) {
 			toastMessage(this.plugin, text.addBetaThemeModal.alreadyInList, 10);
 			return;
@@ -53,7 +54,7 @@ export default class AddNewTheme extends Modal {
 					this.address = value.trim();
 				});
 				textEl.inputEl.addEventListener("keydown", (e: KeyboardEvent) => {
-					if (e.key === "Enter" && this.address !== " ") {
+					if (e.key === "Enter" && this.address !== "") {
 						e.preventDefault();
 						void this.submitForm();
 					}
