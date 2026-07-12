@@ -24,14 +24,19 @@ export default class AddNewPluginModal extends Modal {
 	version: string;
 	versionSetting: Setting | null = null;
 
+	// "Use latest version" checkbox state. When true, the plugin tracks the latest
+	// release and the version dropdown is greyed out. Seeded per-add from the global
+	// selectLatestPluginVersionByDefault setting; toggling it does not change the global.
+	useLatestVersion: boolean;
+	// Versions loaded for the current repository (used to rebuild the dropdown on toggle).
+	private loadedVersions: ReleaseVersion[] = [];
+	private versionsAvailable = false;
+
 	// Repository Setting
 	repositoryAddressEl: TextComponent | null = null;
 
 	// Token Validation
 	secretName: string;
-	validToken: boolean | undefined;
-	tokenInputEl: SecretComponent | null = null;
-	validateButton: ButtonComponent | null = null;
 	validator: TokenValidator | null = null;
 
 	// Plugin install action
@@ -60,6 +65,37 @@ export default class AddNewPluginModal extends Modal {
 		this.updateVersion = updateVersion;
 		this.enableAfterInstall = plugin.settings.enableAfterInstall;
 		this.onSubmitted = onSubmitted;
+
+		// Seed the "use latest" checkbox: an explicit prefilled version wins, otherwise
+		// fall back to the user's global default.
+		this.useLatestVersion = this.version ? this.version === "latest" : plugin.settings.selectLatestPluginVersionByDefault;
+		if (this.useLatestVersion) this.version = "latest";
+	}
+
+	/** Grey out / enable the version dropdown to match the "use latest" checkbox. */
+	private applyVersionSelectionState(): void {
+		if (!this.versionSetting) return;
+		if (this.useLatestVersion) {
+			this.versionSetting.settingEl.classList.add("disabled-setting");
+			this.versionSetting.setDisabled(true);
+		} else if (this.versionsAvailable) {
+			// Only re-enable once versions have actually loaded for the current repo.
+			this.versionSetting.settingEl.classList.remove("disabled-setting");
+			this.versionSetting.setDisabled(false);
+			this.updateVersionDropdown(this.versionSetting, this.loadedVersions, this.version);
+		}
+		this.updateAddButtonState();
+	}
+
+	/** Enable "Add plugin" only when the repo is valid and a version choice exists. */
+	private updateAddButtonState(): void {
+		if (this.updateVersion && !this.address) {
+			this.addPluginButton?.setDisabled(true);
+			return;
+		}
+		const repoOk = this.isGitHubRepositoryMatch(this.address);
+		const needsVersion = !this.useLatestVersion && this.version === "";
+		this.addPluginButton?.setDisabled(!repoOk || needsVersion);
 	}
 
 	async submitForm(): Promise<void> {
@@ -87,9 +123,8 @@ export default class AddNewPluginModal extends Modal {
 
 			// Reset modal if we don't close (i.e. because plugin could not be installed)
 			this.cancelButton?.setDisabled(false);
-			this.addPluginButton?.setDisabled(false);
 			this.addPluginButton?.setButtonText(text.buttons.addPlugin);
-			this.versionSetting?.setDisabled(false);
+			this.applyVersionSelectionState();
 
 			return;
 		}
@@ -116,9 +151,8 @@ export default class AddNewPluginModal extends Modal {
 
 		// Reset modal if we don't close (i.e. because plugin could not be installed)
 		this.cancelButton?.setDisabled(false);
-		this.addPluginButton?.setDisabled(false);
 		this.addPluginButton?.setButtonText(text.buttons.addPlugin);
-		this.versionSetting?.setDisabled(false);
+		this.applyVersionSelectionState();
 	}
 
 	private updateVersionDropdown(settingEl: Setting, versions: ReleaseVersion[], selected = ""): void {
@@ -146,7 +180,7 @@ export default class AddNewPluginModal extends Modal {
 				}
 				dropdown.onChange((value: string) => {
 					this.version = value;
-					this.addPluginButton?.setDisabled(this.version === "");
+					this.updateAddButtonState();
 				});
 				dropdown.setValue(selectedVersion);
 
@@ -168,7 +202,7 @@ export default class AddNewPluginModal extends Modal {
 						const modal = new VersionSuggestModal(this.app, this.address, suggestedVersions, selectedVersion, (version: string) => {
 							this.version = version;
 							button.setButtonText(version === "latest" ? text.version.latestVersion : version || text.version.selectVersionEllipsis);
-							this.addPluginButton?.setDisabled(this.version === "");
+							this.updateAddButtonState();
 						});
 						modal.open();
 					});
@@ -213,11 +247,8 @@ export default class AddNewPluginModal extends Modal {
 								}
 							}
 
-							// If the GitHub Repository matches the GitHub pattern, enable the "Add Plugin"
-							if (!this.version) {
-								if (this.isGitHubRepositoryMatch(this.address)) this.addPluginButton?.setDisabled(false);
-								else this.addPluginButton?.setDisabled(true);
-							}
+							// Enable/disable "Add plugin" based on repo validity and version choice.
+							this.updateAddButtonState();
 						});
 
 						addressEl.inputEl.addEventListener("keydown", (e: KeyboardEvent) => {
@@ -246,12 +277,56 @@ export default class AddNewPluginModal extends Modal {
 						setting.setDesc(text.repository.label);
 						addressEl.inputEl.addClass("brat-full-width-input");
 					});
+
+					// Convenience "paste from clipboard" button next to the repository input
+					setting.addExtraButton((pasteBtn) => {
+						pasteBtn
+							.setIcon("clipboard-paste")
+							.setTooltip(text.repository.pasteTooltip)
+							.onClick(() => {
+								void (async () => {
+									try {
+										if (!navigator.clipboard?.readText) return;
+										const pasted = (await navigator.clipboard.readText()).trim();
+										if (!pasted) return;
+
+										this.repositoryAddressEl?.setValue(pasted);
+										this.address = scrubRepositoryUrl(pasted);
+										if (!this.version) {
+											this.addPluginButton?.setDisabled(!this.isGitHubRepositoryMatch(this.address));
+										}
+										await this.updateRepositoryVersionInfo(this.version, validationStatusEl);
+									} catch (error) {
+										console.error("Failed to paste repository address", error);
+									}
+								})();
+							});
+					});
 				});
 			}
 			// Add validation status element (as a separate element)
 			// TODO: Find better way to build the modal
 			const validationStatusEl = formEl.createDiv("validation-status");
 			if (!this.address) validationStatusEl.setText(text.repository.enterAddressToValidate);
+
+			// "Use latest version" checkbox with explanatory text, shown to the left of
+			// the version dropdown. When checked, the dropdown below is greyed out and
+			// the plugin tracks the latest release.
+			new Setting(formEl)
+				.setClass("latest-version-setting")
+				.setName(text.version.useLatestName)
+				.setDesc(text.version.useLatestDesc)
+				.addToggle((toggle) => {
+					toggle.setValue(this.useLatestVersion).onChange((value) => {
+						this.useLatestVersion = value;
+						if (value) {
+							this.version = "latest";
+						} else if (this.version === "latest") {
+							this.version = "";
+						}
+						this.applyVersionSelectionState();
+					});
+				});
 
 			// Then add version dropdown
 			this.versionSetting = new Setting(formEl).setClass("version-setting").setClass("disabled-setting");
@@ -278,23 +353,15 @@ export default class AddNewPluginModal extends Modal {
 							}
 							const tokenValue = this.secretName ? this.plugin.app.secretStorage.getSecret(this.secretName) : null;
 							if (tokenValue) {
-								this.validToken = await this.validator?.validateToken(tokenValue, this.address);
-								if (!this.validToken) {
-									this.validateButton?.setButtonText(text.buttons.invalid);
-									this.validateButton?.setDisabled(false);
-								} else {
-									this.validateButton?.setButtonText(text.buttons.valid);
-									this.validateButton?.setDisabled(true);
+								const validToken = await this.validator?.validateToken(tokenValue, this.address);
+								if (validToken && this.address) {
+									// Refresh the version dropdown now that a (valid) token is available.
+									await this.updateRepositoryVersionInfo(this.version, validationStatusEl);
 
-									// Update version dropdown when API key changes
-									if (this.address) {
-										await this.updateRepositoryVersionInfo(this.version, validationStatusEl);
-
-										// Update the secret name for this plugin in the settings if it already exists there
-										if (existBetaPluginInList(this.plugin, this.address)) {
-											updatePluginTokenName(this.plugin, this.address, this.secretName);
-											toastMessage(this.plugin, text.token.settingUpdated(this.address), 3);
-										}
+									// Update the secret name for this plugin in the settings if it already exists there
+									if (existBetaPluginInList(this.plugin, this.address)) {
+										updatePluginTokenName(this.plugin, this.address, this.secretName);
+										toastMessage(this.plugin, text.token.settingUpdated(this.address), 3);
 									}
 								}
 							}
@@ -302,23 +369,8 @@ export default class AddNewPluginModal extends Modal {
 					}),
 				);
 
-			// Initialize validator
+			// Initialize validator (used by the token selector's onChange above).
 			this.validator = new TokenValidator();
-
-			// Validate the current token if we have a secret name
-			if (this.secretName) {
-				const tokenValue = this.plugin.app.secretStorage.getSecret(this.secretName);
-				if (tokenValue) {
-					// Validate asynchronously on initial load
-					void this.validator?.validateToken(tokenValue, this.address).then((isValid) => {
-						this.validToken = isValid;
-						if (this.validToken) {
-							this.validateButton?.setButtonText(text.buttons.valid);
-							this.validateButton?.setDisabled(true);
-						}
-					});
-				}
-			}
 
 			formEl.createDiv("modal-button-container", (buttonContainerEl) => {
 				buttonContainerEl.createEl(
@@ -456,11 +508,14 @@ export default class AddNewPluginModal extends Modal {
 				validateInputEl?.inputEl.classList.add("valid-repository");
 				validationStatusEl?.setText("");
 
+				this.loadedVersions = versions;
+				this.versionsAvailable = true;
+
 				if (this.versionSetting) {
-					this.versionSetting.settingEl.classList.remove("disabled-setting");
-					this.versionSetting.setDisabled(false);
-					// Add new dropdown to existing version setting
+					// Build the dropdown from the loaded versions, then let the "use latest"
+					// checkbox decide whether it stays greyed out.
 					this.updateVersionDropdown(this.versionSetting, versions, selectedVersion);
+					this.applyVersionSelectionState();
 				}
 			} else {
 				// Add invalid-repository class
@@ -469,6 +524,7 @@ export default class AddNewPluginModal extends Modal {
 				validationStatusEl?.setText(text.repository.noReleasesFound);
 				validationStatusEl?.addClass("validation-status-error");
 
+				this.versionsAvailable = false;
 				this.versionSetting?.settingEl.classList.add("disabled-setting");
 				this.versionSetting?.setDisabled(true);
 				this.addPluginButton?.setDisabled(true);

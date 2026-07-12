@@ -53,32 +53,38 @@ export class BratSettingsTab extends PluginSettingTab {
 
 		return [
 			{
-				name: text.general.autoEnablePluginsAfterInstallation.name,
-				desc: text.general.autoEnablePluginsAfterInstallation.desc,
-				control: { type: "toggle", key: "enableAfterInstall" },
-			},
-			{
-				name: text.general.autoUpdatePluginsAtStartup.name,
-				desc: text.general.autoUpdatePluginsAtStartup.desc,
-				control: { type: "toggle", key: "updateAtStartup" },
-			},
-			{
-				name: text.general.autoUpdateThemesAtStartup.name,
-				desc: text.general.autoUpdateThemesAtStartup.desc,
-				control: { type: "toggle", key: "updateThemesAtStartup" },
-			},
-			{
-				name: text.general.selectLatestPluginVersionByDefault.name,
-				desc: text.general.selectLatestPluginVersionByDefault.desc,
-				control: {
-					type: "toggle",
-					key: "selectLatestPluginVersionByDefault",
-				},
-			},
-			{
-				name: text.general.allowIncompatiblePlugins.name,
-				desc: text.general.allowIncompatiblePlugins.desc,
-				control: { type: "toggle", key: "allowIncompatiblePlugins" },
+				type: "group",
+				heading: text.general.heading,
+				items: [
+					{
+						name: text.general.autoEnablePluginsAfterInstallation.name,
+						desc: text.general.autoEnablePluginsAfterInstallation.desc,
+						control: { type: "toggle", key: "enableAfterInstall" },
+					},
+					{
+						name: text.general.autoUpdatePluginsAtStartup.name,
+						desc: text.general.autoUpdatePluginsAtStartup.desc,
+						control: { type: "toggle", key: "updateAtStartup" },
+					},
+					{
+						name: text.general.autoUpdateThemesAtStartup.name,
+						desc: text.general.autoUpdateThemesAtStartup.desc,
+						control: { type: "toggle", key: "updateThemesAtStartup" },
+					},
+					{
+						name: text.general.selectLatestPluginVersionByDefault.name,
+						desc: text.general.selectLatestPluginVersionByDefault.desc,
+						control: {
+							type: "toggle",
+							key: "selectLatestPluginVersionByDefault",
+						},
+					},
+					{
+						name: text.general.allowIncompatiblePlugins.name,
+						desc: text.general.allowIncompatiblePlugins.desc,
+						control: { type: "toggle", key: "allowIncompatiblePlugins" },
+					},
+				],
 			},
 			this.createPluginListDefinition(),
 			this.createThemeListDefinition(),
@@ -540,6 +546,7 @@ export class BratSettingsTab extends PluginSettingTab {
 		return {
 			type: "list",
 			heading: text.betaPluginList.heading,
+			emptyState: text.betaPluginList.emptyState,
 			search: this.createListSearch(text.betaPluginList.filterPlaceholder),
 			addItem: {
 				name: text.betaPluginList.addBetaPlugin,
@@ -548,7 +555,9 @@ export class BratSettingsTab extends PluginSettingTab {
 				},
 			},
 			items: [
-				this.createPluginListDescriptionItem(),
+				// Only show the "edit/remove" guidance when there is at least one plugin;
+				// otherwise the list is empty and the emptyState message is shown instead.
+				...(this.plugin.settings.pluginList.length ? [this.createPluginListDescriptionItem()] : []),
 				...this.plugin.settings.pluginList.map((repository) => {
 					const trackedPlugin = frozenVersions.get(repository);
 					return {
@@ -569,6 +578,7 @@ export class BratSettingsTab extends PluginSettingTab {
 		return {
 			type: "list",
 			heading: text.betaThemeList.heading,
+			emptyState: text.betaThemeList.emptyState,
 			search: this.createListSearch(text.betaThemeList.filterPlaceholder),
 			addItem: {
 				name: text.betaThemeList.addBetaTheme,
