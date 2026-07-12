@@ -9,6 +9,7 @@ export const ja = {
 	},
 	settings: {
 		general: {
+			heading: "一般",
 			autoEnablePluginsAfterInstallation: {
 				name: "インストール後に Beta プラグインを自動で有効化",
 				desc: "有効にすると、新しくインストールした Beta プラグインは既定で自動的に有効になります。個別のプラグインについては「プラグインを追加」フォームで切り替えられます。",
@@ -70,6 +71,7 @@ export const ja = {
 		betaPluginList: {
 			heading: "Beta プラグイン一覧",
 			filterPlaceholder: "プラグインを絞り込み",
+			emptyState: "ベータプラグインはまだ追加されていません。",
 			description: {
 				intro:
 					'以下は、"add a beta plugin for testing" コマンドで追加された Beta プラグインの一覧です。最新バージョンを使うことも、特定のバージョンに固定することもできます。固定バージョンとは、リリースタグに基づく特定のプラグインリリースです。',
@@ -97,6 +99,7 @@ export const ja = {
 			heading: "Beta テーマ一覧",
 			addBetaTheme: "Beta テーマを追加",
 			filterPlaceholder: "テーマを絞り込み",
+			emptyState: "ベータテーマはまだ追加されていません。",
 			deleteThisBetaTheme: "この Beta テーマを削除",
 			confirmRemoval: "もう一度クリックして削除を確認",
 			copyThemeIdentifier: "テーマ識別子をコピー",
@@ -122,6 +125,7 @@ export const ja = {
 		repository: {
 			label: "リポジトリ",
 			placeholder: "リポジトリ（例：https://GitHub.com/githubusername/repository-name）",
+			pasteTooltip: "クリップボードから貼り付け",
 			enterAddressToValidate: "検証する GitHub リポジトリアドレスを入力してください。",
 			addressRequired: "リポジトリアドレスが必要です。",
 			validating: "リポジトリアドレスを検証中...",
@@ -140,10 +144,12 @@ export const ja = {
 			selectVersionEllipsis: "バージョンを選択...",
 			latestVersion: "最新バージョン",
 			prereleaseSuffix: "（プレリリース）",
+			useLatestName: "常に最新バージョンを使用",
+			useLatestDesc: "このプラグインを最新リリースに保ち、自動的に更新します。オフにすると、一覧から特定のバージョンを固定できます。",
 		},
 		token: {
 			name: "GitHub トークン",
-			desc: "このリポジトリ用のトークンとして使用するシークレットを選択します（任意）",
+			desc: "「Link…」ボタンから、このリポジトリの GitHub トークンとして使う保存済みシークレットをリンクします（任意）。",
 			settingCleared: (repository: string): string => `${repository} のトークン設定をクリアしました`,
 			settingUpdated: (repository: string): string => `${repository} のトークン設定を更新しました`,
 		},

@@ -168,8 +168,29 @@
   float: right;
 }
 
+/* Repository input + paste button sit on one row, input flexes to fill */
+.brat-modal .repository-setting .setting-item-control {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.brat-modal .repository-setting .brat-full-width-input {
+  flex: 1;
+}
+
+/* Modal footer: promotional block left-aligned on a single line */
 .brat-promotional-links-modal {
-  padding: 10px 15px;
+  float: none;
+  padding: 10px 0 0;
+}
+.brat-promotional-links-modal .brat-promotional-links-coffee {
+  padding-left: 0;
+}
+.brat-promotional-links-modal .coffee {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  align-items: baseline;
 }
 
 .brat-promotional-links-settings {
