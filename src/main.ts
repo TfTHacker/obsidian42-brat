@@ -37,13 +37,13 @@ export default class BratPlugin extends Plugin {
 		// before the tab exists and the button only appears after a disable/enable.
 		// settings is already initialized to DEFAULT_SETTINGS, and display() runs
 		// lazily when the user opens the tab, so no loaded data is required here.
-		this.addSettingTab(this.settingsTab);
 
 		this.loadSettings()
 			.then(async () => {
 				// Migrate tokens to SecretStorage (Obsidian 1.11.4+)
 				await migrateTokensToSecretStorage(this.app, this.settings, () => this.saveSettings());
 
+				this.addSettingTab(this.settingsTab);
 				this.app.workspace.onLayoutReady(() => {
 					this.registerObsidianProtocolHandler("brat", this.obsidianProtocolHandler);
 
