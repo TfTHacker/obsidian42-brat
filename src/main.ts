@@ -41,7 +41,10 @@ export default class BratPlugin extends Plugin {
 		this.loadSettings()
 			.then(async () => {
 				// Migrate tokens to SecretStorage (Obsidian 1.11.4+)
-				await migrateTokensToSecretStorage(this.app, this.settings, () => this.saveSettings());
+				// Use the plugin's actual folder (manifest.dir) rather than a hard-coded
+				// name so the migration log resolves correctly for renamed/dev installs.
+				const pluginDir = this.manifest.dir ?? `${this.app.vault.configDir}/plugins/${this.manifest.id}`;
+				await migrateTokensToSecretStorage(this.app, this.settings, () => this.saveSettings(), pluginDir);
 
 				this.addSettingTab(this.settingsTab);
 				this.app.workspace.onLayoutReady(() => {
