@@ -161,6 +161,8 @@ export const en = {
 	themeMessages: {
 		noThemeCssFile: "There is no theme.css or theme-beta.css file in the root path of this repository, so there is no theme to install.",
 		noManifestFile: "There is no manifest.json file in the root path of this repository, so theme cannot be installed.",
+		unsafeThemeName: (repository: string, themeName: string): string =>
+			`${repository}: the theme manifest declares an unsafe name ("${themeName}"), so this theme cannot be installed.`,
 		installed: (themeName: string, repository: string): string => `${themeName} theme installed from ${repository}. `,
 		updated: (themeName: string, repository: string): string => `${themeName} theme updated from ${repository}.`,
 		removed: (repository: string): string =>

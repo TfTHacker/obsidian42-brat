@@ -165,6 +165,8 @@ export const ja = {
 	themeMessages: {
 		noThemeCssFile: "このリポジトリのルートパスには theme.css または theme-beta.css がないため、インストールできるテーマがありません。",
 		noManifestFile: "このリポジトリのルートパスには manifest.json がないため、テーマをインストールできません。",
+		unsafeThemeName: (repository: string, themeName: string): string =>
+			`${repository}: テーマの manifest に安全でない名前（「${themeName}」）が指定されているため、このテーマはインストールできません。`,
 		installed: (themeName: string, repository: string): string => `${repository} からテーマ ${themeName} をインストールしました。`,
 		updated: (themeName: string, repository: string): string => `${repository} からテーマ ${themeName} を更新しました。`,
 		removed: (repository: string): string =>

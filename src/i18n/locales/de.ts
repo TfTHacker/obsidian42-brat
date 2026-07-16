@@ -169,6 +169,8 @@ export const de = {
 			"Im Stammverzeichnis dieses Repositorys gibt es keine Datei theme.css oder theme-beta.css, daher kann kein Theme installiert werden.",
 		noManifestFile:
 			"Im Stammverzeichnis dieses Repositorys gibt es keine Datei manifest.json, daher kann das Theme nicht installiert werden.",
+		unsafeThemeName: (repository: string, themeName: string): string =>
+			`${repository}: Das Theme-Manifest deklariert einen unsicheren Namen („${themeName}“), daher kann dieses Theme nicht installiert werden.`,
 		installed: (themeName: string, repository: string): string => `Theme ${themeName} wurde aus ${repository} installiert. `,
 		updated: (themeName: string, repository: string): string => `Theme ${themeName} wurde aus ${repository} aktualisiert.`,
 		removed: (repository: string): string =>
