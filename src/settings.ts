@@ -70,10 +70,8 @@ export function addBetaPluginToList(
 	isIncompatible = false,
 	secretName = "",
 ): void {
-	let save = false;
 	if (!plugin.settings.pluginList.contains(repositoryPath)) {
 		plugin.settings.pluginList.unshift(repositoryPath);
-		save = true;
 	}
 
 	// If it's an existing frozen version plugin, update it instead of checking for duplicates
@@ -88,7 +86,6 @@ export function addBetaPluginToList(
 			tokenName: secretName || existingFrozenPlugin.tokenName,
 			isIncompatible: isIncompatible || undefined,
 		});
-		save = true;
 	} else {
 		plugin.settings.pluginSubListFrozenVersion.unshift({
 			repo: repositoryPath,
@@ -97,11 +94,9 @@ export function addBetaPluginToList(
 			tokenName: secretName || undefined,
 			isIncompatible: isIncompatible || undefined,
 		});
-		save = true;
 	}
-	if (save) {
-		void plugin.saveSettings();
-	}
+	// Every branch above mutates settings, so always persist.
+	void plugin.saveSettings();
 }
 
 /**
@@ -190,10 +185,9 @@ export function updateBetaThemeLastUpdateChecksum(
 	repositoryPath: string,
 	checksum: string,
 ): void {
-	for (const t of plugin.settings.themesList) {
-		if (t.repo === repositoryPath) {
-			t.lastUpdate = checksum;
-			void plugin.saveSettings();
-		}
+	const theme = plugin.settings.themesList.find((t) => t.repo === repositoryPath);
+	if (theme) {
+		theme.lastUpdate = checksum;
+		void plugin.saveSettings();
 	}
 }
