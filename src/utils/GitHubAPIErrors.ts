@@ -24,10 +24,15 @@ export class GitHubResponseError extends Error {
 	public readonly headers: GitHubResponseHeaders;
 
 	constructor(error: Error) {
-		super(`GitHub API error ${error}: ${error.message}`);
+		// The old super() message ("GitHub API error <stringified error>: ...") was
+		// immediately overwritten by this.message below, so it never surfaced. Pass the
+		// real message straight through.
+		super(error.message);
 
+		// message is a declared class field, so it must be assigned here (a field with no
+		// initializer would otherwise reset the Error-set message to undefined).
 		this.message = error.message;
-		const ghError = error as GitHubResponseError;
+		const ghError = error as Partial<GitHubResponseError>;
 		this.status = ghError.status ?? 400;
 		this.headers = ghError.headers ?? {};
 
