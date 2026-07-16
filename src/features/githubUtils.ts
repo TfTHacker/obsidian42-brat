@@ -571,7 +571,9 @@ export const grabReleaseFromRepository = async (
 			Accept: "application/vnd.github.v3+json",
 		};
 
-		if ((isPrivate && personalAccessToken) || personalAccessToken) {
+		// A token raises rate limits on public repos too, so attach it whenever present
+		// (the previous `(isPrivate && token) || token` was just `token`).
+		if (personalAccessToken) {
 			headers.Authorization = `Token ${personalAccessToken}`;
 		}
 
@@ -644,11 +646,9 @@ export const grabReleaseFromRepository = async (
 /**
  *	Wrapper for Obsidian `request` that catches GitHub Rate Limits
  *	@param options - Request options
- *	@param debugLogging - Enable debug logging (default: true)
  */
 export const gitHubRequest = async (
 	options: RequestUrlParam,
-	debugLogging?: true,
 ): Promise<RequestUrlResponse> => {
 	let limit = 0;
 	let remaining = 0;
@@ -679,21 +679,16 @@ export const gitHubRequest = async (
 				reset,
 				options.url,
 			);
-
-			if (debugLogging) {
-				console.error(
-					"BRAT\nGitHub API rate limit exceeded:",
-					`\nRequest: ${rateLimitError.requestUrl}`,
-					`\nRate limits - Remaining: ${rateLimitError.remaining}`,
-					`\nReset in: ${rateLimitError.getMinutesToReset()} minutes`,
-				);
-			}
+			console.error(
+				"BRAT\nGitHub API rate limit exceeded:",
+				`\nRequest: ${rateLimitError.requestUrl}`,
+				`\nRate limits - Remaining: ${rateLimitError.remaining}`,
+				`\nReset in: ${rateLimitError.getMinutesToReset()} minutes`,
+			);
 			throw rateLimitError;
 		}
 
-		if (debugLogging) {
-			console.error("GitHub request failed:", error);
-		}
+		console.error("GitHub request failed:", error);
 		throw gitHubError;
 	}
 };
