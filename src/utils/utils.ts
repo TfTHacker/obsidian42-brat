@@ -1,3 +1,27 @@
+/**
+ * id-collision protection.
+ *
+ * BRAT derives a plugin's install folder from the release's self-declared
+ * manifest `id`. Without a guard, a repository could declare a popular
+ * plugin's id (e.g. "dataview") and silently overwrite that other plugin's
+ * installed files. A collision exists when a plugin with `pluginId` is already
+ * installed in the vault, yet the repository being installed is not one BRAT
+ * tracks — meaning some other, non-BRAT-managed plugin currently owns that id.
+ */
+export function isNonBratPluginIdCollision({
+	pluginId,
+	repositoryPath,
+	installedPluginIds,
+	bratTrackedRepos,
+}: {
+	pluginId: string;
+	repositoryPath: string;
+	installedPluginIds: string[];
+	bratTrackedRepos: string[];
+}): boolean {
+	return installedPluginIds.includes(pluginId) && !bratTrackedRepos.includes(repositoryPath);
+}
+
 export function createGitHubResourceLink(
 	githubResource: string,
 	optionalText?: string,

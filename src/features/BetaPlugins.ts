@@ -9,6 +9,7 @@ import { addBetaPluginToList } from "../settings";
 import AddNewPluginModal from "../ui/AddNewPluginModal";
 import { isConnectedToInternet } from "../utils/internetconnection";
 import { toastMessage } from "../utils/notifications";
+import { isNonBratPluginIdCollision } from "../utils/utils";
 import {
 	grabCommmunityPluginList,
 	grabReleaseFileFromRepository,
@@ -508,6 +509,25 @@ export default class BetaPlugins {
 			if (!updatePluginFiles || forceReinstall) {
 				const releaseFiles = await getRelease();
 				if (releaseFiles === null) return false;
+
+				// id-collision protection: the install folder is derived from the release's
+				// self-declared manifest id, so refuse to overwrite a plugin BRAT does not
+				// manage (e.g. one installed from the community store) that already owns this id.
+				if (
+					isNonBratPluginIdCollision({
+						pluginId: primaryManifest.id,
+						repositoryPath,
+						installedPluginIds: Object.keys(this.plugin.app.plugins.manifests),
+						bratTrackedRepos: this.plugin.settings.pluginList,
+					})
+				) {
+					const msg = `${repositoryPath}\nInstall aborted: a different, already-installed plugin uses the id "${primaryManifest.id}". BRAT will not overwrite a plugin it does not manage. If you installed "${primaryManifest.id}" from the community store, remove it first; otherwise this repository may be attempting to hijack that plugin's id.`;
+					await this.plugin.log(msg, true);
+					// Always surface this regardless of the notifications setting — it is a security refusal.
+					new Notice(`BRAT\n${msg}`, noticeTimeout * 1000);
+					return false;
+				}
+
 				await this.writeReleaseFilesToPluginFolder(primaryManifest.id, releaseFiles);
 				addBetaPluginToList(
 					this.plugin,
