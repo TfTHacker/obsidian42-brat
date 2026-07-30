@@ -22,6 +22,10 @@ export const de = {
 				name: "Beta-Themes beim Start automatisch aktualisieren",
 				desc: "Wenn aktiviert, prüft BRAT bei jedem Start von Obsidian alle Beta-Themes auf Updates.",
 			},
+			preferStableThemeCss: {
+				name: "Stabile Theme-Dateien bevorzugen",
+				desc: "Wenn aktiviert, verwendet BRAT beim Installieren und Aktualisieren von Themes zuerst theme.css. Falls diese Datei fehlt, wird theme-beta.css verwendet.",
+			},
 			selectLatestPluginVersionByDefault: {
 				name: "Neueste Plugin-Version standardmäßig auswählen",
 				desc: "Wenn aktiviert, wird beim Hinzufügen eines neuen Plugins standardmäßig die neueste Version ausgewählt.",

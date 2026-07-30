@@ -7,6 +7,38 @@ import { isConnectedToInternet } from "../utils/internetconnection";
 import { toastMessage } from "../utils/notifications";
 import { checksumForString, grabChecksumOfThemeCssFile, grabCommmunityThemeCssFile, grabCommmunityThemeManifestFile } from "./githubUtils";
 
+type ThemeCssFile = "theme.css" | "theme-beta.css";
+
+const getThemeCssFileOrder = (preferStableThemeCss: boolean): ThemeCssFile[] => {
+	return preferStableThemeCss ? ["theme.css", "theme-beta.css"] : ["theme-beta.css", "theme.css"];
+};
+
+const grabPreferredThemeCssFile = async (plugin: BratPlugin, repository: string): Promise<string | null> => {
+	for (const fileName of getThemeCssFileOrder(plugin.settings.preferStableThemeCss)) {
+		const themeCss = await grabCommmunityThemeCssFile(
+			repository,
+			fileName === "theme-beta.css",
+			plugin.settings.debuggingMode,
+		);
+		if (themeCss) return themeCss;
+	}
+
+	return null;
+};
+
+const grabPreferredThemeCssChecksum = async (plugin: BratPlugin, repository: string): Promise<string> => {
+	for (const fileName of getThemeCssFileOrder(plugin.settings.preferStableThemeCss)) {
+		const checksum = await grabChecksumOfThemeCssFile(
+			repository,
+			fileName === "theme-beta.css",
+			plugin.settings.debuggingMode,
+		);
+		if (checksum !== "0") return checksum;
+	}
+
+	return "0";
+};
+
 /**
  * Installs or updates a theme
  *
@@ -18,10 +50,7 @@ import { checksumForString, grabChecksumOfThemeCssFile, grabCommmunityThemeCssFi
  */
 export const themeSave = async (plugin: BratPlugin, cssGithubRepository: string, newInstall: boolean): Promise<boolean> => {
 	const text = getTranslations().themeMessages;
-	// test for themes-beta.css
-	let themeCss = await grabCommmunityThemeCssFile(cssGithubRepository, true, plugin.settings.debuggingMode);
-	// grabe themes.css if no beta
-	if (!themeCss) themeCss = await grabCommmunityThemeCssFile(cssGithubRepository, false, plugin.settings.debuggingMode);
+	const themeCss = await grabPreferredThemeCssFile(plugin, cssGithubRepository);
 
 	if (!themeCss) {
 		toastMessage(plugin, text.noThemeCssFile);
@@ -78,18 +107,15 @@ export const themesCheckAndUpdates = async (plugin: BratPlugin, showInfo: boolea
 		return;
 	}
 	let newNotice: Notice | undefined;
-	const msg1 = "Checking for beta theme updates STARTED";
+	const msg1 = "Checking for theme updates STARTED";
 	await plugin.log(msg1, true);
 	if (showInfo && plugin.settings.notificationsEnabled) newNotice = new Notice(`BRAT\n${msg1}`, 30000);
 	for (const t of plugin.settings.themesList) {
-		// first test to see if theme-beta.css exists
-		let lastUpdateOnline = await grabChecksumOfThemeCssFile(t.repo, true, plugin.settings.debuggingMode);
-		// if theme-beta.css does NOT exist, try to get theme.css
-		if (lastUpdateOnline === "0") lastUpdateOnline = await grabChecksumOfThemeCssFile(t.repo, false, plugin.settings.debuggingMode);
+		const lastUpdateOnline = await grabPreferredThemeCssChecksum(plugin, t.repo);
 		console.debug("BRAT: lastUpdateOnline", lastUpdateOnline);
 		if (lastUpdateOnline !== t.lastUpdate) await themeSave(plugin, t.repo, false);
 	}
-	const msg2 = "Checking for beta theme updates COMPLETED";
+	const msg2 = "Checking for theme updates COMPLETED";
 	await plugin.log(msg2, true);
 	if (showInfo) {
 		if (plugin.settings.notificationsEnabled && newNotice) newNotice.hide();

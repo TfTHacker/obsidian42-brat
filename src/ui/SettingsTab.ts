@@ -72,6 +72,11 @@ export class BratSettingsTab extends PluginSettingTab {
 						control: { type: "toggle", key: "updateThemesAtStartup" },
 					},
 					{
+						name: text.general.preferStableThemeCss.name,
+						desc: text.general.preferStableThemeCss.desc,
+						control: { type: "toggle", key: "preferStableThemeCss" },
+					},
+					{
 						name: text.general.selectLatestPluginVersionByDefault.name,
 						desc: text.general.selectLatestPluginVersionByDefault.desc,
 						control: {
@@ -174,6 +179,16 @@ export class BratSettingsTab extends PluginSettingTab {
 			.addToggle((cb: ToggleComponent) => {
 				cb.setValue(this.plugin.settings.updateThemesAtStartup).onChange(async (value: boolean) => {
 					this.plugin.settings.updateThemesAtStartup = value;
+					await this.plugin.saveSettings();
+				});
+			});
+
+		new Setting(containerEl)
+			.setName(text.general.preferStableThemeCss.name)
+			.setDesc(text.general.preferStableThemeCss.desc)
+			.addToggle((cb: ToggleComponent) => {
+				cb.setValue(this.plugin.settings.preferStableThemeCss).onChange(async (value: boolean) => {
+					this.plugin.settings.preferStableThemeCss = value;
 					await this.plugin.saveSettings();
 				});
 			});
