@@ -15,11 +15,7 @@ const getThemeCssFileOrder = (preferStableThemeCss: boolean): ThemeCssFile[] => 
 
 const grabPreferredThemeCssFile = async (plugin: BratPlugin, repository: string): Promise<string | null> => {
 	for (const fileName of getThemeCssFileOrder(plugin.settings.preferStableThemeCss)) {
-		const themeCss = await grabCommmunityThemeCssFile(
-			repository,
-			fileName === "theme-beta.css",
-			plugin.settings.debuggingMode,
-		);
+		const themeCss = await grabCommmunityThemeCssFile(repository, fileName === "theme-beta.css", plugin.settings.debuggingMode);
 		if (themeCss) return themeCss;
 	}
 
@@ -28,11 +24,7 @@ const grabPreferredThemeCssFile = async (plugin: BratPlugin, repository: string)
 
 const grabPreferredThemeCssChecksum = async (plugin: BratPlugin, repository: string): Promise<string> => {
 	for (const fileName of getThemeCssFileOrder(plugin.settings.preferStableThemeCss)) {
-		const checksum = await grabChecksumOfThemeCssFile(
-			repository,
-			fileName === "theme-beta.css",
-			plugin.settings.debuggingMode,
-		);
+		const checksum = await grabChecksumOfThemeCssFile(repository, fileName === "theme-beta.css", plugin.settings.debuggingMode);
 		if (checksum !== "0") return checksum;
 	}
 
