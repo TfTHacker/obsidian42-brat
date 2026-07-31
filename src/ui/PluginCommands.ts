@@ -1,4 +1,4 @@
-import type {} from "@obsidian-typings/obsidian-public-1.11.4";
+import type {} from "@obsidian-typings/obsidian-public-1.13.4";
 import type { SettingTab } from "obsidian";
 import type { GraduatedPlugin } from "../features/BetaPlugins";
 import type { CommunityPlugin, CommunityTheme } from "../features/githubUtils";

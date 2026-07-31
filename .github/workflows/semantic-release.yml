@@ -34,6 +34,9 @@ jobs:
         env:
           HUSKY: 0
 
+      - name: Typecheck
+        run: npm run typecheck
+
       - name: Build release variant
         if: github.event_name == 'push'
         run: npm run build:${RELEASE_CHANNEL}
@@ -50,16 +53,16 @@ jobs:
           git config --global user.name "${{ github.actor }}"
           git config --global user.email "${{ github.actor }}@users.noreply.github.com"
 
-      - name: Commit manifest.json (main only)
+      - name: Commit release metadata (main only)
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         run: |
-          if git diff --quiet -- manifest.json; then
-            echo "manifest.json unchanged; skipping commit"
+          if git diff --quiet -- manifest.json versions.json; then
+            echo "Release metadata unchanged; skipping commit"
             exit 0
           fi
 
-          git add manifest.json
-          git commit -m "chore: 🔖 sync manifest version [skip ci]"
+          git add manifest.json versions.json
+          git commit -m "chore: 🔖 sync release metadata [skip ci]"
           git push
 
       - name: Generate artifact attestation (main release)
