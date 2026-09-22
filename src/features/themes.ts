@@ -122,9 +122,15 @@ export const themesCheckAndUpdates = async (plugin: BratPlugin, showInfo: boolea
 	await plugin.log(msg1, true);
 	if (showInfo && plugin.settings.notificationsEnabled) newNotice = new Notice(`BRAT\n${msg1}`, 30000);
 	for (const t of plugin.settings.themesList) {
-		const lastUpdateOnline = await grabPreferredThemeCssChecksum(plugin, t.repo);
-		console.debug("BRAT: lastUpdateOnline", lastUpdateOnline);
-		if (lastUpdateOnline !== t.lastUpdate) await themeSave(plugin, t.repo, false);
+		// Guard each theme independently so one bad manifest/repo doesn't abort the
+		// whole update loop (and leave the "STARTED" notice hanging).
+		try {
+			const lastUpdateOnline = await grabPreferredThemeCssChecksum(plugin, t.repo);
+			console.debug("BRAT: lastUpdateOnline", lastUpdateOnline);
+			if (lastUpdateOnline !== t.lastUpdate) await themeSave(plugin, t.repo, false);
+		} catch (error) {
+			console.error("BRAT - theme update failed", t.repo, error);
+		}
 	}
 	const msg2 = "Checking for theme updates COMPLETED";
 	await plugin.log(msg2, true);
