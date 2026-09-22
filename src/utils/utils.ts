@@ -20,6 +20,7 @@ export function isNonBratPluginIdCollision({
 	bratTrackedRepos: string[];
 }): boolean {
 	return installedPluginIds.includes(pluginId) && !bratTrackedRepos.includes(repositoryPath);
+/**
  * Validates a plugin id or theme folder name that will be concatenated into a
  * filesystem path inside the vault (e.g. `.obsidian/plugins/<id>`). These values
  * come from a remote, attacker-controllable manifest.json, and Obsidian's
