@@ -106,16 +106,13 @@ export default class AddNewPluginModal extends Modal {
 		// If it's an existing frozen version plugin, update it instead of checking for duplicates
 		const existingFrozenPlugin = this.plugin.settings.pluginSubListFrozenVersion.find((p) => p.repo === scrubbedAddress);
 		if (existingFrozenPlugin) {
-			const result = await this.betaPlugins.addPlugin(
-				scrubbedAddress,
-				false,
-				false,
-				false,
-				this.version,
-				true, // Force reinstall
-				this.enableAfterInstall,
-				this.secretName,
-			);
+			const result = await this.betaPlugins.addPlugin({
+				repositoryPath: scrubbedAddress,
+				specifyVersion: this.version,
+				forceReinstall: true,
+				enableAfterInstall: this.enableAfterInstall,
+				secretName: this.secretName,
+			});
 			if (result) {
 				this.onSubmitted?.();
 				this.close();
@@ -134,16 +131,12 @@ export default class AddNewPluginModal extends Modal {
 			return;
 		}
 
-		const result = await this.betaPlugins.addPlugin(
-			scrubbedAddress,
-			false,
-			false,
-			false,
-			this.version,
-			false,
-			this.enableAfterInstall,
-			this.secretName,
-		);
+		const result = await this.betaPlugins.addPlugin({
+			repositoryPath: scrubbedAddress,
+			specifyVersion: this.version,
+			enableAfterInstall: this.enableAfterInstall,
+			secretName: this.secretName,
+		});
 		if (result) {
 			this.onSubmitted?.();
 			this.close();

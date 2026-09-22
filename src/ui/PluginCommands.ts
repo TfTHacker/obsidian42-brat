@@ -340,15 +340,12 @@ export default class PluginCommands {
 						const match = graduated.find((g) => g.repo === repo);
 						if (!match) return;
 						// Install stable release (non-beta manifest, specific version)
-						const success = await this.plugin.betaPlugins.addPlugin(
-							repo,
-							false,
-							false,
-							false,
-							match.stableVersion,
-							true, // force reinstall
-							true, // enable after install
-						);
+						const success = await this.plugin.betaPlugins.addPlugin({
+							repositoryPath: repo,
+							specifyVersion: match.stableVersion,
+							forceReinstall: true,
+							enableAfterInstall: true,
+						});
 						if (success) {
 							this.plugin.betaPlugins.deletePlugin(repo);
 							this.plugin.settingsTab.update();
