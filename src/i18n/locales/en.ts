@@ -20,6 +20,10 @@ export const en = {
 				name: "Auto-update themes at startup",
 				desc: "If enabled all beta themes will be checked for updates each time Obsidian starts.",
 			},
+			preferStableThemeCss: {
+				name: "Prefer stable theme files",
+				desc: "If enabled, BRAT will prefer theme.css over theme-beta.css when installing and updating themes. If the preferred file does not exist, BRAT will use the other file.",
+			},
 			selectLatestPluginVersionByDefault: {
 				name: "Select latest plugin version by default",
 				desc: "If enabled the latest version will be selected by default when adding a new plugin.",

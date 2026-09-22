@@ -23,6 +23,7 @@ export interface Settings {
 	themesList: ThemeInforamtion[];
 	updateAtStartup: boolean;
 	updateThemesAtStartup: boolean;
+	preferStableThemeCss: boolean;
 	enableAfterInstall: boolean;
 	loggingEnabled: boolean;
 	loggingPath: string;
@@ -43,6 +44,7 @@ export const DEFAULT_SETTINGS: Settings = {
 	themesList: [],
 	updateAtStartup: true,
 	updateThemesAtStartup: true,
+	preferStableThemeCss: false,
 	enableAfterInstall: true,
 	loggingEnabled: false,
 	loggingPath: "BRAT-log",

@@ -22,6 +22,10 @@ export const zhCn = {
 				name: "启动时自动更新 Beta 主题",
 				desc: "开启后，每次 Obsidian 启动时都会检查并安装 Beta 主题更新。",
 			},
+			preferStableThemeCss: {
+				name: "优先使用稳定版主题文件",
+				desc: "开启后，BRAT 在安装和更新主题时会优先使用 theme.css；如果不存在，则使用 theme-beta.css。",
+			},
 			selectLatestPluginVersionByDefault: {
 				name: "默认选择插件最新版本",
 				desc: "开启后，添加新插件时会默认选择最新版本。",

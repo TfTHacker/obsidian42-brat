@@ -22,6 +22,10 @@ export const ja = {
 				name: "起動時に Beta テーマを自動更新",
 				desc: "有効にすると、Obsidian の起動時にすべての Beta テーマの更新を確認します。",
 			},
+			preferStableThemeCss: {
+				name: "安定版のテーマファイルを優先",
+				desc: "有効にすると、BRAT はテーマのインストールと更新で theme.css を優先します。theme.css がない場合は theme-beta.css を使用します。",
+			},
 			selectLatestPluginVersionByDefault: {
 				name: "既定で最新のプラグインバージョンを選択",
 				desc: "有効にすると、新しいプラグインを追加するときに最新バージョンが既定で選択されます。",
