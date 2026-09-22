@@ -9,6 +9,7 @@ import { addBetaPluginToList } from "../settings";
 import AddNewPluginModal from "../ui/AddNewPluginModal";
 import { isConnectedToInternet } from "../utils/internetconnection";
 import { toastMessage } from "../utils/notifications";
+import { isSafeVaultFolderName } from "../utils/utils";
 import {
 	grabCommmunityPluginList,
 	grabReleaseFileFromRepository,
@@ -387,6 +388,17 @@ export default class BetaPlugins {
 
 			if (!Object.hasOwn(primaryManifest, "version")) {
 				const msg = `${repositoryPath}\nThe manifest.json file in the latest release or pre-release of the repository does not have a version number in the file. This plugin cannot be installed.`;
+				await this.plugin.log(msg, true);
+				toastMessage(this.plugin, msg, noticeTimeout);
+				return false;
+			}
+
+			// Security: the plugin id is taken verbatim from the remote manifest and is
+			// later concatenated into the install path (.obsidian/plugins/<id>). Reject
+			// ids containing path separators or ".." so a malicious repo cannot escape
+			// the plugins folder and overwrite other plugins or vault files.
+			if (!isSafeVaultFolderName(primaryManifest.id)) {
+				const msg = `${repositoryPath}\nThe manifest.json declares an unsafe plugin id ("${primaryManifest.id}"). This plugin cannot be installed.`;
 				await this.plugin.log(msg, true);
 				toastMessage(this.plugin, msg, noticeTimeout);
 				return false;
