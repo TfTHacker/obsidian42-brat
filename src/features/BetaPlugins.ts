@@ -9,8 +9,7 @@ import { addBetaPluginToList } from "../settings";
 import AddNewPluginModal from "../ui/AddNewPluginModal";
 import { isConnectedToInternet } from "../utils/internetconnection";
 import { toastMessage } from "../utils/notifications";
-import { isNonBratPluginIdCollision } from "../utils/utils";
-import { isSafeVaultFolderName } from "../utils/utils";
+import { isNonBratPluginIdCollision, isSafeVaultFolderName } from "../utils/utils";
 import {
 	grabCommmunityPluginList,
 	grabReleaseFileFromRepository,
