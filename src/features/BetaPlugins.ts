@@ -522,8 +522,11 @@ export default class BetaPlugins {
 				if (releaseFiles === null) return false;
 
 				// id-collision protection: the install folder is derived from the release's
-				// self-declared manifest id, so refuse to overwrite a plugin BRAT does not
-				// manage (e.g. one installed from the community store) that already owns this id.
+				// self-declared manifest id. Warn (rather than silently overwrite) when a
+				// plugin BRAT does not manage (e.g. one installed from the community store)
+				// already owns this id, but let the user explicitly proceed - e.g. they are
+				// intentionally switching an existing plugin to a BRAT-tracked beta channel
+				// that reuses the same id from a different repository.
 				if (
 					isNonBratPluginIdCollision({
 						pluginId: primaryManifest.id,
@@ -532,11 +535,41 @@ export default class BetaPlugins {
 						bratTrackedRepos: this.plugin.settings.pluginList,
 					})
 				) {
-					const msg = `${repositoryPath}\nInstall aborted: a different, already-installed plugin uses the id "${primaryManifest.id}". BRAT will not overwrite a plugin it does not manage. If you installed "${primaryManifest.id}" from the community store, remove it first; otherwise this repository may be attempting to hijack that plugin's id.`;
-					await this.plugin.log(msg, true);
-					// Always surface this regardless of the notifications setting — it is a security refusal.
-					new Notice(`BRAT\n${msg}`, noticeTimeout * 1000);
-					return false;
+					const conflictingPluginName = this.plugin.app.plugins.manifests[primaryManifest.id]?.name ?? primaryManifest.id;
+
+					const confirmResult = await confirm({
+						app: this.plugin.app,
+						title: "Plugin id conflict",
+						okButtonText: "Install anyway",
+						message: createFragment((f) => {
+							f.appendText("The id ");
+							f.createEl("code", { text: primaryManifest.id });
+							f.appendText(" is already used by an installed plugin (");
+							f.createEl("strong", { text: conflictingPluginName });
+							f.appendText(") that BRAT does not manage.");
+							f.createEl("br");
+							f.createEl("br");
+							f.appendText("Installing ");
+							f.createEl("code", { text: repositoryPath });
+							f.appendText(" will overwrite it. Only continue if you recognize this repository, e.g. you are switching ");
+							f.createEl("strong", { text: conflictingPluginName });
+							f.appendText(" to a beta channel tracked by BRAT.");
+							f.createEl("br");
+							f.createEl("br");
+							f.appendText("Do you want to install it anyway?");
+						}),
+					});
+
+					if (!confirmResult) {
+						const msg = `${repositoryPath}\nInstall cancelled: id "${primaryManifest.id}" is already used by "${conflictingPluginName}", which BRAT does not manage.`;
+						await this.plugin.log(msg, true);
+						return false;
+					}
+
+					await this.plugin.log(
+						`${repositoryPath}\nUser confirmed overwrite of non-BRAT plugin "${conflictingPluginName}" (id "${primaryManifest.id}").`,
+						true,
+					);
 				}
 
 				await this.writeReleaseFilesToPluginFolder(primaryManifest.id, releaseFiles);
