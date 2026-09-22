@@ -9,7 +9,7 @@ import { addBetaPluginToList } from "../settings";
 import AddNewPluginModal from "../ui/AddNewPluginModal";
 import { isConnectedToInternet } from "../utils/internetconnection";
 import { toastMessage } from "../utils/notifications";
-import { isSafeVaultFolderName } from "../utils/utils";
+import { isNonBratPluginIdCollision, isSafeVaultFolderName } from "../utils/utils";
 import {
 	grabCommmunityPluginList,
 	grabReleaseFileFromRepository,
@@ -523,6 +523,58 @@ export default class BetaPlugins {
 			if (!updatePluginFiles || forceReinstall) {
 				const releaseFiles = await getRelease();
 				if (releaseFiles === null) return false;
+
+				// id-collision protection: the install folder is derived from the release's
+				// self-declared manifest id. Warn (rather than silently overwrite) when a
+				// plugin BRAT does not manage (e.g. one installed from the community store)
+				// already owns this id, but let the user explicitly proceed - e.g. they are
+				// intentionally switching an existing plugin to a BRAT-tracked beta channel
+				// that reuses the same id from a different repository.
+				if (
+					isNonBratPluginIdCollision({
+						pluginId: primaryManifest.id,
+						repositoryPath,
+						installedPluginIds: Object.keys(this.plugin.app.plugins.manifests),
+						bratTrackedRepos: this.plugin.settings.pluginList,
+					})
+				) {
+					const conflictingPluginName = this.plugin.app.plugins.manifests[primaryManifest.id]?.name ?? primaryManifest.id;
+
+					const confirmResult = await confirm({
+						app: this.plugin.app,
+						title: "Plugin id conflict",
+						okButtonText: "Install anyway",
+						message: createFragment((f) => {
+							f.appendText("The id ");
+							f.createEl("code", { text: primaryManifest.id });
+							f.appendText(" is already used by an installed plugin (");
+							f.createEl("strong", { text: conflictingPluginName });
+							f.appendText(") that BRAT does not manage.");
+							f.createEl("br");
+							f.createEl("br");
+							f.appendText("Installing ");
+							f.createEl("code", { text: repositoryPath });
+							f.appendText(" will overwrite it. Only continue if you recognize this repository, e.g. you are switching ");
+							f.createEl("strong", { text: conflictingPluginName });
+							f.appendText(" to a beta channel tracked by BRAT.");
+							f.createEl("br");
+							f.createEl("br");
+							f.appendText("Do you want to install it anyway?");
+						}),
+					});
+
+					if (!confirmResult) {
+						const msg = `${repositoryPath}\nInstall cancelled: id "${primaryManifest.id}" is already used by "${conflictingPluginName}", which BRAT does not manage.`;
+						await this.plugin.log(msg, true);
+						return false;
+					}
+
+					await this.plugin.log(
+						`${repositoryPath}\nUser confirmed overwrite of non-BRAT plugin "${conflictingPluginName}" (id "${primaryManifest.id}").`,
+						true,
+					);
+				}
+
 				await this.writeReleaseFilesToPluginFolder(primaryManifest.id, releaseFiles);
 				addBetaPluginToList(
 					this.plugin,
