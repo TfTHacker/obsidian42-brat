@@ -22,6 +22,10 @@ export const de = {
 				name: "Beta-Themes beim Start automatisch aktualisieren",
 				desc: "Wenn aktiviert, prüft BRAT bei jedem Start von Obsidian alle Beta-Themes auf Updates.",
 			},
+			preferStableThemeCss: {
+				name: "Stabile Theme-Dateien bevorzugen",
+				desc: "Wenn aktiviert, verwendet BRAT beim Installieren und Aktualisieren von Themes zuerst theme.css. Falls diese Datei fehlt, wird theme-beta.css verwendet.",
+			},
 			selectLatestPluginVersionByDefault: {
 				name: "Neueste Plugin-Version standardmäßig auswählen",
 				desc: "Wenn aktiviert, wird beim Hinzufügen eines neuen Plugins standardmäßig die neueste Version ausgewählt.",
@@ -36,6 +40,10 @@ export const de = {
 			enableNotifications: {
 				name: "Benachrichtigungen aktivieren",
 				desc: "Wenn aktiviert, zeigt BRAT Popup-Benachrichtigungen zu verschiedenen Aktivitäten an. Wenn deaktiviert, werden keine Benachrichtigungen angezeigt.",
+			},
+			graduationNotifications: {
+				name: "Benachrichtigen, wenn ein Plugin in den Community-Store aufgenommen wird",
+				desc: "Wenn ein BRAT-Beta-Plugin im Community-Store von Obsidian verfügbar wird, zeigt BRAT einen Hinweis an, der vorschlägt, zur Store-Version zu wechseln. Deaktiviere dies, um diese Hinweise zu unterdrücken. Du kannst weiterhin über die BRAT-Befehle für aufgenommene Plugins bei Bedarf reagieren.",
 			},
 			enableLogging: {
 				name: "Protokollierung aktivieren",
@@ -169,6 +177,8 @@ export const de = {
 			"Im Stammverzeichnis dieses Repositorys gibt es keine Datei theme.css oder theme-beta.css, daher kann kein Theme installiert werden.",
 		noManifestFile:
 			"Im Stammverzeichnis dieses Repositorys gibt es keine Datei manifest.json, daher kann das Theme nicht installiert werden.",
+		unsafeThemeName: (repository: string, themeName: string): string =>
+			`${repository}: Das Theme-Manifest deklariert einen unsicheren Namen („${themeName}“), daher kann dieses Theme nicht installiert werden.`,
 		installed: (themeName: string, repository: string): string => `Theme ${themeName} wurde aus ${repository} installiert. `,
 		updated: (themeName: string, repository: string): string => `Theme ${themeName} wurde aus ${repository} aktualisiert.`,
 		removed: (repository: string): string =>

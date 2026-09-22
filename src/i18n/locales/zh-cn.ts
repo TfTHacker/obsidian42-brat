@@ -22,6 +22,10 @@ export const zhCn = {
 				name: "启动时自动更新 Beta 主题",
 				desc: "开启后，每次 Obsidian 启动时都会检查并安装 Beta 主题更新。",
 			},
+			preferStableThemeCss: {
+				name: "优先使用稳定版主题文件",
+				desc: "开启后，BRAT 在安装和更新主题时会优先使用 theme.css；如果不存在，则使用 theme-beta.css。",
+			},
 			selectLatestPluginVersionByDefault: {
 				name: "默认选择插件最新版本",
 				desc: "开启后，添加新插件时会默认选择最新版本。",
@@ -36,6 +40,10 @@ export const zhCn = {
 			enableNotifications: {
 				name: "启用通知",
 				desc: "开启后，BRAT 会用弹窗提示安装、更新等操作状态。关闭后不再显示这些通知。",
+			},
+			graduationNotifications: {
+				name: "当插件上架社区商店时通知",
+				desc: "当某个 BRAT 测试版插件在 Obsidian 社区商店中上架时，BRAT 会显示提示，建议你切换到商店版本。关闭后将不再显示这些提示。你仍可通过 BRAT 的相关命令随时处理已上架的插件。",
 			},
 			enableLogging: {
 				name: "启用日志",
@@ -160,6 +168,8 @@ export const zhCn = {
 	themeMessages: {
 		noThemeCssFile: "这个仓库的根目录里没有 theme.css 或 theme-beta.css 文件，因此没有可安装的主题。",
 		noManifestFile: "这个仓库的根目录里没有 manifest.json 文件，因此无法安装该主题。",
+		unsafeThemeName: (repository: string, themeName: string): string =>
+			`${repository}：主题 manifest 声明了不安全的名称（“${themeName}”），因此无法安装此主题。`,
 		installed: (themeName: string, repository: string): string => `已从 ${repository} 安装主题 ${themeName}。`,
 		updated: (themeName: string, repository: string): string => `已从 ${repository} 更新主题 ${themeName}。`,
 		removed: (repository: string): string =>

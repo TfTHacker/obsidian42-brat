@@ -20,6 +20,10 @@ export const en = {
 				name: "Auto-update themes at startup",
 				desc: "If enabled all beta themes will be checked for updates each time Obsidian starts.",
 			},
+			preferStableThemeCss: {
+				name: "Prefer stable theme files",
+				desc: "If enabled, BRAT will prefer theme.css over theme-beta.css when installing and updating themes. If the preferred file does not exist, BRAT will use the other file.",
+			},
 			selectLatestPluginVersionByDefault: {
 				name: "Select latest plugin version by default",
 				desc: "If enabled the latest version will be selected by default when adding a new plugin.",
@@ -34,6 +38,10 @@ export const en = {
 			enableNotifications: {
 				name: "Enable notifications",
 				desc: "BRAT will provide popup notifications for its various activities. Turn this off means no notifications.",
+			},
+			graduationNotifications: {
+				name: "Notify when a plugin joins the community store",
+				desc: "When a BRAT beta plugin becomes available in Obsidian's community store, BRAT shows a notice suggesting you switch to the store version. Turn this off to silence those notices. You can still act on graduated plugins on demand via BRAT's graduated-plugin commands.",
 			},
 			enableLogging: {
 				name: "Enable logging",
@@ -161,6 +169,8 @@ export const en = {
 	themeMessages: {
 		noThemeCssFile: "There is no theme.css or theme-beta.css file in the root path of this repository, so there is no theme to install.",
 		noManifestFile: "There is no manifest.json file in the root path of this repository, so theme cannot be installed.",
+		unsafeThemeName: (repository: string, themeName: string): string =>
+			`${repository}: the theme manifest declares an unsafe name ("${themeName}"), so this theme cannot be installed.`,
 		installed: (themeName: string, repository: string): string => `${themeName} theme installed from ${repository}. `,
 		updated: (themeName: string, repository: string): string => `${themeName} theme updated from ${repository}.`,
 		removed: (repository: string): string =>

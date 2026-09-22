@@ -10,6 +10,7 @@ import AddNewPluginModal from "../ui/AddNewPluginModal";
 import { isConnectedToInternet } from "../utils/internetconnection";
 import { toastMessage } from "../utils/notifications";
 import { isNonBratPluginIdCollision } from "../utils/utils";
+import { isSafeVaultFolderName } from "../utils/utils";
 import {
 	grabCommmunityPluginList,
 	grabReleaseFileFromRepository,
@@ -393,6 +394,17 @@ export default class BetaPlugins {
 				return false;
 			}
 
+			// Security: the plugin id is taken verbatim from the remote manifest and is
+			// later concatenated into the install path (.obsidian/plugins/<id>). Reject
+			// ids containing path separators or ".." so a malicious repo cannot escape
+			// the plugins folder and overwrite other plugins or vault files.
+			if (!isSafeVaultFolderName(primaryManifest.id)) {
+				const msg = `${repositoryPath}\nThe manifest.json declares an unsafe plugin id ("${primaryManifest.id}"). This plugin cannot be installed.`;
+				await this.plugin.log(msg, true);
+				toastMessage(this.plugin, msg, noticeTimeout);
+				return false;
+			}
+
 			let isIncompatible = false;
 
 			// Check manifest minAppVersion and current version of Obisidan, don't load plugin if not compatible
@@ -742,7 +754,9 @@ export default class BetaPlugins {
 			}
 			toastMessage(this.plugin, msg2, 10);
 		}
-		await this.checkForOfficiallyReleasedPlugins();
+		if (this.plugin.settings.notifyOnPluginGraduation) {
+			await this.checkForOfficiallyReleasedPlugins();
+		}
 	}
 
 	/**

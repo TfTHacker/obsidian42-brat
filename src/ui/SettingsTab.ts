@@ -72,6 +72,11 @@ export class BratSettingsTab extends PluginSettingTab {
 						control: { type: "toggle", key: "updateThemesAtStartup" },
 					},
 					{
+						name: text.general.preferStableThemeCss.name,
+						desc: text.general.preferStableThemeCss.desc,
+						control: { type: "toggle", key: "preferStableThemeCss" },
+					},
+					{
 						name: text.general.selectLatestPluginVersionByDefault.name,
 						desc: text.general.selectLatestPluginVersionByDefault.desc,
 						control: {
@@ -96,6 +101,11 @@ export class BratSettingsTab extends PluginSettingTab {
 						name: text.monitoring.enableNotifications.name,
 						desc: text.monitoring.enableNotifications.desc,
 						control: { type: "toggle", key: "notificationsEnabled" },
+					},
+					{
+						name: text.monitoring.graduationNotifications.name,
+						desc: text.monitoring.graduationNotifications.desc,
+						control: { type: "toggle", key: "notifyOnPluginGraduation" },
 					},
 					{
 						name: text.monitoring.enableLogging.name,
@@ -174,6 +184,16 @@ export class BratSettingsTab extends PluginSettingTab {
 			.addToggle((cb: ToggleComponent) => {
 				cb.setValue(this.plugin.settings.updateThemesAtStartup).onChange(async (value: boolean) => {
 					this.plugin.settings.updateThemesAtStartup = value;
+					await this.plugin.saveSettings();
+				});
+			});
+
+		new Setting(containerEl)
+			.setName(text.general.preferStableThemeCss.name)
+			.setDesc(text.general.preferStableThemeCss.desc)
+			.addToggle((cb: ToggleComponent) => {
+				cb.setValue(this.plugin.settings.preferStableThemeCss).onChange(async (value: boolean) => {
+					this.plugin.settings.preferStableThemeCss = value;
 					await this.plugin.saveSettings();
 				});
 			});
@@ -413,6 +433,19 @@ export class BratSettingsTab extends PluginSettingTab {
 					cb.setValue(this.plugin.settings.notificationsEnabled);
 					cb.onChange((value: boolean) => {
 						this.plugin.settings.notificationsEnabled = value;
+						void this.plugin.saveSettings();
+					});
+				});
+		});
+
+		monitoringGroup.addSetting((setting) => {
+			setting
+				.setName(text.monitoring.graduationNotifications.name)
+				.setDesc(text.monitoring.graduationNotifications.desc)
+				.addToggle((cb: ToggleComponent) => {
+					cb.setValue(this.plugin.settings.notifyOnPluginGraduation);
+					cb.onChange((value: boolean) => {
+						this.plugin.settings.notifyOnPluginGraduation = value;
 						void this.plugin.saveSettings();
 					});
 				});

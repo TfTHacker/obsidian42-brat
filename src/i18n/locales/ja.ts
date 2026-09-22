@@ -22,6 +22,10 @@ export const ja = {
 				name: "起動時に Beta テーマを自動更新",
 				desc: "有効にすると、Obsidian の起動時にすべての Beta テーマの更新を確認します。",
 			},
+			preferStableThemeCss: {
+				name: "安定版のテーマファイルを優先",
+				desc: "有効にすると、BRAT はテーマのインストールと更新で theme.css を優先します。theme.css がない場合は theme-beta.css を使用します。",
+			},
 			selectLatestPluginVersionByDefault: {
 				name: "既定で最新のプラグインバージョンを選択",
 				desc: "有効にすると、新しいプラグインを追加するときに最新バージョンが既定で選択されます。",
@@ -36,6 +40,10 @@ export const ja = {
 			enableNotifications: {
 				name: "通知を有効化",
 				desc: "有効にすると、BRAT は各種アクティビティについてポップアップ通知を表示します。オフにすると通知は表示されません。",
+			},
+			graduationNotifications: {
+				name: "プラグインがコミュニティストアに追加されたら通知する",
+				desc: "BRAT のベータプラグインが Obsidian のコミュニティストアで利用可能になると、ストア版への切り替えを提案する通知が表示されます。オフにするとこれらの通知を非表示にします。追加されたプラグインには、BRAT のコマンドから必要に応じて対応できます。",
 			},
 			enableLogging: {
 				name: "ログを有効化",
@@ -165,6 +173,8 @@ export const ja = {
 	themeMessages: {
 		noThemeCssFile: "このリポジトリのルートパスには theme.css または theme-beta.css がないため、インストールできるテーマがありません。",
 		noManifestFile: "このリポジトリのルートパスには manifest.json がないため、テーマをインストールできません。",
+		unsafeThemeName: (repository: string, themeName: string): string =>
+			`${repository}: テーマの manifest に安全でない名前（「${themeName}」）が指定されているため、このテーマはインストールできません。`,
 		installed: (themeName: string, repository: string): string => `${repository} からテーマ ${themeName} をインストールしました。`,
 		updated: (themeName: string, repository: string): string => `${repository} からテーマ ${themeName} を更新しました。`,
 		removed: (repository: string): string =>
