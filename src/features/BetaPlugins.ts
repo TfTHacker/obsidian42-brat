@@ -52,7 +52,7 @@ export interface AddPluginOptions {
 	/** if true (with updatePluginFiles), only check for updates without applying them */
 	seeIfUpdatedOnly?: boolean;
 	/** if true, report when an update did not succeed */
-	reportIfNotUpdted?: boolean;
+	reportIfNotUpdated?: boolean;
 	/** if set, install this specific version instead of the manifest-beta.json value */
 	specifyVersion?: string;
 	/** if true, force a reinstall even if the plugin is already installed */
@@ -352,7 +352,7 @@ export default class BetaPlugins {
 			repositoryPath,
 			updatePluginFiles = false,
 			seeIfUpdatedOnly = false,
-			reportIfNotUpdted = false,
+			reportIfNotUpdated = false,
 			specifyVersion = "",
 			forceReinstall = false,
 			enableAfterInstall = this.plugin.settings.enableAfterInstall,
@@ -365,7 +365,7 @@ export default class BetaPlugins {
 					repositoryPath,
 					updatePluginFiles,
 					seeIfUpdatedOnly,
-					reportIfNotUpdted,
+					reportIfNotUpdated,
 					specifyVersion,
 					forceReinstall,
 					enableAfterInstall,
@@ -640,7 +640,7 @@ export default class BetaPlugins {
 					return true;
 				}
 
-				if (reportIfNotUpdted) {
+				if (reportIfNotUpdated) {
 					toastMessage(this.plugin, `No update available for ${repositoryPath}`, 3);
 				}
 				return true;
@@ -692,7 +692,7 @@ export default class BetaPlugins {
 	async updatePlugin(
 		repositoryPath: string,
 		onlyCheckDontUpdate = false,
-		reportIfNotUpdted = false,
+		reportIfNotUpdated = false,
 		forceReinstall = false,
 		secretName = "",
 	): Promise<boolean> {
@@ -700,7 +700,7 @@ export default class BetaPlugins {
 			repositoryPath,
 			updatePluginFiles: true,
 			seeIfUpdatedOnly: onlyCheckDontUpdate,
-			reportIfNotUpdted,
+			reportIfNotUpdated,
 			forceReinstall,
 			enableAfterInstall: false,
 			secretName,
