@@ -9,6 +9,7 @@ export const zhCn = {
 	},
 	settings: {
 		general: {
+			heading: "常规",
 			autoEnablePluginsAfterInstallation: {
 				name: "安装后自动启用 Beta 插件",
 				desc: "开启后，新安装的 Beta 插件会默认自动启用。你仍然可以在“添加插件”表单中为单个插件单独调整。",
@@ -70,6 +71,7 @@ export const zhCn = {
 		betaPluginList: {
 			heading: "Beta 插件列表",
 			filterPlaceholder: "筛选插件",
+			emptyState: "尚未添加测试插件。",
 			description: {
 				intro:
 					"下方列出已通过 BRAT 添加的 Beta 插件。你可以让插件跟随最新版本，也可以固定到某个发布版本。固定版本指基于 release 标签指定的某个插件版本。",
@@ -94,6 +96,7 @@ export const zhCn = {
 			heading: "Beta 主题列表",
 			addBetaTheme: "添加 Beta 主题",
 			filterPlaceholder: "筛选主题",
+			emptyState: "尚未添加测试主题。",
 			deleteThisBetaTheme: "删除此 Beta 主题",
 			confirmRemoval: "再次点击确认移除",
 			copyThemeIdentifier: "复制主题标识符",
@@ -119,6 +122,7 @@ export const zhCn = {
 		repository: {
 			label: "仓库",
 			placeholder: "仓库（示例：https://GitHub.com/githubusername/repository-name）",
+			pasteTooltip: "从剪贴板粘贴",
 			enterAddressToValidate: "输入 GitHub 仓库地址后会自动验证。",
 			addressRequired: "需要填写仓库地址。",
 			validating: "正在验证仓库地址...",
@@ -135,10 +139,12 @@ export const zhCn = {
 			selectVersionEllipsis: "选择版本...",
 			latestVersion: "最新版本",
 			prereleaseSuffix: "（预发布）",
+			useLatestName: "始终使用最新版本",
+			useLatestDesc: "让此插件保持最新发布版本并自动更新。关闭后可从列表中固定某个特定版本。",
 		},
 		token: {
 			name: "GitHub 令牌",
-			desc: "选择一个密钥，作为访问此仓库的令牌（可选）",
+			desc: "使用“Link…”按钮，将已保存的密钥关联为此仓库的 GitHub 令牌（可选）。",
 			settingCleared: (repository: string): string => `已清除 ${repository} 的令牌设置`,
 			settingUpdated: (repository: string): string => `已更新 ${repository} 的令牌设置`,
 		},

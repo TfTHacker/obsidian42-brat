@@ -15,11 +15,12 @@ const MIGRATION_LOG_KEY = "brat-migrations";
  */
 async function hasMigrationRun(
 	app: App,
+	pluginDir: string,
 	migrationId: string,
 ): Promise<boolean> {
 	try {
 		const logData = await app.vault.adapter.read(
-			`${app.vault.configDir}/plugins/obsidian42-brat/${MIGRATION_LOG_KEY}.json`,
+			`${pluginDir}/${MIGRATION_LOG_KEY}.json`,
 		);
 		const log = JSON.parse(logData) as MigrationLog;
 		return log.appliedMigrations.includes(migrationId);
@@ -33,10 +34,11 @@ async function hasMigrationRun(
  */
 async function markMigrationComplete(
 	app: App,
+	pluginDir: string,
 	migrationId: string,
 ): Promise<void> {
 	try {
-		const logPath = `${app.vault.configDir}/plugins/obsidian42-brat/${MIGRATION_LOG_KEY}.json`;
+		const logPath = `${pluginDir}/${MIGRATION_LOG_KEY}.json`;
 		let log: MigrationLog = { appliedMigrations: [] };
 
 		try {
@@ -76,11 +78,12 @@ export async function migrateTokensToSecretStorage(
 	app: App,
 	settings: Settings,
 	saveSettings: () => Promise<void>,
+	pluginDir: string,
 ): Promise<void> {
 	const MIGRATION_ID = "tokens-to-secretstorage-v1";
 
 	// Check if migration already ran
-	if (await hasMigrationRun(app, MIGRATION_ID)) {
+	if (await hasMigrationRun(app, pluginDir, MIGRATION_ID)) {
 		return;
 	}
 
@@ -169,7 +172,7 @@ export async function migrateTokensToSecretStorage(
 		}
 
 		// Mark migration as complete
-		await markMigrationComplete(app, MIGRATION_ID);
+		await markMigrationComplete(app, pluginDir, MIGRATION_ID);
 	} catch (error) {
 		console.error("BRAT: Failed to migrate tokens to SecretStorage:", error);
 		// Don't throw - allow plugin to continue loading

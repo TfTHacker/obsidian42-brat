@@ -37,9 +37,4 @@ export class VersionSuggestModal extends SuggestModal<ReleaseVersion> {
 	onChooseSuggestion(version: ReleaseVersion) {
 		this.onChoose(version.version);
 	}
-
-	onNoSuggestion(): void {
-		this.onChoose(this.selected ? this.selected : "");
-		this.close();
-	}
 }

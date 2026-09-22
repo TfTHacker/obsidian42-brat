@@ -9,6 +9,7 @@ export const de = {
 	},
 	settings: {
 		general: {
+			heading: "Allgemein",
 			autoEnablePluginsAfterInstallation: {
 				name: "Beta-Plugins nach der Installation automatisch aktivieren",
 				desc: "Wenn aktiviert, werden neu installierte Beta-Plugins standardmäßig automatisch aktiviert. Diese Option kann im Formular zum Hinzufügen eines Plugins pro Plugin angepasst werden.",
@@ -71,6 +72,7 @@ export const de = {
 		betaPluginList: {
 			heading: "Beta-Plugin-Liste",
 			filterPlaceholder: "Plugins filtern",
+			emptyState: "Noch keine Beta-Plugins hinzugefügt.",
 			description: {
 				intro:
 					'Dies ist die Liste der Beta-Plugins, die über den Befehl "add a beta plugin for testing" hinzugefügt wurden. Du kannst die neueste Version verwenden oder eine Version fixieren. Eine fixierte Version ist ein bestimmtes Plugin-Release anhand seines Release-Tags.',
@@ -99,6 +101,7 @@ export const de = {
 			heading: "Beta-Theme-Liste",
 			addBetaTheme: "Beta-Theme hinzufügen",
 			filterPlaceholder: "Themes filtern",
+			emptyState: "Noch keine Beta-Themes hinzugefügt.",
 			deleteThisBetaTheme: "Dieses Beta-Theme löschen",
 			confirmRemoval: "Zum Bestätigen erneut klicken",
 			copyThemeIdentifier: "Theme-Kennung kopieren",
@@ -124,6 +127,7 @@ export const de = {
 		repository: {
 			label: "Repository",
 			placeholder: "Repository (Beispiel: https://GitHub.com/githubusername/repository-name)",
+			pasteTooltip: "Aus Zwischenablage einfügen",
 			enterAddressToValidate: "Gib eine GitHub-Repository-Adresse ein, um sie zu validieren.",
 			addressRequired: "Repository-Adresse ist erforderlich.",
 			validating: "Repository-Adresse wird validiert...",
@@ -141,10 +145,13 @@ export const de = {
 			selectVersionEllipsis: "Version auswählen...",
 			latestVersion: "Neueste Version",
 			prereleaseSuffix: "(Vorabversion)",
+			useLatestName: "Immer die neueste Version verwenden",
+			useLatestDesc:
+				"Hält dieses Plugin auf der neuesten Version und aktualisiert es automatisch. Deaktivieren, um eine bestimmte Version aus der Liste festzulegen.",
 		},
 		token: {
 			name: "GitHub-Token",
-			desc: "Wähle ein Secret als Token für dieses Repository aus (optional)",
+			desc: "Verwende die Schaltfläche „Link…“, um ein gespeichertes Secret als GitHub-Token für dieses Repository zu verknüpfen (optional).",
 			settingCleared: (repository: string): string => `Token-Einstellung für ${repository} gelöscht`,
 			settingUpdated: (repository: string): string => `Token-Einstellung für ${repository} aktualisiert`,
 		},

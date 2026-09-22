@@ -1,4 +1,4 @@
-![](media/brat.jpg)
+![brat](media/brat.svg)
 
 # BRAT - Beta Reviewers Auto-update Tester
 

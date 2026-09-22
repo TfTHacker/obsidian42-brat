@@ -7,6 +7,7 @@ export const en = {
 	},
 	settings: {
 		general: {
+			heading: "General",
 			autoEnablePluginsAfterInstallation: {
 				name: "Auto-enable plugins after installation",
 				desc: 'If enabled beta plugins will be automatically enabled after installtion by default. Note: you can toggle this on and off for each plugin in the "add plugin" form.',
@@ -68,6 +69,7 @@ export const en = {
 		betaPluginList: {
 			heading: "Beta plugin list",
 			filterPlaceholder: "Filter plugins",
+			emptyState: "No beta plugins added yet.",
 			description: {
 				intro:
 					'The following is a list of beta plugins added via the command "add a beta plugin for testing". You can chose to add the latest version or a frozen version. A frozen version is a specific release of a plugin based on its release tag.',
@@ -93,6 +95,7 @@ export const en = {
 			heading: "Beta themes list",
 			addBetaTheme: "Add beta theme",
 			filterPlaceholder: "Filter themes",
+			emptyState: "No beta themes added yet.",
 			deleteThisBetaTheme: "Delete this beta theme",
 			confirmRemoval: "Click once more to confirm removal",
 			copyThemeIdentifier: "Copy theme identifier",
@@ -118,6 +121,7 @@ export const en = {
 		repository: {
 			label: "Repository",
 			placeholder: "Repository (example: https://GitHub.com/githubusername/repository-name)",
+			pasteTooltip: "Paste from clipboard",
 			enterAddressToValidate: "Enter a GitHub repository address to validate it.",
 			addressRequired: "Repository address is required.",
 			validating: "Validating repository address...",
@@ -135,10 +139,13 @@ export const en = {
 			selectVersionEllipsis: "Select a version...",
 			latestVersion: "Latest version",
 			prereleaseSuffix: "(Prerelease)",
+			useLatestName: "Always use the latest version",
+			useLatestDesc:
+				"Keep this plugin on its newest release and update it automatically. Turn this off to pin a specific version from the list.",
 		},
 		token: {
 			name: "GitHub token",
-			desc: "Select a secret as token for this repository (optional)",
+			desc: "Use the Link… button to link a saved secret as the GitHub token for this repository (optional).",
 			settingCleared: (repository: string): string => `Token setting cleared for ${repository}`,
 			settingUpdated: (repository: string): string => `Token setting updated for ${repository}`,
 		},
