@@ -37,6 +37,10 @@ export const zhCn = {
 				name: "启用通知",
 				desc: "开启后，BRAT 会用弹窗提示安装、更新等操作状态。关闭后不再显示这些通知。",
 			},
+			graduationNotifications: {
+				name: "当插件上架社区商店时通知",
+				desc: "当某个 BRAT 测试版插件在 Obsidian 社区商店中上架时，BRAT 会显示提示，建议你切换到商店版本。关闭后将不再显示这些提示。你仍可通过 BRAT 的相关命令随时处理已上架的插件。",
+			},
 			enableLogging: {
 				name: "启用日志",
 				desc: "开启后，插件更新记录会写入日志文件。",

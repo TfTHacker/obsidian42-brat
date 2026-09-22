@@ -37,6 +37,10 @@ export const de = {
 				name: "Benachrichtigungen aktivieren",
 				desc: "Wenn aktiviert, zeigt BRAT Popup-Benachrichtigungen zu verschiedenen Aktivitäten an. Wenn deaktiviert, werden keine Benachrichtigungen angezeigt.",
 			},
+			graduationNotifications: {
+				name: "Benachrichtigen, wenn ein Plugin in den Community-Store aufgenommen wird",
+				desc: "Wenn ein BRAT-Beta-Plugin im Community-Store von Obsidian verfügbar wird, zeigt BRAT einen Hinweis an, der vorschlägt, zur Store-Version zu wechseln. Deaktiviere dies, um diese Hinweise zu unterdrücken. Du kannst weiterhin über die BRAT-Befehle für aufgenommene Plugins bei Bedarf reagieren.",
+			},
 			enableLogging: {
 				name: "Protokollierung aktivieren",
 				desc: "Plugin-Updates werden in eine Protokolldatei geschrieben.",

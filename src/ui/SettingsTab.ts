@@ -98,6 +98,11 @@ export class BratSettingsTab extends PluginSettingTab {
 						control: { type: "toggle", key: "notificationsEnabled" },
 					},
 					{
+						name: text.monitoring.graduationNotifications.name,
+						desc: text.monitoring.graduationNotifications.desc,
+						control: { type: "toggle", key: "notifyOnPluginGraduation" },
+					},
+					{
 						name: text.monitoring.enableLogging.name,
 						desc: text.monitoring.enableLogging.desc,
 						control: { type: "toggle", key: "loggingEnabled" },
@@ -413,6 +418,19 @@ export class BratSettingsTab extends PluginSettingTab {
 					cb.setValue(this.plugin.settings.notificationsEnabled);
 					cb.onChange((value: boolean) => {
 						this.plugin.settings.notificationsEnabled = value;
+						void this.plugin.saveSettings();
+					});
+				});
+		});
+
+		monitoringGroup.addSetting((setting) => {
+			setting
+				.setName(text.monitoring.graduationNotifications.name)
+				.setDesc(text.monitoring.graduationNotifications.desc)
+				.addToggle((cb: ToggleComponent) => {
+					cb.setValue(this.plugin.settings.notifyOnPluginGraduation);
+					cb.onChange((value: boolean) => {
+						this.plugin.settings.notifyOnPluginGraduation = value;
 						void this.plugin.saveSettings();
 					});
 				});

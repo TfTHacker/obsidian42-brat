@@ -722,7 +722,9 @@ export default class BetaPlugins {
 			}
 			toastMessage(this.plugin, msg2, 10);
 		}
-		await this.checkForOfficiallyReleasedPlugins();
+		if (this.plugin.settings.notifyOnPluginGraduation) {
+			await this.checkForOfficiallyReleasedPlugins();
+		}
 	}
 
 	/**
