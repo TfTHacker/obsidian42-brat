@@ -443,7 +443,7 @@ export default class BetaPlugins {
 
 				console.debug("rFiles", rFiles);
 				// if beta, use that manifest, or if there is no manifest in release, use the primaryManifest
-				if (usingBetaManifest || rFiles.manifest === "") rFiles.manifest = JSON.stringify(primaryManifest);
+				if (usingBetaManifest || rFiles.manifest === "") rFiles.manifest = JSON.stringify(primaryManifest, null, 4);
 
 				const manifestObj = JSON.parse(rFiles.manifest ?? "") as PluginManifestEx;
 
@@ -491,7 +491,7 @@ export default class BetaPlugins {
 				}
 
 				if (isIncompatible) {
-					rFiles.manifest = JSON.stringify(manifestObj);
+					rFiles.manifest = JSON.stringify(manifestObj, null, 4);
 				}
 
 				if (this.plugin.settings.debuggingMode) console.debug("BRAT: rFiles.manifest", usingBetaManifest, rFiles);
