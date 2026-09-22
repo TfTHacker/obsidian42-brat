@@ -185,9 +185,9 @@ export function updateBetaThemeLastUpdateChecksum(
 	repositoryPath: string,
 	checksum: string,
 ): void {
-	const theme = plugin.settings.themesList.find((t) => t.repo === repositoryPath);
-	if (theme) {
-		theme.lastUpdate = checksum;
+const themes = plugin.settings.themesList.filter((t) => t.repo === repositoryPath);
+	if (themes.length > 0) {
+		for (const theme of themes) theme.lastUpdate = checksum;
 		void plugin.saveSettings();
 	}
 }
