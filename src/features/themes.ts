@@ -1,4 +1,4 @@
-import type { ThemeManifest } from "@obsidian-typings/obsidian-public-1.11.4";
+import type { ThemeManifest } from "@obsidian-typings/obsidian-public-1.13.4";
 import { Notice, normalizePath } from "obsidian";
 import { getTranslations } from "../i18n";
 import type BratPlugin from "../main";

@@ -8,9 +8,8 @@ import type {
 	SettingDefinitionItem,
 	SettingDefinitionList,
 	SettingGroupItem,
-	ToggleComponent,
 } from "obsidian";
-import { PluginSettingTab, requireApiVersion, SecretComponent as SecretComponentClass, Setting, SettingGroup } from "obsidian";
+import { PluginSettingTab, SecretComponent as SecretComponentClass, Setting } from "obsidian";
 import { type GitHubTokenInfo, validateGitHubToken } from "../features/githubUtils";
 import { themeDelete } from "../features/themes";
 import { getTranslations } from "../i18n";
@@ -636,22 +635,6 @@ export class BratSettingsTab extends PluginSettingTab {
 		};
 	}
 
-	private createPluginListDescriptionFragment(): DocumentFragment {
-		const guideUrl =
-			"https://github.com/TfTHacker/obsidian42-brat/blob/main/BRAT-DEVELOPER-GUIDE.md#managing-beta-plugin-and-theme-lists-in-settings";
-		const text = getTranslations().settings.betaPluginList.description;
-		// eslint-disable-next-line obsidianmd/prefer-active-doc -- BRAT compatibility: activeDocument breaks settings description rendering
-		const fragment = document.createDocumentFragment();
-		const line = fragment.createEl("div");
-		line.createSpan({ text: text.editAndRemove });
-		line.appendText(" ");
-		line.createEl("a", {
-			href: guideUrl,
-			text: "Learn more",
-		});
-		return fragment;
-	}
-
 	private createTrackedPluginDescriptionFragment(trackedPlugin?: PluginVersion): DocumentFragment {
 		const text = getTranslations().settings.betaPluginList;
 		const secretName = trackedPlugin?.tokenName || "";
@@ -705,7 +688,7 @@ export class BratSettingsTab extends PluginSettingTab {
 		if (!trackedPlugin?.version || trackedPlugin.version === "latest") {
 			setting.addButton((btn: ButtonComponent) => {
 				if (isSecretMissing) {
-					btn.setIcon("sync").setTooltip(text.secretMissingTooltip(secretName)).setWarning().setDisabled(true);
+					btn.setIcon("sync").setTooltip(text.secretMissingTooltip(secretName)).setDestructive().setDisabled(true);
 				} else {
 					btn
 						.setIcon("sync")
@@ -721,7 +704,7 @@ export class BratSettingsTab extends PluginSettingTab {
 			btn.setIcon("edit").setTooltip(text.changeVersionAndUpdateSettings);
 
 			if (isSecretMissing) {
-				btn.setWarning();
+				btn.setDestructive();
 			}
 
 			btn.onClick(() => {
@@ -740,7 +723,7 @@ export class BratSettingsTab extends PluginSettingTab {
 			btn
 				.setIcon("cross")
 				.setTooltip(text.removeThisBetaPlugin)
-				.setWarning()
+				.setDestructive()
 				.onClick(() => {
 					if (btn.buttonEl.textContent === "") {
 						btn.setButtonText(text.confirmRemoval);
@@ -769,7 +752,7 @@ export class BratSettingsTab extends PluginSettingTab {
 			btn
 				.setIcon("cross")
 				.setTooltip(text.deleteThisBetaTheme)
-				.setWarning()
+				.setDestructive()
 				.onClick(() => {
 					if (btn.buttonEl.textContent === "") {
 						btn.setButtonText(text.confirmRemoval);
@@ -840,11 +823,7 @@ export class BratSettingsTab extends PluginSettingTab {
 		};
 	}
 
-	private createListSearch(placeholder: string): SettingDefinitionGroup<BratSettingsKey>["search"] | undefined {
-		if (!requireApiVersion("1.13.1")) {
-			return undefined;
-		}
-
+	private createListSearch(placeholder: string): SettingDefinitionGroup<BratSettingsKey>["search"] {
 		return {
 			placeholder,
 			match: (def: SettingDefinition, query: string) => {

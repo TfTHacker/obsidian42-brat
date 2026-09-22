@@ -1,4 +1,4 @@
-import type {} from "@obsidian-typings/obsidian-public-1.11.4";
+import type {} from "@obsidian-typings/obsidian-public-1.13.4";
 import type { PluginManifest } from "obsidian";
 import { apiVersion, Notice, normalizePath, Platform, requireApiVersion } from "obsidian";
 import { compare as compareVersions, coerce as semverCoerce } from "semver";

@@ -1,6 +1,7 @@
 {
   "compilerOptions": {
     "ignoreDeprecations": "6.0",
+    "types": ["node"],
     "strict": true,
     "baseUrl": ".",
     "inlineSourceMap": true,
