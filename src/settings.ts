@@ -29,6 +29,7 @@ export interface Settings {
 	loggingVerboseEnabled: boolean;
 	debuggingMode: boolean;
 	notificationsEnabled: boolean;
+	notifyOnPluginGraduation: boolean;
 	/** @deprecated Tokens are now stored in SecretStorage (Obsidian 1.11.4+) */
 	personalAccessToken?: string;
 	globalTokenName?: string; // name of secret in SecretStorage for global PAT
@@ -48,6 +49,7 @@ export const DEFAULT_SETTINGS: Settings = {
 	loggingVerboseEnabled: false,
 	debuggingMode: false,
 	notificationsEnabled: true,
+	notifyOnPluginGraduation: true,
 	globalTokenName: "",
 	personalAccessToken: "",
 	selectLatestPluginVersionByDefault: false,

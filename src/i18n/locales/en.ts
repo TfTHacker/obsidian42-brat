@@ -35,6 +35,10 @@ export const en = {
 				name: "Enable notifications",
 				desc: "BRAT will provide popup notifications for its various activities. Turn this off means no notifications.",
 			},
+			graduationNotifications: {
+				name: "Notify when a plugin joins the community store",
+				desc: "When a BRAT beta plugin becomes available in Obsidian's community store, BRAT shows a notice suggesting you switch to the store version. Turn this off to silence those notices. You can still act on graduated plugins on demand via BRAT's graduated-plugin commands.",
+			},
 			enableLogging: {
 				name: "Enable logging",
 				desc: "Plugin updates will be logged to a file in the log file.",
