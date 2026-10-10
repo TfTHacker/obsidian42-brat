@@ -626,8 +626,9 @@ export const grabReleaseFromRepository = async (
 					if (aDate > bDate) return -1;
 					return 0;
 				})
-				.filter((release) => includePrereleases || !release.prerelease)[0] ??
-			null
+				.filter((release) => includePrereleases || !release.prerelease)
+				// When no version is requested, skip releases without a manifest.json (e.g. other software released from the same repository)
+				.filter((release) => (version && version !== "latest") || release.assets.some((asset) => asset.name === "manifest.json"))[0] ?? null
 		);
 	} catch (error) {
 		// Special handling for rate limit errors
