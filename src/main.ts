@@ -80,6 +80,12 @@ export default class BratPlugin extends Plugin {
 		await this.saveData(this.settings);
 	}
 
+	// Reload settings when data.json changes outside Obsidian (Sync, git, hand edit),
+	// so the next save does not overwrite the external change
+	async onExternalSettingsChange(): Promise<void> {
+		await this.loadSettings();
+	}
+
 	obsidianProtocolHandler = (params: ObsidianProtocolData) => {
 		if (!params.plugin && !params.theme) {
 			toastMessage(this, "Could not locate the repository from the URL.", 10);
